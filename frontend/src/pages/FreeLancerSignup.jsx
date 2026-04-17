@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -22,11 +22,58 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
+import { freelancerSchema } from "@/validations/auth.validator";
 
 const FreeLancerSignUp = () => {
-  const [skills, setSkills] = React.useState([]);
-  const [inputValue, setInputValue] = React.useState("");
+  const [skills, setSkills] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const [errors, setErrors] = useState({});
+  const [formData, setFormData] = React.useState({
+    name: "",
+    title: "",
+    bio: "",
+    address: "",
+    phone: "",
+    email: "",
+    hourlyRate: "",
+    portfolio: "",
+    password: "",
+    confirmPassword: "",
+  });
 
+  const validateForm = () => {
+    const data = {
+      ...formData,
+      skills,
+    };
+
+    const { error } = freelancerSchema.validate(data, {
+      abortEarly: false,
+    });
+
+    if (!error) return null;
+
+    const errObj = {};
+    error.details.forEach((err) => {
+      errObj[err.path[0]] = err.message;
+    });
+
+    return errObj;
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const validationErrors = validateForm();
+
+    if (validationErrors) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+    console.log("Form Valid ✅");
+  };
   const addSkill = (e) => {
     if (e.key === "Enter" && inputValue.trim() !== "") {
       e.preventDefault();
@@ -142,11 +189,11 @@ const FreeLancerSignUp = () => {
               </p>
             </div>
 
-            <form className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Full Name
+                    Full Name <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <User
@@ -155,14 +202,21 @@ const FreeLancerSignUp = () => {
                     />
                     <Input
                       placeholder="Chirag Soni"
+                      value={formData.name}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.name && (
+                    <p className="text-red-500 text-xs ml-1">{errors.name}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Professional Title
+                    Professional Title <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Briefcase
@@ -170,21 +224,32 @@ const FreeLancerSignUp = () => {
                       size={16}
                     />
                     <Input
+                      value={formData.title}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       placeholder="Full Stack Developer"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.title && (
+                    <p className="text-red-500 text-xs">{errors.title}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Professional Bio / Description
+                    Professional Bio / Description <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <div className="absolute left-4 top-4 text-muted-foreground">
                       <Briefcase size={16} />
                     </div>
                     <Textarea
+                      value={formData.bio}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       placeholder="Tell us about your expertise, years of experience, and what you can offer to clients..."
                       className="min-h-[120px] rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12 py-4 resize-none"
                     />
@@ -193,43 +258,58 @@ const FreeLancerSignUp = () => {
                     Pro Tip: A detailed bio increases your chances of getting
                     hired by 40%.
                   </p>
+                  {errors.bio && (
+                    <p className="text-red-500 text-xs">{errors.bio}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Office / Residential Address
+                    Office / Residential Address <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                       <Globe size={16} />{" "}
                     </div>
                     <Input
+                      value={formData.address}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       placeholder="Street 102, Silicon Valley, CA, USA"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.address && (
+                    <p className="text-red-500 text-xs">{errors.address}</p>
+                  )}
                 </div>
 
-                   <div className="space-y-2 group">
+                <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Phone Number
+                    Phone Number <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                       <Phone size={16} />
                     </div>
                     <Input
+                      value={formData.phone}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       placeholder="+91 1234567890"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.phone && (
+                    <p className="text-red-500 text-xs">{errors.phone}</p>
+                  )}
                 </div>
-
-
 
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Work Email
+                    Work Email <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Mail
@@ -237,16 +317,23 @@ const FreeLancerSignUp = () => {
                       size={16}
                     />
                     <Input
+                      value={formData.email}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       type="email"
                       placeholder="chirag@talent.com"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-red-500 text-xs">{errors.email}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Hourly Rate ($/hr)
+                    Hourly Rate ($/hr) <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <DollarSign
@@ -254,16 +341,23 @@ const FreeLancerSignUp = () => {
                       size={16}
                     />
                     <Input
+                      value={formData.hourlyRate}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       type="number"
                       placeholder="35"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.hourlyRate && (
+                    <p className="text-red-500 text-xs">{errors.hourlyRate}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Portfolio Link
+                    Portfolio Link <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <LinkIcon
@@ -271,16 +365,22 @@ const FreeLancerSignUp = () => {
                       size={16}
                     />
                     <Input
+                      value={formData.portfolio}
+                      onChange={(e) =>
+                        setFormData({ ...formData, name: e.target.value })
+                      }
                       placeholder="https://github.com/chiragsoni"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.portfolio && (
+                    <p className="text-red-500 text-xs">{errors.portfolio}</p>
+                  )}
                 </div>
-                
 
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Enter Your Skills (Press Enter to add)
+                    Enter Your Skills (Press Enter to add) <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Code2
@@ -315,12 +415,15 @@ const FreeLancerSignUp = () => {
                       </Badge>
                     ))}
                   </div>
+                  {errors.skills && (
+                    <p className="text-red-500 text-xs mt-1">{errors.skills}</p>
+                  )}
                 </div>
 
                 {/* Password */}
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Password
+                    Password <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Lock
@@ -329,14 +432,28 @@ const FreeLancerSignUp = () => {
                     />
                     <Input
                       type="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          password: e.target.value,
+                        });
+                        setErrors({ ...errors, password: "" });
+                      }}
                       placeholder="••••••••"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Confirm Password
+                    Confirm Password <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Lock
@@ -345,13 +462,29 @@ const FreeLancerSignUp = () => {
                     />
                     <Input
                       type="password"
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={(e) => {
+                        setFormData({
+                          ...formData,
+                          confirmPassword: e.target.value,
+                        });
+                        setErrors({ ...errors, confirmPassword: "" });
+                      }}
                       placeholder="••••••••"
-                      className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
+                      className={`h-14 rounded-2xl bg-secondary/40 border-none px-12 ${
+                        errors.confirmPassword ? "border border-red-500" : ""
+                      }`}
                     />
                   </div>
                   <p className="text-[10px] text-muted-foreground ml-1">
                     Must be at least 8 characters long.
                   </p>
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
                 </div>
               </div>
 

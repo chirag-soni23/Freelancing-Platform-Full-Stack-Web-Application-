@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
@@ -18,8 +18,54 @@ import {
   Phone,
 } from "lucide-react";
 import { Link } from "react-router-dom";
+import { clientSchema } from "@/validations/auth.validator";
 
 const ClientSignUp = () => {
+  const [formData, setFormData] = useState({
+    name: "",
+    companyName: "",
+    email: "",
+    website: "",
+    address: "",
+    phone: "",
+    password: "",
+    confirmPassword: "",
+  });
+
+  const [errors, setErrors] = useState({});
+  const validateForm = () => {
+    const { error } = clientSchema.validate(formData, {
+      abortEarly: false,
+    });
+
+    if (!error) return null;
+
+    const errObj = {};
+    error.details.forEach((err) => {
+      errObj[err.path[0]] = err.message;
+    });
+
+    return errObj;
+  };
+  const handleChange = (e) => {
+    setFormData({
+      ...formData,
+      [e.target.name]: e.target.value,
+    });
+  };
+  const handleSubmit = (e) => {
+    e.preventDefault();
+
+    const validationErrors = validateForm();
+
+    if (validationErrors) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors({});
+    console.log("Form Valid ✅", formData);
+  };
   return (
     <div className="h-screen flex flex-col lg:flex-row bg-background overflow-hidden">
       <div className="hidden lg:flex flex-col justify-between p-16 relative w-[40%] h-full overflow-hidden shrink-0">
@@ -119,12 +165,12 @@ const ClientSignUp = () => {
               </p>
             </div>
 
-            <form className="space-y-8">
+            <form onSubmit={handleSubmit} className="space-y-8">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
                 {/* Full Name */}
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Full Name
+                    Full Name <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <User
@@ -132,10 +178,16 @@ const ClientSignUp = () => {
                       size={16}
                     />
                     <Input
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
                       placeholder="Chirag Soni"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.name && (
+                    <p className="text-red-500 text-xs">{errors.name}</p>
+                  )}
                 </div>
 
                 {/* Company Name */}
@@ -149,16 +201,22 @@ const ClientSignUp = () => {
                       size={16}
                     />
                     <Input
+                      name="companyName"
+                      value={formData.companyName}
+                      onChange={handleChange}
                       placeholder="Creative Labs Inc."
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.companyName && (
+                    <p className="text-red-500 text-xs">{errors.companyName}</p>
+                  )}
                 </div>
 
                 {/* Work Email */}
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Work Email
+                    Work Email <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Mail
@@ -166,17 +224,23 @@ const ClientSignUp = () => {
                       size={16}
                     />
                     <Input
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
                       type="email"
                       placeholder="chirag@company.com"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-red-500 text-xs">{errors.email}</p>
+                  )}
                 </div>
 
                 {/* Company Website */}
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Company Website (Optional)
+                    Company Website
                   </Label>
                   <div className="relative">
                     <LinkIcon
@@ -184,46 +248,64 @@ const ClientSignUp = () => {
                       size={16}
                     />
                     <Input
+                      name="website"
+                      value={formData.website}
+                      onChange={handleChange}
                       placeholder="https://example.com"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.website && (
+                    <p className="text-red-500 text-xs">{errors.website}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Address
+                    Address <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                       <Globe size={16} />
                     </div>
                     <Input
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
                       placeholder="Street 102, Silicon Valley, CA, USA"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.address && (
+                    <p className="text-red-500 text-xs">{errors.address}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Phone Number
+                    Phone Number <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
                       <Phone size={16} />
                     </div>
                     <Input
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
                       placeholder="+91 1234567890"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.phone && (
+                    <p className="text-red-500 text-xs">{errors.phone}</p>
+                  )}
                 </div>
 
                 {/* Password (Full width logic optionally or half) */}
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Password
+                    Password <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Lock
@@ -231,6 +313,9 @@ const ClientSignUp = () => {
                       size={16}
                     />
                     <Input
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
                       type="password"
                       placeholder="••••••••"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
@@ -239,11 +324,14 @@ const ClientSignUp = () => {
                   <p className="text-[10px] text-muted-foreground ml-1">
                     Must be at least 8 characters long.
                   </p>
+                  {errors.password && (
+                    <p className="text-red-500 text-xs">{errors.password}</p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Confirm Password
+                    Confirm Password <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Lock
@@ -251,6 +339,9 @@ const ClientSignUp = () => {
                       size={16}
                     />
                     <Input
+                      name="confirmPassword"
+                      value={formData.confirmPassword}
+                      onChange={handleChange}
                       type="password"
                       placeholder="••••••••"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
@@ -259,8 +350,12 @@ const ClientSignUp = () => {
                   <p className="text-[10px] text-muted-foreground ml-1">
                     Must be at least 8 characters long.
                   </p>
+                  {errors.confirmPassword && (
+                    <p className="text-red-500 text-xs">
+                      {errors.confirmPassword}
+                    </p>
+                  )}
                 </div>
-                
               </div>
 
               <div className="flex items-start space-x-3 p-1">
