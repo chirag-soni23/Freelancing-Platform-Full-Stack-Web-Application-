@@ -23,12 +23,11 @@ import {
 import { Link } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { freelancerSchema } from "@/validations/auth.validator";
+import { useAuth } from "@/hooks/useAuth";
 
 const FreeLancerSignUp = () => {
-  const [skills, setSkills] = useState([]);
-  const [inputValue, setInputValue] = useState("");
-  const [errors, setErrors] = useState({});
-  const [formData, setFormData] = React.useState({
+  const { registerFreelancer, isRegisteringFreelancer } = useAuth();
+  const initialState = {
     name: "",
     title: "",
     bio: "",
@@ -39,7 +38,11 @@ const FreeLancerSignUp = () => {
     portfolio: "",
     password: "",
     confirmPassword: "",
-  });
+  };
+  const [skills, setSkills] = useState([]);
+  const [inputValue, setInputValue] = useState("");
+  const [errors, setErrors] = useState({});
+  const [formData, setFormData] = useState(initialState);
 
   const validateForm = () => {
     const data = {
@@ -72,7 +75,20 @@ const FreeLancerSignUp = () => {
     }
 
     setErrors({});
-    console.log("Form Valid ✅");
+
+    const finalData = {
+      ...formData,
+      hourlyRate: Number(formData.hourlyRate),
+      skills,
+    };
+
+    registerFreelancer(finalData, {
+      onSuccess: () => {
+        setFormData(initialState);
+        setSkills([]);
+        setInputValue("");
+      },
+    });
   };
   const addSkill = (e) => {
     if (e.key === "Enter" && inputValue.trim() !== "") {
@@ -226,7 +242,7 @@ const FreeLancerSignUp = () => {
                     <Input
                       value={formData.title}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, title: e.target.value })
                       }
                       placeholder="Full Stack Developer"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
@@ -239,7 +255,8 @@ const FreeLancerSignUp = () => {
 
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Professional Bio / Description <span className="text-red-500">*</span>
+                    Professional Bio / Description{" "}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <div className="absolute left-4 top-4 text-muted-foreground">
@@ -248,7 +265,7 @@ const FreeLancerSignUp = () => {
                     <Textarea
                       value={formData.bio}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, bio: e.target.value })
                       }
                       placeholder="Tell us about your expertise, years of experience, and what you can offer to clients..."
                       className="min-h-[120px] rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12 py-4 resize-none"
@@ -265,7 +282,8 @@ const FreeLancerSignUp = () => {
 
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Office / Residential Address <span className="text-red-500">*</span>
+                    Office / Residential Address{" "}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <div className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground">
@@ -274,7 +292,7 @@ const FreeLancerSignUp = () => {
                     <Input
                       value={formData.address}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, address: e.target.value })
                       }
                       placeholder="Street 102, Silicon Valley, CA, USA"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
@@ -296,7 +314,7 @@ const FreeLancerSignUp = () => {
                     <Input
                       value={formData.phone}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, phone: e.target.value })
                       }
                       placeholder="+91 1234567890"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
@@ -319,7 +337,7 @@ const FreeLancerSignUp = () => {
                     <Input
                       value={formData.email}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, email: e.target.value })
                       }
                       type="email"
                       placeholder="chirag@talent.com"
@@ -343,7 +361,7 @@ const FreeLancerSignUp = () => {
                     <Input
                       value={formData.hourlyRate}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, hourlyRate: e.target.value })
                       }
                       type="number"
                       placeholder="35"
@@ -367,7 +385,7 @@ const FreeLancerSignUp = () => {
                     <Input
                       value={formData.portfolio}
                       onChange={(e) =>
-                        setFormData({ ...formData, name: e.target.value })
+                        setFormData({ ...formData, portfolio: e.target.value })
                       }
                       placeholder="https://github.com/chiragsoni"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
@@ -380,7 +398,8 @@ const FreeLancerSignUp = () => {
 
                 <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Enter Your Skills (Press Enter to add) <span className="text-red-500">*</span>
+                    Enter Your Skills (Press Enter to add){" "}
+                    <span className="text-red-500">*</span>
                   </Label>
                   <div className="relative">
                     <Code2
@@ -511,8 +530,13 @@ const FreeLancerSignUp = () => {
               </div>
 
               {/* CTA Button */}
-              <Button className="w-full h-16 rounded-3xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all group overflow-hidden">
-                Create Talent Account{" "}
+              <Button
+                disabled={isRegisteringFreelancer}
+                className="w-full h-16 rounded-3xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all group overflow-hidden"
+              >
+                {isRegisteringFreelancer
+                  ? "Creating..."
+                  : "Create Talent Account"}
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </form>

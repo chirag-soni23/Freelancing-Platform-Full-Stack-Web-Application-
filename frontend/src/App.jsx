@@ -1,10 +1,14 @@
-import React from 'react'
-import AppRoutes from './routes'
+import React from "react";
+import AppRoutes from "./routes";
+import { Toaster } from "./components/ui/toaster";
 
 const App = () => {
   return (
-    <AppRoutes/>
-  )
-}
+    <>
+      <Toaster />
+      <AppRoutes />
+    </>
+  );
+};
 
-export default App
+export default App;
