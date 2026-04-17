@@ -19,18 +19,21 @@ import {
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import { clientSchema } from "@/validations/auth.validator";
+import { useAuth } from "@/hooks/useAuth";
 
 const ClientSignUp = () => {
-  const [formData, setFormData] = useState({
+  const initialState = {
     name: "",
     companyName: "",
     email: "",
-    website: "",
+    companyWebsite: "",
     address: "",
     phone: "",
     password: "",
     confirmPassword: "",
-  });
+  };
+  const [formData, setFormData] = useState(initialState);
+  const { registerClient, isRegisteringClient } = useAuth();
 
   const [errors, setErrors] = useState({});
   const validateForm = () => {
@@ -64,7 +67,16 @@ const ClientSignUp = () => {
     }
 
     setErrors({});
-    console.log("Form Valid ✅", formData);
+
+    const finalData = {
+      ...formData,
+    };
+
+    registerClient(finalData, {
+      onSuccess: () => {
+        setFormData(initialState);
+      },
+    });
   };
   return (
     <div className="h-screen flex flex-col lg:flex-row bg-background overflow-hidden">
@@ -248,15 +260,15 @@ const ClientSignUp = () => {
                       size={16}
                     />
                     <Input
-                      name="website"
-                      value={formData.website}
+                      name="companyWebsite"
+                      value={formData.companyWebsite}
                       onChange={handleChange}
                       placeholder="https://example.com"
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
-                  {errors.website && (
-                    <p className="text-red-500 text-xs">{errors.website}</p>
+                  {errors.companyWebsite && (
+                    <p className="text-red-500 text-xs">{errors.companyWebsite}</p>
                   )}
                 </div>
 
@@ -379,8 +391,11 @@ const ClientSignUp = () => {
                 </label>
               </div>
 
-              <Button className="w-full h-16 rounded-3xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all group overflow-hidden">
-                Create Account{" "}
+              <Button
+                disabled={isRegisteringClient}
+                className="w-full h-16 rounded-3xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all group overflow-hidden"
+              >
+                {isRegisteringClient ? "Creating..." : "Create Account"}
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </form>

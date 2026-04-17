@@ -77,7 +77,7 @@ export const clientSchema = Joi.object({
     "string.empty": "Email is required",
   }),
 
-  website: Joi.string().uri().allow("", null).messages({
+  companyWebsite: Joi.string().uri().allow("", null).messages({
     "string.uri": "Invalid website URL",
   }),
 
@@ -90,6 +90,7 @@ export const clientSchema = Joi.object({
   }),
 
   password: Joi.string()
+
     .pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/)
     .required()
     .messages({
