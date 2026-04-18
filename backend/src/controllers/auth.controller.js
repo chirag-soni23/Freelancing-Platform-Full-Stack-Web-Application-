@@ -7,6 +7,7 @@ import imagekit from "../utils/imageKit.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/mailer.js";
 import { Op } from "sequelize";
+import { emailQueue } from "../queue/emailQueue.js";
 
 // register client
 export const registerClient = async (req, res, next) => {
@@ -101,8 +102,8 @@ export const registerFreelancer = async (req, res, next) => {
   }
 };
 
-// login client
-export const loginClient = async (req, res, next) => {
+// login
+export const login = async (req, res, next) => {
   try {
     const { email, password } = req.validatedData;
 
@@ -110,10 +111,6 @@ export const loginClient = async (req, res, next) => {
 
     if (!user) {
       throw ApiError.UNAUTHORIZED("Invalid email or password");
-    }
-
-    if (user.role !== "client") {
-      throw ApiError.FORBIDDEN("Access denied: Not a client account");
     }
 
     const match = await bcrypt.compare(password, user.password);
@@ -124,46 +121,12 @@ export const loginClient = async (req, res, next) => {
 
     await generateToken(user, res);
 
-    return successResponse(res, StatusCodes.OK, {
-      message: "Client login successful",
+    return successResponse(res, 200, {
+      message: "Login successful",
       data: user,
     });
   } catch (error) {
     next(error);
-    console.log(error.message);
-  }
-};
-
-// login freelancer
-export const loginFreelancer = async (req, res, next) => {
-  try {
-    const { email, password } = req.validatedData;
-
-    const user = await db.User.findOne({ where: { email } });
-
-    if (!user) {
-      throw ApiError.UNAUTHORIZED("Invalid email or password");
-    }
-
-    if (user.role !== "freelancer") {
-      throw ApiError.FORBIDDEN("Access denied: Not a freelancer account");
-    }
-
-    const match = await bcrypt.compare(password, user.password);
-
-    if (!match) {
-      throw ApiError.UNAUTHORIZED("Invalid email or password");
-    }
-
-    await generateToken(user, res);
-
-    return successResponse(res, StatusCodes.OK, {
-      message: "Freelancer login successful",
-      data: user,
-    });
-  } catch (error) {
-    next(error);
-    console.log(error.message);
   }
 };
 
@@ -443,12 +406,19 @@ export const forgotPassword = async (req, res, next) => {
 
     const resetUrl = `${process.env.CLIENT_URL}/reset-password/${resetToken}`;
 
-    await sendEmail({
-      to: user.email,
-      subject: "Reset Password",
-      text: `Click to reset password: ${resetUrl}`,
-    });
-
+    await emailQueue.add(
+      "sendEmail",
+      {
+        to: user.email,
+        subject: "Reset Password",
+        text: `Click to reset password: ${resetUrl}`,
+      },
+      {
+        attempts: 1,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
     return successResponse(res, 200, {
       message: "Reset link sent to email",
     });
@@ -461,7 +431,7 @@ export const forgotPassword = async (req, res, next) => {
 export const resetPasswordWithToken = async (req, res, next) => {
   try {
     const { token } = req.params;
-    const { password, confirmPassword } = req.body;
+    const { password, confirmPassword } = req.validatedData;
 
     if (password !== confirmPassword) {
       throw ApiError.BADREQUEST("Passwords do not match");

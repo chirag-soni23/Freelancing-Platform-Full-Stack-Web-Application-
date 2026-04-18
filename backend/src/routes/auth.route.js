@@ -5,13 +5,13 @@ import {
   registerClientSchema,
   registerFreelancerSchema,
   resetPasswordSchema,
+  resetPasswordWithTokenSchema,
   updateProfileSchema,
 } from "../validation/auth.validator.js";
 import {
   forgotPassword,
   getMe,
-  loginClient,
-  loginFreelancer,
+  login,
   logout,
   registerClient,
   registerFreelancer,
@@ -34,10 +34,9 @@ router.post(
   validate(registerFreelancerSchema),
   registerFreelancer,
 );
-router.post("/login-client", validate(loginSchema), loginClient);
-router.post("/login-freelance", validate(loginSchema), loginFreelancer);
+router.post("/login", validate(loginSchema), login);
 router.get("/me", isAuth, getMe);
-router.get("/verify-email/:token",isAuth,verifyEmail);
+router.get("/verify-email/:token", isAuth, verifyEmail);
 router.patch(
   "/update-profile",
   isAuth,
@@ -63,8 +62,12 @@ router.patch(
   validate(resetPasswordSchema),
   resetPassword,
 );
-router.post("/forgot-password",isAuth,forgotPassword);
-router.patch("/reset-password/:token",isAuth,resetPasswordWithToken);
+router.post("/forgot-password", isAuth, forgotPassword);
+router.patch(
+  "/reset-password/:token",
+  validate(resetPasswordWithTokenSchema),
+  resetPasswordWithToken,
+);
 router.post("/resend-verification", isAuth, resendVerificationEmail);
 
 export default router;

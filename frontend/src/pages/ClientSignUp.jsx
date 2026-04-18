@@ -79,7 +79,7 @@ const ClientSignUp = () => {
     });
   };
   return (
-    <div className="h-screen flex flex-col lg:flex-row bg-background overflow-hidden">
+    <div className="h-screen w-screen fixed inset-0 flex flex-col lg:flex-row bg-background overflow-hidden">
       <div className="hidden lg:flex flex-col justify-between p-16 relative w-[40%] h-full overflow-hidden shrink-0">
         <div
           className="absolute inset-0 z-0 bg-cover bg-center"
@@ -161,8 +161,8 @@ const ClientSignUp = () => {
         </div>
       </div>
 
-      <div className="flex-1 h-full overflow-y-auto bg-[#fcfdfe] dark:bg-[#020617] scrollbar-hide">
-        <div className="min-h-full flex items-center justify-center lg:p-0 md:p-0 p-12">
+    <div className="flex-1 h-full overflow-y-auto bg-[#fcfdfe] dark:bg-[#020617] scrollbar-hide">
+        <div className="flex justify-center lg:p-0 md:p-0 p-12">
           <div className="w-full max-w-2xl space-y-6 py-10">
             <div className="space-y-3">
               <div className="flex items-center gap-2 text-primary font-black text-xs uppercase tracking-[0.3em]">

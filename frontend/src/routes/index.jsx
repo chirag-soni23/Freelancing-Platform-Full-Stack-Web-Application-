@@ -7,6 +7,7 @@ import FindWork from "@/pages/FindWork";
 import FreeLancerSignUp from "@/pages/FreeLancerSignup";
 import Home from "@/pages/Home";
 import Login from "@/pages/Login";
+import ResetPassword from "@/pages/ResetPassword";
 import WorkDetail from "@/pages/WorkDetail";
 import React from "react";
 import { Route, Routes } from "react-router-dom";
@@ -18,6 +19,7 @@ const AppRoutes = () => {
         <Route path="/client-signup" element={<ClientSignUp />} />
         <Route path="/freelancer-signup" element={<FreeLancerSignUp />} />
         <Route path="/login" element={<Login />} />
+        <Route path="/reset-password/:token" element={<ResetPassword/>}/>
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
           <Route path="/find-work" element={<FindWork />} />

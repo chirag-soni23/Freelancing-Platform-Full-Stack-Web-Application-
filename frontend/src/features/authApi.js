@@ -12,15 +12,9 @@ export const registerFreelancer = async (data) => {
   return res.data;
 };
 
-// login client
-export const loginClient = async (data) => {
-  const res = await api.post("/auth/login-client", data);
-  return res.data;
-};
-
-// login freelancer
-export const loginFreelancer = async (data) => {
-  const res = await api.post("/auth/login-freelance", data);
+// login
+export const login = async (data) => {
+  const res = await api.post("/auth/login", data);
   return res.data;
 };
 

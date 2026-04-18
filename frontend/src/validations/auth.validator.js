@@ -104,3 +104,22 @@ export const clientSchema = Joi.object({
     "string.empty": "Confirm password is required",
   }),
 });
+
+export const resetPasswordWithTokenSchema = Joi.object({
+  password: Joi.string()
+    .pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/)
+    .required()
+    .messages({
+      "string.empty": "Password is required",
+      "string.pattern.base":
+        "Password must have 1 uppercase & 1 special character",
+    }),
+
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({
+      "any.only": "Passwords do not match",
+      "string.empty": "Confirm password is required",
+    }),
+});

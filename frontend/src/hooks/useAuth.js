@@ -2,8 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   registerClient,
   registerFreelancer,
-  loginClient,
-  loginFreelancer,
+  login,
   getMe,
   logout,
   updateProfile,
@@ -64,8 +63,8 @@ export const useAuth = () => {
     },
   });
 
-  const loginClientMutation = useMutation({
-    mutationFn: loginClient,
+  const loginMutation = useMutation({
+    mutationFn: login,
 
     onSuccess: async () => {
       await queryClient.invalidateQueries(["me"]);
@@ -85,26 +84,6 @@ export const useAuth = () => {
     },
   });
 
-  const loginFreelancerMutation = useMutation({
-    mutationFn: loginFreelancer,
-
-    onSuccess: async () => {
-      await queryClient.invalidateQueries(["me"]);
-
-      toast({
-        title: "Success",
-        description: "Login successful 🎉",
-      });
-    },
-
-    onError: (err) => {
-      toast({
-        title: "Error",
-        description: err?.response?.data?.message || err.message,
-        variant: "destructive",
-      });
-    },
-  });
 
   const logoutMutation = useMutation({
     mutationFn: logout,
@@ -256,15 +235,13 @@ export const useAuth = () => {
     isRegisteringFreelancer: registerFreelancerMutation.isPending,
 
     // login
-    loginClient: loginClientMutation.mutate,
-    isLoggingInClient: loginClientMutation.isPending,
-
-    loginFreelancer: loginFreelancerMutation.mutate,
-    isLoggingInFreelancer: loginFreelancerMutation.isPending,
+    login: loginMutation.mutate,
+    isLogging: loginMutation.isPending,
 
     // logout
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
+
 
     // profile
     updateProfile: updateProfileMutation.mutate,
@@ -272,8 +249,10 @@ export const useAuth = () => {
 
     // password
     forgotPassword: forgotPasswordMutation.mutate,
+    isLoadingForgot : forgotPasswordMutation.isPending,
     resetPassword: resetPasswordMutation.mutate,
     resetPasswordWithToken: resetPasswordWithTokenMutation.mutate,
+    isResetting: resetPasswordWithTokenMutation.isPending,
 
     // email
     verifyEmail: verifyEmailMutation.mutate,
