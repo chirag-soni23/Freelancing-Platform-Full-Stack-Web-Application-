@@ -6,8 +6,8 @@ const Message = sequelize.define(
   {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
+      primaryKey: true,
     },
 
     conversationId: {
@@ -20,9 +20,19 @@ const Message = sequelize.define(
       allowNull: false,
     },
 
+    receiverId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
     text: {
       type: DataTypes.TEXT,
       allowNull: false,
+    },
+
+    isRead: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {

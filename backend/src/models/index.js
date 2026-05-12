@@ -1,13 +1,17 @@
 import connection from "../db/db.js";
 import User from "./auth.model.js";
 import Category from "./category.model.js";
+import Conversation from "./conversation.model.js";
 import Job from "./job.model.js";
+import Message from "./message.model.js";
 
 const db = {
   connection,
   User,
   Category,
   Job,
+  Conversation,
+  Message,
 };
 
 db.User.hasMany(db.Category, {
@@ -30,6 +34,26 @@ db.Job.belongsTo(db.User, {
   foreignKey: "clientId",
   as: "client",
 });
+
+db.Conversation.hasMany(db.Message, {
+  foreignKey: "conversationId",
+  as: "messages",
+});
+
+db.Message.belongsTo(db.Conversation, {
+  foreignKey: "conversationId",
+});
+
+db.User.hasMany(db.Conversation, {
+  foreignKey: "senderId",
+  as: "sentConversations",
+});
+
+db.User.hasMany(db.Conversation, {
+  foreignKey: "receiverId",
+  as: "receivedConversations",
+});
+
 // db.Job.hasMany(db.Bid, { foreignKey: "jobId" });
 // db.Bid.belongsTo(db.Job, { foreignKey: "jobId" });
 

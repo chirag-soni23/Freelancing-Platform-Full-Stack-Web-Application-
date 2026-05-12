@@ -6,16 +6,16 @@ const Conversation = sequelize.define(
   {
     id: {
       type: DataTypes.INTEGER,
-      primaryKey: true,
       autoIncrement: true,
+      primaryKey: true,
     },
 
-    userOneId: {
+    senderId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },
 
-    userTwoId: {
+    receiverId: {
       type: DataTypes.INTEGER,
       allowNull: false,
     },

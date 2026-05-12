@@ -1,18 +1,17 @@
 import express from "express";
 
 import {
-  startChat,
+  createConversation,
   sendMessage,
   getMessages,
-  getMyConversations,
 } from "../controllers/chat.controller.js";
 
+import { isAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/start", startChat);
-router.get("/my-conversations", getMyConversations);
-router.post("/send", sendMessage);
-router.get("/:conversationId", getMessages);
+router.post("/conversation", createConversation);
+router.post("/message", sendMessage);
+router.get("/messages/:conversationId", getMessages);
 
 export default router;

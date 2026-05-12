@@ -1,53 +1,57 @@
 import { Op } from "sequelize";
 import db from "../models/index.js";
-import ApiError, { successResponse } from "../utils/apiResponse.js";
+import { StatusCodes } from "../config/index.js";
+import { successResponse } from "../utils/apiResponse.js";
 
-// start chat
-export const startChat = async (req, res, next) => {
+// create conversation
+export const createConversation = async (req, res, next) => {
   try {
-    const currentUserId = req.user.id;
+    const senderId = req.user.id;
 
-    const { userId } = req.body;
+    const { receiverId } = req.body;
 
-    if (currentUserId === userId) {
-      throw ApiError.BADREQUEST("You cannot chat with yourself");
+    const sender = await db.User.findByPk(senderId);
+
+    // receiver user
+    const receiver = await db.User.findByPk(receiverId);
+
+    if (!receiver) {
+      throw new Error("Receiver not found");
     }
 
-    const user = await db.User.findByPk(userId);
+    const validConversation =
+      (sender.role === "client" && receiver.role === "freelancer") ||
+      (sender.role === "freelancer" && receiver.role === "client");
 
-    if (!user) {
-      throw ApiError.NOTFOUND("User not found");
+    if (!validConversation) {
+      throw new Error("Only client and freelancer can chat");
     }
-
-    // existing chat check
 
     let conversation = await db.Conversation.findOne({
       where: {
         [Op.or]: [
           {
-            userOneId: currentUserId,
-            userTwoId: userId,
+            senderId,
+            receiverId,
           },
-
           {
-            userOneId: userId,
-            userTwoId: currentUserId,
+            senderId: receiverId,
+            receiverId: senderId,
           },
         ],
       },
     });
 
-    // create if not exists
-
+    // CREATE NEW
     if (!conversation) {
       conversation = await db.Conversation.create({
-        userOneId: currentUserId,
-        userTwoId: userId,
+        senderId,
+        receiverId,
       });
     }
 
-    return successResponse(res, 200, {
-      message: "Chat started successfully",
+    return successResponse(res, StatusCodes.OK, {
+      message: "Conversation ready",
       data: conversation,
     });
   } catch (error) {
@@ -60,28 +64,14 @@ export const sendMessage = async (req, res, next) => {
   try {
     const senderId = req.user.id;
 
-    const { conversationId, text } = req.body;
-
-    const conversation = await db.Conversation.findByPk(conversationId);
-
-    if (!conversation) {
-      throw ApiError.NOTFOUND("Conversation not found");
-    }
-
-    // SECURITY CHECK
-
-    const isParticipant =
-      conversation.userOneId === senderId ||
-      conversation.userTwoId === senderId;
-
-    if (!isParticipant) {
-      throw ApiError.UNAUTHORIZED("Unauthorized access");
-    }
+    const { conversationId, receiverId, text } = req.body;
 
     const message = await db.Message.create({
       conversationId,
       senderId,
+      receiverId,
       text,
+      isRead: false,
     });
 
     return successResponse(res, 201, {
@@ -103,68 +93,11 @@ export const getMessages = async (req, res, next) => {
         conversationId,
       },
 
-      include: [
-        {
-          model: db.User,
-          as: "sender",
-
-          attributes: ["id", "name", "profilePic"],
-        },
-      ],
-
       order: [["createdAt", "ASC"]],
     });
 
-    return successResponse(res, 200, {
-      message: "Messages fetched",
+    return successResponse(res, StatusCodes.OK, {
       data: messages,
-    });
-  } catch (error) {
-    next(error);
-  }
-};
-
-// get my conversions
-export const getMyConversations = async (req, res, next) => {
-  try {
-    const userId = req.user.id;
-
-    const conversations = await db.Conversation.findAll({
-      where: {
-        [Op.or]: [
-          {
-            userOneId: userId,
-          },
-
-          {
-            userTwoId: userId,
-          },
-        ],
-      },
-
-      include: [
-        {
-          model: db.User,
-          as: "userOne",
-
-          attributes: ["id", "name", "profilePic", "role"],
-        },
-
-        {
-          model: db.User,
-          as: "userTwo",
-
-          attributes: ["id", "name", "profilePic", "role"],
-        },
-      ],
-
-      order: [["updatedAt", "DESC"]],
-    });
-
-    return successResponse(res, 200, {
-      message: "Conversations fetched successfully",
-
-      data: conversations,
     });
   } catch (error) {
     next(error);
