@@ -1,35 +1,39 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   startChat,
   sendMessage,
   getMessages,
+  getMyConversations,
 } from "@/features/chatApi";
 
 import { toast } from "./use-toast";
 
-export const useChat = (
-  conversationId
-) => {
-  const queryClient =
-    useQueryClient();
+export const useChat = (conversationId) => {
+  const queryClient = useQueryClient();
+
+  /* =========================
+     GET CONVERSATIONS
+  ========================= */
+
+  const conversationsQuery = useQuery({
+    queryKey: ["conversations"],
+
+    queryFn: getMyConversations,
+
+    retry: false,
+
+    refetchOnWindowFocus: false,
+  });
 
   /* =========================
      GET MESSAGES
   ========================= */
 
   const messagesQuery = useQuery({
-    queryKey: [
-      "messages",
-      conversationId,
-    ],
+    queryKey: ["messages", conversationId],
 
-    queryFn: () =>
-      getMessages(conversationId),
+    queryFn: () => getMessages(conversationId),
 
     enabled: !!conversationId,
 
@@ -42,89 +46,70 @@ export const useChat = (
      START CHAT
   ========================= */
 
-  const startChatMutation =
-    useMutation({
-      mutationFn: startChat,
+  const startChatMutation = useMutation({
+    mutationFn: startChat,
 
-      onSuccess: (data) => {
-        toast({
-          title: "Success",
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({
+        queryKey: ["conversations"],
+      });
 
-          description:
-            data?.message ||
-            "Chat started successfully 🚀",
-        });
-      },
+      toast({
+        title: "Success",
 
-      onError: (err) => {
-        toast({
-          title: "Error",
+        description: data?.message || "Chat started successfully 🚀",
+      });
+    },
 
-          description:
-            err?.response?.data
-              ?.message ||
-            err.message,
+    onError: (err) => {
+      toast({
+        title: "Error",
 
-          variant: "destructive",
-        });
-      },
-    });
+        description: err?.response?.data?.message || err.message,
+
+        variant: "destructive",
+      });
+    },
+  });
 
   /* =========================
      SEND MESSAGE
   ========================= */
 
-  const sendMessageMutation =
-    useMutation({
-      mutationFn: sendMessage,
+  const sendMessageMutation = useMutation({
+    mutationFn: sendMessage,
 
-      onSuccess: () => {
-        queryClient.invalidateQueries({
-          queryKey: [
-            "messages",
-            conversationId,
-          ],
-        });
-      },
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["messages", conversationId],
+      });
+    },
 
-      onError: (err) => {
-        toast({
-          title: "Error",
+    onError: (err) => {
+      toast({
+        title: "Error",
 
-          description:
-            err?.response?.data
-              ?.message ||
-            err.message,
+        description: err?.response?.data?.message || err.message,
 
-          variant: "destructive",
-        });
-      },
-    });
+        variant: "destructive",
+      });
+    },
+  });
 
   return {
-    /* messages */
-    messages:
-      messagesQuery.data?.data ||
-      [],
+    conversations: conversationsQuery.data?.data || [],
+    isLoadingConversations: conversationsQuery.isLoading,
+    refetchConversations: conversationsQuery.refetch,
 
-    isLoadingMessages:
-      messagesQuery.isLoading,
+    messages: messagesQuery.data?.data || [],
+    isLoadingMessages: messagesQuery.isLoading,
+    refetchMessages: messagesQuery.refetch,
 
-    refetchMessages:
-      messagesQuery.refetch,
+    startChat: startChatMutation.mutateAsync,
+    isStartingChat: startChatMutation.isPending,
 
-    /* start chat */
-    startChat:
-      startChatMutation.mutate,
-
-    isStartingChat:
-      startChatMutation.isPending,
-
-    /* send message */
-    sendMessage:
-      sendMessageMutation.mutate,
-
-    isSendingMessage:
-      sendMessageMutation.isPending,
+ 
+    sendMessage: sendMessageMutation.mutateAsync,
+    isSendingMessage: sendMessageMutation.isPending,
   };
 };

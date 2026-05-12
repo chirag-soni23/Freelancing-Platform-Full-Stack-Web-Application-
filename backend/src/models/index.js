@@ -54,6 +54,16 @@ db.User.hasMany(db.Conversation, {
   as: "receivedConversations",
 });
 
+db.Conversation.belongsTo(db.User, {
+  foreignKey: "senderId",
+  as: "sender",
+});
+
+db.Conversation.belongsTo(db.User, {
+  foreignKey: "receiverId",
+  as: "receiver",
+});
+
 // db.Job.hasMany(db.Bid, { foreignKey: "jobId" });
 // db.Bid.belongsTo(db.Job, { foreignKey: "jobId" });
 

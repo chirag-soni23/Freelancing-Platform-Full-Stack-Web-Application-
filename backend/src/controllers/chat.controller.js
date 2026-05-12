@@ -103,3 +103,46 @@ export const getMessages = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getMyConversations = async (req, res, next) => {
+  try {
+    const userId = req.user.id;
+
+    const conversations = await db.Conversation.findAll({
+      where: {
+        [Op.or]: [
+          {
+            senderId: userId,
+          },
+          {
+            receiverId: userId,
+          },
+        ],
+      },
+
+      include: [
+        {
+          model: db.User,
+          as: "sender",
+
+          attributes: ["id", "name", "profilePic"],
+        },
+
+        {
+          model: db.User,
+          as: "receiver",
+
+          attributes: ["id", "name", "profilePic"],
+        },
+      ],
+
+      order: [["updatedAt", "DESC"]],
+    });
+
+    return successResponse(res, 200, {
+      data: conversations,
+    });
+  } catch (error) {
+    next(error);
+  }
+};

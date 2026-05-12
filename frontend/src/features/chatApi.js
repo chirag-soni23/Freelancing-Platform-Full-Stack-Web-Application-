@@ -1,24 +1,29 @@
-// services/chat.service.js
-
 import { api } from "@/services/api";
 
-// CREATE / START CHAT
+// start chat
 export const startChat = async (data) => {
   const res = await api.post("/chat/conversation", data);
 
   return res.data;
 };
 
-// SEND MESSAGE
+// send messages
 export const sendMessage = async (data) => {
   const res = await api.post("/chat/message", data);
 
   return res.data;
 };
 
-// GET MESSAGES
+// get messages
 export const getMessages = async (conversationId) => {
   const res = await api.get(`/chat/messages/${conversationId}`);
+
+  return res.data;
+};
+
+// get my conversations
+export const getMyConversations = async () => {
+  const res = await api.get("/chat/conversations");
 
   return res.data;
 };
