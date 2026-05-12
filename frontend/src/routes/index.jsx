@@ -11,6 +11,7 @@ import RoleProtectedRoute from "./RoleProtectedRoute";
 import Contact from "@/pages/Contact";
 import FreelancerDetails from "@/pages/FreelancerDetails";
 import JobDetails from "@/pages/JobDetails";
+import Chat from "@/pages/Chat";
 
 const MainLayout = lazy(() => import("@/components/layout/MainLayout"));
 const Dashboard = lazy(() => import("@/dashboard/Dashboard"));
@@ -162,6 +163,12 @@ const AppRoutes = () => {
               <RoleProtectedRoute allowedRoles={["client"]}>
                 <Jobs />
               </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="chats"
+            element={
+                <Chat />
             }
           />
         </Route>
