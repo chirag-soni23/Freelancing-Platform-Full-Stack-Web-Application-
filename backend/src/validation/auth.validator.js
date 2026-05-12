@@ -30,8 +30,8 @@ export const registerClientSchema = Joi.object({
     "string.empty": "Confirm password is required",
   }),
 
-  companyName: Joi.string().min(2).max(100).required().messages({
-    "string.empty": "Company name is required",
+  companyName: Joi.string().min(2).max(100).optional().allow("").messages({
+    "string.min": "Company name must be at least 2 characters",
   }),
 
   companyWebsite: Joi.string().uri().allow("", null).messages({
@@ -90,6 +90,10 @@ export const registerFreelancerSchema = Joi.object({
     "number.min": "Hourly rate must be greater than 0",
   }),
 
+  currency: Joi.string().valid("INR", "USD").required().messages({
+    "any.only": "Currency must be INR or USD",
+    "string.empty": "Currency is required",
+  }),
   portfolio: Joi.string().uri().allow("", null).messages({
     "string.uri": "Invalid portfolio URL",
   }),
@@ -143,9 +147,17 @@ export const updateProfileSchema = Joi.object({
     "array.base": "Skills must be an array",
   }),
 
+  languages: Joi.array().items(Joi.string()).messages({
+    "array.base": "language must be an array",
+  }),
+
   hourlyRate: Joi.number().min(1).messages({
     "number.base": "Hourly rate must be a number",
     "number.min": "Hourly rate must be greater than 0",
+  }),
+
+  currency: Joi.string().valid("INR", "USD").messages({
+    "any.only": "Currency must be INR or USD",
   }),
 
   portfolio: Joi.string().uri().allow("", null).messages({

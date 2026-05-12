@@ -3,8 +3,8 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox"; // Shadcn Checkbox
-import { Separator } from "@/components/ui/separator"; // Shadcn Separator
+import { Checkbox } from "@/components/ui/checkbox";
+import { Separator } from "@/components/ui/separator";
 import {
   Search,
   Filter,
@@ -17,12 +17,19 @@ import {
   ArrowUpRight,
   Gavel,
   TrendingUp,
+  IndianRupee,
+  DollarSign,
 } from "lucide-react";
 import Header from "@/components/work/Header";
+import { useJob } from "@/hooks/useJob";
+import { useNavigate } from "react-router-dom";
 
 const jobs = [1, 2, 3, 4];
 
 const FindWork = () => {
+  const { jobs } = useJob();
+  console.log(jobs);
+  const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#fcfdfe] dark:bg-[#020617] text-foreground p-4 md:p-10">
       <Header />
@@ -132,7 +139,6 @@ const FindWork = () => {
           </div>
         </aside>
 
-        {/* 💼 Jobs Feed: Clean Card Design */}
         <main className="lg:col-span-9 space-y-6">
           {jobs.map((job, i) => (
             <Card
@@ -153,29 +159,25 @@ const FindWork = () => {
                       </div>
 
                       <h2 className="text-2xl md:text-3xl font-bold tracking-tight group-hover:text-primary transition-all duration-300">
-                        Senior Full-Stack Engineer{" "}
-                        <span className="text-muted-foreground/40 font-light">
+                        {job?.title}
+                        {/* <span className="text-muted-foreground/40 font-light">
                           / Next.js
-                        </span>
+                        </span> */}
                       </h2>
 
                       <p className="text-muted-foreground text-[16px] leading-relaxed max-w-2xl line-clamp-2">
-                        We need a developer to architect a fintech dashboard
-                        using Supabase and React. Focus on high performance and
-                        complex data visualizations.
+                        {job?.description}
                       </p>
 
                       <div className="flex flex-wrap gap-2 pt-2">
-                        {["Next.js", "Supabase", "TypeScript", "Tailwind"].map(
-                          (s) => (
-                            <span
-                              key={s}
-                              className="px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground text-[12px] font-bold"
-                            >
-                              {s}
-                            </span>
-                          ),
-                        )}
+                        {job?.skills.map((s) => (
+                          <span
+                            key={s}
+                            className="px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground text-[12px] font-bold"
+                          >
+                            {s}
+                          </span>
+                        ))}
                       </div>
                     </div>
 
@@ -189,20 +191,20 @@ const FindWork = () => {
                   </div>
                 </div>
 
-                {/* Footer Bar: Updated with Bid Activity */}
                 <div className="bg-secondary/20 dark:bg-secondary/10 px-8 py-6 flex flex-col md:flex-row items-center justify-between gap-6 border-t border-border/10">
                   <div className="flex items-center gap-10">
-                    {/* Budget Section */}
                     <div className="space-y-1">
                       <p className="text-[10px] uppercase font-black text-muted-foreground tracking-[0.15em]">
                         Budget
                       </p>
                       <div className="flex items-center gap-1.5 font-black text-xl tracking-tight">
-                        <CircleDollarSign
-                          size={20}
-                          className="text-emerald-500"
-                        />
-                        ₹45,000
+                        {job?.currency === "INR" ? (
+                          <IndianRupee size={20} className="text-emerald-500" />
+                        ) : (
+                          <DollarSign size={20} className="text-emerald-500" />
+                        )}
+
+                        <span>{job?.budget}</span>
                       </div>
                     </div>
 
@@ -242,14 +244,23 @@ const FindWork = () => {
                       </div>
                     </div>
                   </div>
+                  <div className="flex flex-col md:flex-row gap-3">
+                    <Button onClick={() => navigate(`/job-details/${job.id}`)} className="w-full md:w-auto rounded-2xl px-10 h-12 font-black group/btn shadow-lg shadow-primary/20 transition-all hover:-translate-y-1">
+                      View Details
+                      <ArrowUpRight
+                        className="ml-2 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
+                        size={18}
+                      />
+                    </Button>
 
-                  <Button className="w-full md:w-auto rounded-2xl px-10 h-12 font-black group/btn shadow-lg shadow-primary/20 transition-all hover:translate-y-[-2px]">
-                    Place a Bid
-                    <ArrowUpRight
-                      className="ml-2 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform"
-                      size={18}
-                    />
-                  </Button>
+                    <Button className="w-full md:w-auto rounded-2xl px-10 h-12 font-black group/btn shadow-lg shadow-primary/20 transition-all hover:-translate-y-1">
+                      Place a Bid
+                      <ArrowUpRight
+                        className="ml-2 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
+                        size={18}
+                      />
+                    </Button>
+                  </div>
                 </div>
               </CardContent>
             </Card>

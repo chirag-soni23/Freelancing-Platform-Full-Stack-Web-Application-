@@ -24,7 +24,7 @@ const Header = () => {
         <div className="flex items-center gap-4">
           <Button
             variant="ghost"
-            className="font-bold hover:bg-transparent hover:text-primary"
+            className="font-bold px-8 py-6 hover:bg-transparent hover:text-primary"
           >
             Save Project
           </Button>

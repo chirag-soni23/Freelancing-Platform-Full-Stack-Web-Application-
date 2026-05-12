@@ -10,6 +10,14 @@ async function syncDatabase() {
       alter: true,
     });
 
+    // await db.Category.sync({
+    //   alter: true,
+    // });
+
+    // await db.Job.sync({
+    //   alter: true,
+    // });
+
     await db.connection.query("SET FOREIGN_KEY_CHECKS = 1");
     console.log("Database synchronized successfully.");
   } catch (error) {

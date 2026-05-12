@@ -1,6 +1,9 @@
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-dotenv.config();
+import path from "path";
+dotenv.config({
+  path: path.join(process.cwd(), "backend", ".env"),
+});
 
 export const sendEmail = async ({ to, subject, text }) => {
   const transporter = nodemailer.createTransport({

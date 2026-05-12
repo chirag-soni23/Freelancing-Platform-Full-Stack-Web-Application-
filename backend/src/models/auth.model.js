@@ -60,8 +60,18 @@ const User = sequelize.define(
       type: DataTypes.JSON,
     },
 
+    languages: {
+      type: DataTypes.JSON,
+    },
+
     hourlyRate: {
       type: DataTypes.FLOAT,
+    },
+
+    currency: {
+      type: DataTypes.ENUM("INR", "USD"),
+      allowNull: false,
+      defaultValue: "INR",
     },
 
     portfolio: {

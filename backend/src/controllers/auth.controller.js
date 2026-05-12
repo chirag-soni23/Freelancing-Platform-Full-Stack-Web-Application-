@@ -6,7 +6,7 @@ import bcrypt from "bcrypt";
 import imagekit from "../utils/imageKit.js";
 import crypto from "crypto";
 import { sendEmail } from "../utils/mailer.js";
-import { Op } from "sequelize";
+import { Op, fn, col, where as sequelizeWhere } from "sequelize";
 import { emailQueue } from "../queue/emailQueue.js";
 
 // register client
@@ -20,7 +20,7 @@ export const registerClient = async (req, res, next) => {
       companyName,
       companyWebsite,
       address,
-    } = req.validatedData;
+    } = req.body;
 
     const existEmail = await db.User.findOne({ where: { email } });
     if (existEmail) {
@@ -63,10 +63,12 @@ export const registerFreelancer = async (req, res, next) => {
       title,
       bio,
       skills,
+      languages,
       hourlyRate,
+      currency,
       portfolio,
       address,
-    } = req.validatedData;
+    } = req.body;
 
     const existEmail = await db.User.findOne({ where: { email } });
 
@@ -82,11 +84,12 @@ export const registerFreelancer = async (req, res, next) => {
       phone,
       password: hashedPassword,
       role: "freelancer",
-
       title,
       bio,
       skills,
+      languages,
       hourlyRate,
+      currency,
       portfolio,
       address,
     });
@@ -105,7 +108,7 @@ export const registerFreelancer = async (req, res, next) => {
 // login
 export const login = async (req, res, next) => {
   try {
-    const { email, password } = req.validatedData;
+    const { email, password } = req.body;
 
     const user = await db.User.findOne({ where: { email } });
 
@@ -133,51 +136,58 @@ export const login = async (req, res, next) => {
 // get me
 export const getMe = async (req, res, next) => {
   try {
-    const user = await db.User.findByPk(req.user.id, {
-      raw: true,
-    });
+    if (!req.user?.id) {
+      throw ApiError.UNAUTHORIZED("User not authenticated");
+    }
+
+    const user = await db.User.findByPk(req.user.id);
 
     if (!user) {
       throw ApiError.NOTFOUND("User not found");
     }
 
-    delete user.password;
+    const userData = user.toJSON();
+    delete userData.password;
 
     let filteredUser = {};
 
-    if (user.role === "client") {
-      filteredUser = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        profilePic: user.profilePic,
-        address: user.address,
-        companyName: user.companyName,
-        companyWebsite: user.companyWebsite,
-        isEmailVerified: user.isEmailVerified,
-        createdAt: user.createdAt,
-      };
-    }
+    const role = userData.role?.toLowerCase();
 
-    if (user.role === "freelancer") {
+    if (role === "client") {
       filteredUser = {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        role: user.role,
-        profilePic: user.profilePic,
-        address: user.address,
-        title: user.title,
-        bio: user.bio,
-        skills: user.skills,
-        hourlyRate: user.hourlyRate,
-        portfolio: user.portfolio,
-        isEmailVerified: user.isEmailVerified,
-        createdAt: user.createdAt,
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        role: userData.role,
+        profilePic: userData.profilePic,
+        address: userData.address,
+        companyName: userData.companyName,
+        companyWebsite: userData.companyWebsite,
+        isEmailVerified: userData.isEmailVerified,
+        createdAt: userData.createdAt,
       };
+    } else if (role === "freelancer") {
+      filteredUser = {
+        id: userData.id,
+        name: userData.name,
+        email: userData.email,
+        phone: userData.phone,
+        role: userData.role,
+        profilePic: userData.profilePic,
+        address: userData.address,
+        title: userData.title,
+        bio: userData.bio,
+        skills: userData.skills,
+        languages: userData.languages,
+        hourlyRate: userData.hourlyRate,
+        currency: userData.currency,
+        portfolio: userData.portfolio,
+        isEmailVerified: userData.isEmailVerified,
+        createdAt: userData.createdAt,
+      };
+    } else {
+      filteredUser = userData;
     }
 
     return successResponse(res, StatusCodes.OK, {
@@ -185,8 +195,8 @@ export const getMe = async (req, res, next) => {
       data: filteredUser,
     });
   } catch (error) {
+    console.log("GET ME ERROR:", error.message);
     next(error);
-    console.log(error.message);
   }
 };
 
@@ -217,7 +227,7 @@ export const updateProfile = async (req, res, next) => {
       throw ApiError.NOTFOUND("User not found");
     }
 
-    const data = req.validatedData;
+    const data = req.body;
 
     if (data.name !== undefined) user.name = data.name;
     if (data.phone !== undefined) user.phone = data.phone;
@@ -229,7 +239,9 @@ export const updateProfile = async (req, res, next) => {
       if (data.title !== undefined) user.title = data.title;
       if (data.bio !== undefined) user.bio = data.bio;
       if (data.skills !== undefined) user.skills = data.skills;
+      if (data.languages !== undefined) user.languages = data.languages;
       if (data.hourlyRate !== undefined) user.hourlyRate = data.hourlyRate;
+      if (data.currency !== undefined) user.currency = data.currency;
       if (data.portfolio !== undefined) user.portfolio = data.portfolio;
     }
 
@@ -347,7 +359,7 @@ export const updateProfilePic = async (req, res, next) => {
 // reset password
 export const resetPassword = async (req, res, next) => {
   try {
-    const { oldPassword, newPassword, confirmPassword } = req.validatedData;
+    const { oldPassword, newPassword, confirmPassword } = req.body;
 
     if (newPassword !== confirmPassword) {
       throw ApiError.BADREQUEST(
@@ -431,7 +443,7 @@ export const forgotPassword = async (req, res, next) => {
 export const resetPasswordWithToken = async (req, res, next) => {
   try {
     const { token } = req.params;
-    const { password, confirmPassword } = req.validatedData;
+    const { password, confirmPassword } = req.body;
 
     if (password !== confirmPassword) {
       throw ApiError.BADREQUEST("Passwords do not match");
@@ -473,17 +485,29 @@ export const verifyEmail = async (req, res, next) => {
 
     const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
 
+    // 🔍 token se user dhundo
     const user = await db.User.findOne({
       where: {
         emailVerificationToken: hashedToken,
-        emailVerificationExpire: { [Op.gt]: Date.now() },
       },
     });
 
+    // ❌ user nahi mila
     if (!user) {
-      throw ApiError.BADREQUEST("Invalid or expired verification link");
+      throw ApiError.BADREQUEST("Invalid verification link");
     }
 
+    // ❌ token expired
+    if (user.emailVerificationExpire < Date.now()) {
+      throw ApiError.BADREQUEST("Verification link expired");
+    }
+
+    // ❌ already verified
+    if (user.isEmailVerified) {
+      throw ApiError.BADREQUEST("Email already verified");
+    }
+
+    // ✅ verify karo
     user.isEmailVerified = true;
     user.emailVerificationToken = null;
     user.emailVerificationExpire = null;
@@ -498,7 +522,7 @@ export const verifyEmail = async (req, res, next) => {
   }
 };
 
-// resend email varification
+// resend verification email
 export const resendVerificationEmail = async (req, res, next) => {
   try {
     const user = await db.User.findByPk(req.user.id);
@@ -522,14 +546,124 @@ export const resendVerificationEmail = async (req, res, next) => {
 
     const verifyUrl = `${process.env.CLIENT_URL}/verify-email/${token}`;
 
-    await sendEmail({
-      to: user.email,
-      subject: "Verify Your Email",
-      text: `Click to verify email: ${verifyUrl}`,
-    });
+    await emailQueue.add(
+      "sendEmail",
+      {
+        to: user.email,
+        subject: "Verify Your Email",
+        text: `Click to verify email: ${verifyUrl}`,
+      },
+      {
+        attempts: 2,
+        removeOnComplete: true,
+        removeOnFail: true,
+      },
+    );
 
     return successResponse(res, 200, {
       message: "Verification email sent again",
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// get all freelancer
+export const getAllFreelancers = async (req, res, next) => {
+  try {
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    const offset = (page - 1) * limit;
+
+    let where = {
+      role: "freelancer",
+    };
+
+    if (search && search.trim().length > 0) {
+      const keyword = search.trim().toLowerCase();
+
+      where[Op.or] = [
+        { name: { [Op.like]: `%${keyword}%` } },
+        { title: { [Op.like]: `%${keyword}%` } },
+
+        sequelizeWhere(fn("JSON_SEARCH", col("skills"), "one", keyword), {
+          [Op.ne]: null,
+        }),
+      ];
+    }
+
+    const { count, rows } = await db.User.findAndCountAll({
+      where,
+      attributes: { exclude: ["password"] },
+      limit,
+      offset,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Freelancers fetched",
+      data: rows,
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// get all clients
+export const getAllClients = async (req, res, next) => {
+  try {
+    const clients = await db.User.findAll({
+      where: { role: "client" },
+      attributes: { exclude: ["password"] },
+      order: [["createdAt", "DESC"]],
+    });
+
+    return successResponse(res, 200, {
+      message: "Clients fetched successfully",
+      data: clients,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// get freelancer by id
+export const getFreelancerById = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+
+    const freelancer = await db.User.findOne({
+      where: {
+        id,
+        role: "freelancer",
+      },
+      attributes: {
+        exclude: [
+          "password",
+          "resetPasswordToken",
+          "resetPasswordExpire",
+          "emailVerificationToken",
+          "emailVerificationExpire",
+        ],
+      },
+    });
+
+    if (!freelancer) {
+      throw ApiError.NOTFOUND("Freelancer not found");
+    }
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Freelancer fetched successfully",
+      data: freelancer,
     });
   } catch (error) {
     next(error);

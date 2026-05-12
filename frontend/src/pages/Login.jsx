@@ -5,7 +5,6 @@ import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Badge } from "@/components/ui/badge";
 import { Link } from "react-router-dom";
-// Dialog Imports
 import {
   Dialog,
   DialogContent,
@@ -24,6 +23,7 @@ import {
   KeyRound,
 } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { loginSchema } from "@/validations/auth.validator";
 
 const Login = () => {
   const { login, isLogging, forgotPassword, isLoadingForgot } = useAuth();
@@ -32,8 +32,26 @@ const Login = () => {
     email: "",
     password: "",
   });
+  const [errors, setErrors] = useState({});
+  const validateForm = () => {
+    const { error } = loginSchema.validate(formData, {
+      abortEarly: false,
+    });
 
-  // Modal ke liye state (Optional: agar programmatically close karna ho)
+    if (!error) {
+      setErrors({});
+      return true;
+    }
+
+    const newErrors = {};
+    error.details.forEach((err) => {
+      newErrors[err.path[0]] = err.message;
+    });
+
+    setErrors(newErrors);
+    return false;
+  };
+
   const [resetEmail, setResetEmail] = useState("");
 
   const handleChange = (e) => {
@@ -42,16 +60,33 @@ const Login = () => {
       [e.target.name]: e.target.value,
     });
   };
-
   const handleSubmit = (e) => {
     e.preventDefault();
+
+    if (!validateForm()) return;
+
     login(formData, {
       onSuccess: () => {
         setFormData({ email: "", password: "" });
+        setErrors({});
+      },
+
+      onError: (err) => {
+        const message = err?.response?.data?.message || "Login failed";
+
+        if (message.toLowerCase().includes("email")) {
+          setErrors({ email: message });
+        } else if (message.toLowerCase().includes("password")) {
+          setErrors({ password: message });
+        } else {
+          setErrors({
+            email: message,
+            password: message,
+          });
+        }
       },
     });
   };
-
   const handleResetPassword = (e) => {
     e.preventDefault();
     forgotPassword(
@@ -171,6 +206,11 @@ const Login = () => {
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.email && (
+                    <p className="text-red-500 text-xs mt-1 ml-1">
+                      {errors.email}
+                    </p>
+                  )}
                 </div>
 
                 <div className="space-y-2 group">
@@ -247,6 +287,11 @@ const Login = () => {
                       className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
                     />
                   </div>
+                  {errors.password && (
+                    <p className="text-red-500 text-xs mt-1 ml-1">
+                      {errors.password}
+                    </p>
+                  )}
                 </div>
               </div>
 

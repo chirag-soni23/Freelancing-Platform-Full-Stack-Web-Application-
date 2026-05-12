@@ -20,8 +20,12 @@ export const login = async (data) => {
 
 // get current user
 export const getMe = async () => {
-  const res = await api.get("/auth/me");
-  return res.data;
+  try {
+    const res = await api.get("/auth/me");
+    return res.data;
+  } catch (err) {
+    return null;
+  }
 };
 
 // logout
@@ -83,5 +87,31 @@ export const verifyEmail = async (token) => {
 // resend verification email
 export const resendVerification = async () => {
   const res = await api.post("/auth/resend-verification");
+  return res.data;
+};
+
+// get all freelancers
+export const getFreelancers = async (params) => {
+  const res = await api.get("/auth/getall-freelancer", {
+    params,
+  });
+  return res.data;
+};
+
+// get all clients
+export const getClients = async () => {
+  const res = await api.get("/auth/getall-client");
+  return res.data;
+};
+
+// get freelancer by id
+export const getFreelancerById = async (id) => {
+  const res = await api.get(`/auth/freelancer/${id}`);
+  return res.data;
+};
+
+// get client by id
+export const getClientById = async (id) => {
+  const res = await api.get(`/auth/client/${id}`);
   return res.data;
 };

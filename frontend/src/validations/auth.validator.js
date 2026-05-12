@@ -31,6 +31,11 @@ export const freelancerSchema = Joi.object({
     "number.base": "Hourly rate must be a number",
   }),
 
+  currency: Joi.string().valid("INR", "USD").required().messages({
+    "any.only": "Currency must be INR or USD",
+    "string.empty": "Currency is required",
+  }),
+
   skills: Joi.array()
     .items(
       Joi.string().min(2).max(30).messages({
@@ -45,6 +50,20 @@ export const freelancerSchema = Joi.object({
       "array.min": "At least one skill is required",
     }),
 
+  languages: Joi.array()
+    .items(
+      Joi.string().min(2).max(30).messages({
+        "string.base": "Language must be a string",
+        "string.max": "Language cannot exceed 30 characters",
+      }),
+    )
+    .min(1)
+    .optional()
+    .messages({
+      "array.base": "Language must be an array",
+      "array.min": "At least one language is required",
+    }),
+
   portfolio: Joi.string().uri().required().messages({
     "string.empty": "Portfolio is required",
     "string.uri": "Invalid portfolio URL",
@@ -55,8 +74,9 @@ export const freelancerSchema = Joi.object({
     .required()
     .messages({
       "string.empty": "Password is required",
+      "string.pattern.base":
+        "Password must have 1 uppercase & 1 special character",
     }),
-
   confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
     "any.only": "Passwords do not match",
   }),
@@ -115,11 +135,19 @@ export const resetPasswordWithTokenSchema = Joi.object({
         "Password must have 1 uppercase & 1 special character",
     }),
 
-  confirmPassword: Joi.string()
-    .valid(Joi.ref("password"))
-    .required()
-    .messages({
-      "any.only": "Passwords do not match",
-      "string.empty": "Confirm password is required",
-    }),
+  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
+    "any.only": "Passwords do not match",
+    "string.empty": "Confirm password is required",
+  }),
+});
+
+export const loginSchema = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Invalid email",
+    "string.empty": "Email is required",
+  }),
+
+  password: Joi.string().required().messages({
+    "string.empty": "Password is required",
+  }),
 });

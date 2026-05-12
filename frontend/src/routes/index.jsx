@@ -1,37 +1,173 @@
-import MainLayout from "@/components/layout/MainLayout";
-import Dashboard from "@/dashboard/Dashboard";
-import { AppLayout } from "@/dashboard/layouts/AppLayout";
-import ClientSignUp from "@/pages/ClientSignUp";
-import FindFreelancers from "@/pages/FindFreelancers";
-import FindWork from "@/pages/FindWork";
-import FreeLancerSignUp from "@/pages/FreeLancerSignup";
-import Home from "@/pages/Home";
-import Login from "@/pages/Login";
-import ResetPassword from "@/pages/ResetPassword";
-import WorkDetail from "@/pages/WorkDetail";
-import React from "react";
+import React, { Suspense, lazy } from "react";
 import { Route, Routes } from "react-router-dom";
+
+import ProtectedRoute from "./ProtectedRoute";
+import PublicRoute from "./PublicRoute";
+import Profile from "@/pages/Profile";
+import VerifyEmailPage from "@/pages/VerifyEmailPage";
+import Category from "@/client/pages/Category";
+import Jobs from "@/client/pages/Jobs";
+import RoleProtectedRoute from "./RoleProtectedRoute";
+import Contact from "@/pages/Contact";
+import FreelancerDetails from "@/pages/FreelancerDetails";
+import JobDetails from "@/pages/JobDetails";
+
+const MainLayout = lazy(() => import("@/components/layout/MainLayout"));
+const Dashboard = lazy(() => import("@/dashboard/Dashboard"));
+const AppLayout = lazy(() =>
+  import("@/dashboard/layouts/AppLayout").then((m) => ({
+    default: m.AppLayout,
+  })),
+);
+
+const ClientSignUp = lazy(() => import("@/pages/ClientSignUp"));
+const FindFreelancers = lazy(() => import("@/pages/FindFreelancers"));
+const FindWork = lazy(() => import("@/pages/FindWork"));
+const FreeLancerSignUp = lazy(() => import("@/pages/FreeLancerSignup"));
+const Home = lazy(() => import("@/pages/Home"));
+const Login = lazy(() => import("@/pages/Login"));
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+const WorkDetail = lazy(() => import("@/pages/WorkDetail"));
+const NotFound = lazy(() => import("@/pages/NotFound"));
+
+const Loader = () => (
+  <div className="flex items-center justify-center h-screen">
+    <div className="w-10 h-10 border-4 border-gray-300 border-t-black rounded-full animate-spin"></div>
+  </div>
+);
 
 const AppRoutes = () => {
   return (
-    <>
+    <Suspense fallback={<Loader />}>
       <Routes>
-        <Route path="/client-signup" element={<ClientSignUp />} />
-        <Route path="/freelancer-signup" element={<FreeLancerSignUp />} />
-        <Route path="/login" element={<Login />} />
-        <Route path="/reset-password/:token" element={<ResetPassword/>}/>
+        {/* PUBLIC */}
+        <Route
+          path="/client-signup"
+          element={
+            <PublicRoute>
+              <ClientSignUp />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/freelancer-signup"
+          element={
+            <PublicRoute>
+              <FreeLancerSignUp />
+            </PublicRoute>
+          }
+        />
+
+        <Route
+          path="/login"
+          element={
+            <PublicRoute>
+              <Login />
+            </PublicRoute>
+          }
+        />
+
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+
+        {/* MAIN */}
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
-          <Route path="/find-work" element={<FindWork />} />
-          <Route path="/find-freelancers" element={<FindFreelancers />} />
-          <Route path="/work-detail/:id" element={<WorkDetail />} />
+          <Route path="/contact" element={<Contact />} />
+
+          <Route
+            path="find-work"
+            element={
+              <RoleProtectedRoute
+                disallowedRoles={["client"]}
+                allowGuest={true}
+                redirectTo="/unknown"
+              >
+                <FindWork />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="find-freelancers"
+            element={
+              <RoleProtectedRoute
+                disallowedRoles={["freelancer"]}
+                allowGuest={true}
+                redirectTo="/unknown"
+              >
+                <FindFreelancers />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="freelancer-details/:id"
+            element={
+              <RoleProtectedRoute
+                disallowedRoles={["freelancer"]}
+                allowGuest={true}
+                redirectTo="/unknown"
+              >
+                <FreelancerDetails />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="job-details/:id"
+            element={
+              <RoleProtectedRoute
+                disallowedRoles={["client"]}
+                allowGuest={true}
+                redirectTo="/unknown"
+              >
+                <JobDetails/>
+              </RoleProtectedRoute>
+            }
+          />
+          <Route path="work-detail/:id" element={<WorkDetail />} />
+          <Route
+            path="profile"
+            element={
+              <ProtectedRoute>
+                <Profile />
+              </ProtectedRoute>
+            }
+          />
         </Route>
 
-        <Route path="/dashboard" element={<AppLayout />}>
-          <Route index element={<Dashboard />}></Route>
+        {/* PROTECTED */}
+        <Route
+          path="dashboard"
+          element={
+            <ProtectedRoute>
+              <AppLayout />
+            </ProtectedRoute>
+          }
+        >
+          <Route index element={<Dashboard />} />
+
+          {/* CLIENT */}
+          <Route
+            path="category"
+            element={
+              <RoleProtectedRoute allowedRoles={["client"]}>
+                <Category />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="jobs"
+            element={
+              <RoleProtectedRoute allowedRoles={["client"]}>
+                <Jobs />
+              </RoleProtectedRoute>
+            }
+          />
         </Route>
+        <Route path="*" element={<NotFound />} />
       </Routes>
-    </>
+    </Suspense>
   );
 };
 

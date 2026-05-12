@@ -16,10 +16,12 @@ import {
   User,
   Link as LinkIcon,
   Phone,
+  FileText,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { clientSchema } from "@/validations/auth.validator";
 import { useAuth } from "@/hooks/useAuth";
+import { Textarea } from "@/components/ui/textarea";
 
 const ClientSignUp = () => {
   const initialState = {
@@ -28,12 +30,14 @@ const ClientSignUp = () => {
     email: "",
     companyWebsite: "",
     address: "",
+    requirements: "",
     phone: "",
     password: "",
     confirmPassword: "",
   };
   const [formData, setFormData] = useState(initialState);
   const { registerClient, isRegisteringClient } = useAuth();
+  const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});
   const validateForm = () => {
@@ -75,6 +79,8 @@ const ClientSignUp = () => {
     registerClient(finalData, {
       onSuccess: () => {
         setFormData(initialState);
+
+        navigate("/");
       },
     });
   };
@@ -161,7 +167,7 @@ const ClientSignUp = () => {
         </div>
       </div>
 
-    <div className="flex-1 h-full overflow-y-auto bg-[#fcfdfe] dark:bg-[#020617] scrollbar-hide">
+      <div className="flex-1 h-full overflow-y-auto bg-[#fcfdfe] dark:bg-[#020617] scrollbar-hide">
         <div className="flex justify-center lg:p-0 md:p-0 p-12">
           <div className="w-full max-w-2xl space-y-6 py-10">
             <div className="space-y-3">
@@ -268,7 +274,9 @@ const ClientSignUp = () => {
                     />
                   </div>
                   {errors.companyWebsite && (
-                    <p className="text-red-500 text-xs">{errors.companyWebsite}</p>
+                    <p className="text-red-500 text-xs">
+                      {errors.companyWebsite}
+                    </p>
                   )}
                 </div>
 
@@ -311,6 +319,33 @@ const ClientSignUp = () => {
                   </div>
                   {errors.phone && (
                     <p className="text-red-500 text-xs">{errors.phone}</p>
+                  )}
+                </div>
+
+                 <div className="space-y-2 group md:col-span-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
+                    Requirements{" "}
+                    <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <div className="absolute left-4 top-4 text-muted-foreground">
+                      <FileText size={16} />
+                    </div>
+                    <Textarea
+                      value={formData.re}
+                      onChange={(e) =>
+                        setFormData({ ...formData, bio: e.target.value })
+                      }
+                      placeholder="Tell us about your expertise, years of experience, and what you can offer to clients..."
+                      className="min-h-[120px] rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12 py-4 resize-none"
+                    />
+                  </div>
+                  <p className="text-[10px] text-muted-foreground italic ml-1">
+                    Pro Tip: A detailed bio increases your chances of getting
+                    hired by 40%.
+                  </p>
+                  {errors.bio && (
+                    <p className="text-red-500 text-xs">{errors.bio}</p>
                   )}
                 </div>
 

@@ -1,20 +1,48 @@
 import { useState } from "react";
-// NavLink ko import karein
-import { Link, useNavigate, NavLink } from "react-router-dom"; 
+import { Link, useNavigate, NavLink } from "react-router-dom";
 import { Sun, Moon, Menu, X, Briefcase } from "lucide-react";
 import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
+import { useAuth } from "@/hooks/useAuth";
 
-const navLinks = [
-  { label: "Home", href: "/" },
-  { label: "Find Work", href: "/find-work" },
-  { label: "Find Freelancers", href: "/find-freelancers" },
-];
+const getNavLinks = (user) => {
+  const role = user?.data?.role;
 
+  let links = [{ label: "Home", href: "/" }];
+
+  if (!user) {
+    links.push(
+      { label: "Find Work", href: "/find-work" },
+      { label: "Find Freelancers", href: "/find-freelancers" },
+    );
+  }
+
+  if (role === "client") {
+    links.push({ label: "Find Freelancers", href: "/find-freelancers" });
+  }
+
+  if (role === "freelancer") {
+    links.push({ label: "Find Work", href: "/find-work" });
+  }
+
+  links.push({ label: "Contact", href: "/contact" });
+
+  return links;
+};
 const Navbar = () => {
   const { theme, toggle } = useTheme();
+  const { user } = useAuth();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navigate = useNavigate();
+  const getDashboardRoute = () => {
+    if (!user) return "/";
+
+    if (user?.data.role === "client") return "/client-dashboard";
+    if (user?.data.role === "freelancer") return "/freelancer-dashboard";
+    if (user?.data.role === "admin") return "/admin-dashboard";
+
+    return "/";
+  };
 
   return (
     <>
@@ -31,26 +59,25 @@ const Navbar = () => {
               </span>
             </Link>
 
-            {/* Desktop Nav - ✨ Active/Inactive Logic Added */}
+            {/* Desktop Nav */}
             <div className="hidden md:flex items-center gap-8">
-              {navLinks.map((l) => (
+              {getNavLinks(user).map((l) => (
                 <NavLink
                   key={l.label}
                   to={l.href}
                   className={({ isActive }) =>
                     `text-sm font-bold transition-all duration-200 relative py-2 ${
                       isActive
-                        ? "text-primary" // Active Style
-                        : "text-muted-foreground hover:text-foreground" // Inactive Style
+                        ? "text-primary"
+                        : "text-muted-foreground hover:text-foreground"
                     }`
                   }
                 >
                   {({ isActive }) => (
                     <>
                       {l.label}
-                      {/* Active Underline Indicator */}
                       {isActive && (
-                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full animate-in fade-in zoom-in duration-300" />
+                        <span className="absolute bottom-0 left-0 w-full h-0.5 bg-primary rounded-full" />
                       )}
                     </>
                   )}
@@ -60,27 +87,59 @@ const Navbar = () => {
 
             {/* Right Side */}
             <div className="flex items-center gap-2">
-              <Button variant="ghost" size="icon" onClick={toggle} className="rounded-xl">
-                {theme === "light" ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={toggle}
+                className="rounded-xl"
+              >
+                {theme === "light" ? (
+                  <Moon className="h-4 w-4" />
+                ) : (
+                  <Sun className="h-4 w-4" />
+                )}
               </Button>
 
               <div className="hidden md:flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="font-bold"
-                  onClick={() => navigate("/login")}
-                >
-                  Login
-                </Button>
+                {!user ? (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="font-bold rounded-xl"
+                      onClick={() => navigate("/login")}
+                    >
+                      Login
+                    </Button>
 
-                <Button
-                  size="sm"
-                  className="rounded-xl gradient-primary border-0 font-bold shadow-lg shadow-primary/20"
-                  onClick={() => navigate("/login")}
-                >
-                  Post Project
-                </Button>
+                    <Button
+                      size="sm"
+                      className="rounded-xl gradient-primary border-0 font-bold shadow-lg shadow-primary/20"
+                      onClick={() => navigate("/client-signup")}
+                    >
+                      Sign Up
+                    </Button>
+                  </>
+                ) : (
+                  <>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="font-bold"
+                      onClick={() => navigate("/profile")}
+                    >
+                      Profile
+                    </Button>
+
+                    <Button
+                      size="sm"
+                      className="rounded-xl gradient-primary border-0 font-bold shadow-lg shadow-primary/20"
+                      onClick={() => navigate("/dashboard")}
+                    >
+                      Dashboard
+                    </Button>
+                  </>
+                )}
               </div>
 
               {/* Mobile Menu Button */}
@@ -97,30 +156,39 @@ const Navbar = () => {
         </div>
       </nav>
 
-      {/* Mobile Sidebar - ✨ Active/Inactive Logic Added */}
-      <div className={`fixed inset-0 z-50 md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}>
+      {/* MOBILE */}
+      <div
+        className={`fixed inset-0 z-50 md:hidden ${mobileOpen ? "pointer-events-auto" : "pointer-events-none"}`}
+      >
         <div
-          className={`absolute inset-0 bg-black/40 transition-opacity duration-300 ${mobileOpen ? "opacity-100" : "opacity-0"}`}
+          className={`absolute inset-0 bg-black/40 ${mobileOpen ? "opacity-100" : "opacity-0"}`}
           onClick={() => setMobileOpen(false)}
         />
 
-        <div className={`absolute top-0 left-0 h-full w-72 bg-card border-r border-border shadow-lg transform transition-transform duration-300 p-6 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}>
+        <div
+          className={`absolute top-0 left-0 h-full w-72 bg-card border-r border-border shadow-lg p-6 ${mobileOpen ? "translate-x-0" : "-translate-x-full"}`}
+        >
           <div className="flex items-center justify-between mb-8">
-            <span className="font-black text-xl italic text-primary">MENU.</span>
-            <X className="h-6 w-6 cursor-pointer text-muted-foreground" onClick={() => setMobileOpen(false)} />
+            <span className="font-black text-xl italic text-primary">
+              MENU.
+            </span>
+            <X
+              className="h-6 w-6 cursor-pointer"
+              onClick={() => setMobileOpen(false)}
+            />
           </div>
 
           <div className="space-y-4">
-            {navLinks.map((l) => (
+            {getNavLinks(user).map((l) => (
               <NavLink
                 key={l.label}
                 to={l.href}
                 onClick={() => setMobileOpen(false)}
                 className={({ isActive }) =>
-                  `block p-3 rounded-xl text-base font-bold transition-colors ${
+                  `block p-3 rounded-xl font-bold ${
                     isActive
-                      ? "bg-primary/10 text-primary" // Mobile Active
-                      : "text-muted-foreground hover:bg-secondary" // Mobile Inactive
+                      ? "bg-primary/10 text-primary"
+                      : "text-muted-foreground hover:bg-secondary"
                   }`
                 }
               >
@@ -128,11 +196,41 @@ const Navbar = () => {
               </NavLink>
             ))}
           </div>
-          
-          {/* Mobile Footer Buttons */}
+
           <div className="absolute bottom-8 left-6 right-6 space-y-3">
-             <Button className="w-full rounded-xl font-bold" variant="outline" onClick={() => navigate("/login")}>Login</Button>
-             <Button className="w-full rounded-xl font-bold gradient-primary border-0 shadow-lg" onClick={() => navigate("/signup")}>Sign Up</Button>
+            {!user ? (
+              <>
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => navigate("/login")}
+                >
+                  Login
+                </Button>
+                <Button
+                  className="w-full gradient-primary border-0"
+                  onClick={() => navigate("/client-signup")}
+                >
+                  Sign Up
+                </Button>
+              </>
+            ) : (
+              <>
+                <Button
+                  className="w-full"
+                  variant="outline"
+                  onClick={() => navigate("/profile")}
+                >
+                  Profile
+                </Button>
+                <Button
+                  className="w-full gradient-primary border-0"
+                  onClick={() => navigate("/dashboard")}
+                >
+                  Dashboard
+                </Button>
+              </>
+            )}
           </div>
         </div>
       </div>

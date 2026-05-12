@@ -10,6 +10,9 @@ import {
 } from "../validation/auth.validator.js";
 import {
   forgotPassword,
+  getAllClients,
+  getAllFreelancers,
+  getFreelancerById,
   getMe,
   login,
   logout,
@@ -37,6 +40,9 @@ router.post(
 router.post("/login", validate(loginSchema), login);
 router.get("/me", isAuth, getMe);
 router.get("/verify-email/:token", isAuth, verifyEmail);
+router.get("/getall-freelancer",getAllFreelancers);
+router.get("/getall-client",getAllClients);
+router.get("/freelancer/:id",getFreelancerById);
 router.patch(
   "/update-profile",
   isAuth,
@@ -62,7 +68,7 @@ router.patch(
   validate(resetPasswordSchema),
   resetPassword,
 );
-router.post("/forgot-password", isAuth, forgotPassword);
+router.post("/forgot-password", forgotPassword);
 router.patch(
   "/reset-password/:token",
   validate(resetPasswordWithTokenSchema),

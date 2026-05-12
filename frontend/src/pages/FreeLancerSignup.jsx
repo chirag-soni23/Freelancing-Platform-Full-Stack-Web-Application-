@@ -19,14 +19,23 @@ import {
   Cpu,
   X,
   Phone,
+  IndianRupee,
 } from "lucide-react";
-import { Link } from "react-router-dom";
+import {
+  Select,
+  SelectTrigger,
+  SelectValue,
+  SelectContent,
+  SelectItem,
+} from "@/components/ui/select";
+import { Link, useNavigate } from "react-router-dom";
 import { Textarea } from "@/components/ui/textarea";
 import { freelancerSchema } from "@/validations/auth.validator";
 import { useAuth } from "@/hooks/useAuth";
 
 const FreeLancerSignUp = () => {
   const { registerFreelancer, isRegisteringFreelancer } = useAuth();
+  const navigate = useNavigate();
   const initialState = {
     name: "",
     title: "",
@@ -35,12 +44,15 @@ const FreeLancerSignUp = () => {
     phone: "",
     email: "",
     hourlyRate: "",
+    currency: "INR",
     portfolio: "",
     password: "",
     confirmPassword: "",
   };
   const [skills, setSkills] = useState([]);
+  const [languages, setLanguages] = useState([]);
   const [inputValue, setInputValue] = useState("");
+  const [langInput, setLangInput] = useState("");
   const [errors, setErrors] = useState({});
   const [formData, setFormData] = useState(initialState);
 
@@ -48,6 +60,7 @@ const FreeLancerSignUp = () => {
     const data = {
       ...formData,
       skills,
+      languages,
     };
 
     const { error } = freelancerSchema.validate(data, {
@@ -80,13 +93,18 @@ const FreeLancerSignUp = () => {
       ...formData,
       hourlyRate: Number(formData.hourlyRate),
       skills,
+      languages,
     };
 
     registerFreelancer(finalData, {
       onSuccess: () => {
         setFormData(initialState);
         setSkills([]);
+        setLanguages([]);
         setInputValue("");
+        setLangInput("");
+
+        navigate("/");
       },
     });
   };
@@ -99,9 +117,24 @@ const FreeLancerSignUp = () => {
       setInputValue("");
     }
   };
+  const addLanguage = (e) => {
+    if (e.key === "Enter" && langInput.trim() !== "") {
+      e.preventDefault();
+
+      if (!languages.includes(langInput.trim())) {
+        setLanguages([...languages, langInput.trim()]);
+      }
+
+      setLangInput("");
+    }
+  };
 
   const removeSkill = (skillToRemove) => {
     setSkills(skills.filter((skill) => skill !== skillToRemove));
+  };
+
+  const removeLanguage = (languageToRemove) => {
+    setLanguages(languages.filter((language) => language !== languageToRemove));
   };
   return (
     <div className="h-screen w-screen fixed inset-0 flex flex-col lg:flex-row bg-background overflow-hidden">
@@ -350,26 +383,62 @@ const FreeLancerSignUp = () => {
                 </div>
 
                 <div className="space-y-2 group">
-                  <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
-                    Hourly Rate ($/hr) <span className="text-red-500">*</span>
+                  <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground">
+                    Hourly Rate <span className="text-red-500">*</span>
                   </Label>
-                  <div className="relative">
-                    <DollarSign
-                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
-                      size={16}
-                    />
-                    <Input
-                      value={formData.hourlyRate}
-                      onChange={(e) =>
-                        setFormData({ ...formData, hourlyRate: e.target.value })
+
+                  <div className="flex gap-2">
+                    <Select
+                      value={formData.currency}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, currency: value })
                       }
-                      type="number"
-                      placeholder="35"
-                      className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
-                    />
+                    >
+                      <SelectTrigger className="h-14 w-[120px] rounded-2xl bg-secondary/40 border-none font-bold">
+                        <SelectValue placeholder="Currency" />
+                      </SelectTrigger>
+
+                      <SelectContent>
+                        <SelectItem value="INR">₹ INR</SelectItem>
+                        <SelectItem value="USD">$ USD</SelectItem>
+                      </SelectContent>
+                    </Select>
+
+                    {/* Rate Input */}
+                    <div className="relative flex-1">
+                      {formData.currency === "INR" ? (
+                        <IndianRupee
+                          className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                          size={16}
+                        />
+                      ) : (
+                        <DollarSign
+                          class
+                          Name="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                          size={16}
+                        />
+                      )}
+
+                      <Input
+                        value={formData.hourlyRate}
+                        onChange={(e) =>
+                          setFormData({
+                            ...formData,
+                            hourlyRate: e.target.value,
+                          })
+                        }
+                        type="number"
+                        placeholder="500"
+                        className="h-14 rounded-2xl bg-secondary/40 border-none px-12 font-bold"
+                      />
+                    </div>
                   </div>
+
                   {errors.hourlyRate && (
                     <p className="text-red-500 text-xs">{errors.hourlyRate}</p>
+                  )}
+                  {errors.currency && (
+                    <p className="text-red-500 text-xs">{errors.currency}</p>
                   )}
                 </div>
 
@@ -436,6 +505,51 @@ const FreeLancerSignUp = () => {
                   </div>
                   {errors.skills && (
                     <p className="text-red-500 text-xs mt-1">{errors.skills}</p>
+                  )}
+                </div>
+
+                <div className="space-y-2 group md:col-span-2">
+                  <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
+                    Enter Your Language (Press Enter to add){" "}
+                    <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <Code2
+                      className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground"
+                      size={16}
+                    />
+                    <Input
+                      value={langInput}
+                      onChange={(e) => setLangInput(e.target.value)}
+                      onKeyDown={addLanguage}
+                      placeholder="e.g. English, Hindi, Spanish.."
+                      className="h-14 rounded-2xl bg-secondary/40 border-none focus-visible:ring-2 focus-visible:ring-primary/20 font-bold px-12"
+                    />
+                  </div>
+
+                  {/* Language Badges Container */}
+                  <div className="flex flex-wrap gap-2 mt-3 px-1">
+                    {languages.map((language, index) => (
+                      <Badge
+                        key={index}
+                        className="bg-primary/10 text-primary hover:bg-primary/20 border-none px-3 py-1.5 flex items-center gap-2 rounded-lg animate-in fade-in zoom-in duration-200"
+                      >
+                        <span className="font-bold text-xs">{language}</span>
+                        <button
+                          type="button"
+                          onClick={() => removeLanguage(language)}
+                          className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                        >
+                          <X size={10} className="fill-current" />{" "}
+                          <span className="sr-only">Remove</span>
+                        </button>
+                      </Badge>
+                    ))}
+                  </div>
+                  {errors.languages && (
+                    <p className="text-red-500 text-xs mt-1">
+                      {errors.languages}
+                    </p>
                   )}
                 </div>
 

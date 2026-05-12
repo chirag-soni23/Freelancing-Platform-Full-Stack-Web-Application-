@@ -11,16 +11,42 @@ import {
   resetPasswordWithToken,
   resendVerification,
   verifyEmail,
+  updateProfilePic,
+  uploadProfilePic,
+  getFreelancers,
+  getClients,
+  getFreelancerById,
 } from "@/features/authApi";
 import { toast } from "./use-toast";
 
-
-export const useAuth = () => {
+export const useAuth = (params,freelancerId) => {
   const queryClient = useQueryClient();
 
   const meQuery = useQuery({
     queryKey: ["me"],
     queryFn: getMe,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const freelancersQuery = useQuery({
+    queryKey: ["freelancers", params],
+    queryFn: () => getFreelancers(params),
+    keepPreviousData: true,
+    staleTime: 5000,
+  });
+
+  const clientsQuery = useQuery({
+    queryKey: ["clients"],
+    queryFn: getClients,
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const freelancerQuery = useQuery({
+    queryKey: ["freelancer", freelancerId],
+    queryFn: () => getFreelancerById(freelancerId),
+    enabled: !!freelancerId,
     retry: false,
     refetchOnWindowFocus: false,
   });
@@ -84,7 +110,6 @@ export const useAuth = () => {
     },
   });
 
-
   const logoutMutation = useMutation({
     mutationFn: logout,
 
@@ -134,6 +159,50 @@ export const useAuth = () => {
       toast({
         title: "Success",
         description: data?.message || "Reset link sent",
+      });
+    },
+
+    onError: (err) => {
+      toast({
+        title: "Error",
+        description: err?.response?.data?.message || err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // upload profile pic
+  const uploadProfilePicMutation = useMutation({
+    mutationFn: uploadProfilePic,
+
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["me"]);
+
+      toast({
+        title: "Success",
+        description: data?.message || "Profile picture uploaded",
+      });
+    },
+
+    onError: (err) => {
+      toast({
+        title: "Error",
+        description: err?.response?.data?.message || err.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  // update profile pic
+  const updateProfilePicMutation = useMutation({
+    mutationFn: updateProfilePic,
+
+    onSuccess: (data) => {
+      queryClient.invalidateQueries(["me"]);
+
+      toast({
+        title: "Success",
+        description: data?.message || "Profile picture updated",
       });
     },
 
@@ -242,20 +311,37 @@ export const useAuth = () => {
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
 
-
     // profile
     updateProfile: updateProfileMutation.mutate,
     isUpdatingProfile: updateProfileMutation.isPending,
 
     // password
     forgotPassword: forgotPasswordMutation.mutate,
-    isLoadingForgot : forgotPasswordMutation.isPending,
+    isLoadingForgot: forgotPasswordMutation.isPending,
     resetPassword: resetPasswordMutation.mutate,
     resetPasswordWithToken: resetPasswordWithTokenMutation.mutate,
     isResetting: resetPasswordWithTokenMutation.isPending,
 
+    freelancers: freelancersQuery.data?.data ?? [],
+    freelancerPagination: freelancersQuery.data?.pagination || {},
+    isFetchingFreelancers: freelancersQuery.isFetching,
+    clients: clientsQuery.data?.data || [],
+
+    isLoadingFreelancers: freelancersQuery.isLoading,
+    isLoadingClients: clientsQuery.isLoading,
+
+    // single freelancer
+    freelancer: freelancerQuery.data?.data || null,
+    isLoadingFreelancer: freelancerQuery.isLoading,
+
     // email
-    verifyEmail: verifyEmailMutation.mutate,
-    resendVerification: resendVerificationMutation.mutate,
+    verifyEmail: verifyEmailMutation.mutateAsync,
+    resendVerification: resendVerificationMutation.mutateAsync,
+
+    uploadProfilePic: uploadProfilePicMutation.mutate,
+    isUploadingProfilePic: uploadProfilePicMutation.isPending,
+
+    updateProfilePic: updateProfilePicMutation.mutate,
+    isUpdatingProfilePic: updateProfilePicMutation.isPending,
   };
 };
