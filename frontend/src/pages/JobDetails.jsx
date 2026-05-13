@@ -25,11 +25,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useChat } from "@/hooks/useChat";
 
 const JobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { job, isLoadingJob } = useJob(id);
+  const { startChat } = useChat();
 
   if (isLoadingJob) {
     return (
@@ -61,7 +63,7 @@ const JobDetails = () => {
 
   return (
     <div className="min-h-screen bg-[#fafbfc] dark:bg-[#020617] text-foreground font-sans">
-      <nav className="sticky top-0 z-50 bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-b border-border/40">
+      <nav className=" bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-b border-border/40">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Button
             onClick={() => navigate(-1)}
@@ -202,9 +204,19 @@ const JobDetails = () => {
                   <Button
                     variant="outline"
                     className="w-full h-14 rounded-2xl font-bold border-2 hover:bg-secondary flex items-center justify-center gap-2 transition-all active:scale-95"
-                    onClick={() =>
-                      console.log("Chat initiated with:", j.client.id)
-                    }
+                    onClick={async () => {
+                      try {
+                        const res = await startChat({
+                          receiverId: j?.client.id,
+                        });
+
+                        navigate(
+                          `/dashboard/chats?conversationId=${res?.data?.id}&receiverId=${j?.client.id}`,
+                        );
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
                   >
                     <MessageSquare size={20} className="text-primary" />
                     Start a Chat
