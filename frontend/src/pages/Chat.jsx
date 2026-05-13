@@ -270,30 +270,48 @@ const Chat = () => {
      AUTO SCROLL
   ========================= */
 
-  const isInitialLoadRef = useRef(true);
+ /* =========================
+   AUTO SCROLL
+========================= */
 
-  useEffect(() => {
-    if (!allMessages.length) return;
+const scrollRef = useRef(null);
 
-    // first chat open
-    if (isInitialLoadRef.current) {
-      messagesEndRef.current?.scrollIntoView();
+const hasOpenedConversationRef = useRef(false);
 
-      isInitialLoadRef.current = false;
+// first open conversation -> direct bottom
+useEffect(() => {
+  if (!conversationId) return;
 
-      return;
-    }
+  setTimeout(() => {
+    messagesEndRef.current?.scrollIntoView();
+  }, 50);
 
-    // realtime new message
-    messagesEndRef.current?.scrollIntoView({
-      behavior: "smooth",
-    });
-  }, [liveMessages]);
+  hasOpenedConversationRef.current = true;
+}, [conversationId, messages.length]);
 
-  // reset when changing conversation
-  useEffect(() => {
-    isInitialLoadRef.current = true;
-  }, [conversationId]);
+// realtime new messages
+useEffect(() => {
+  if (!liveMessages.length) return;
+
+  if (!hasOpenedConversationRef.current) return;
+
+  const lastMessage =
+    liveMessages[liveMessages.length - 1];
+
+  // current open conversation only
+  if (
+    Number(lastMessage.conversationId) !==
+    Number(conversationId)
+  ) {
+    return;
+  }
+
+  // smooth scroll for new message
+  messagesEndRef.current?.scrollIntoView({
+    behavior: "smooth",
+  });
+}, [liveMessages, conversationId]);
+
 
   /* =========================
      SEND MESSAGE
@@ -585,7 +603,10 @@ const Chat = () => {
 
               {/* MESSAGES */}
 
-              <ScrollArea className="flex-1 h-0">
+            <ScrollArea
+  className="flex-1 h-0"
+  viewportRef={scrollRef}
+>
                 <div className="p-4 sm:p-6 space-y-6 max-w-5xl mx-auto w-full min-h-full">
                   {allMessages.map((msg) => {
                     const isMe =
