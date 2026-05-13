@@ -24,11 +24,11 @@ import Header from "@/components/work/Header";
 import { useJob } from "@/hooks/useJob";
 import { useNavigate } from "react-router-dom";
 
-const jobs = [1, 2, 3, 4];
+// const jobs = [1, 2, 3, 4];
 
 const FindWork = () => {
   const { jobs } = useJob();
-  console.log(jobs);
+  // console.log(jobs);
   const navigate = useNavigate();
   return (
     <div className="min-h-screen bg-[#fcfdfe] dark:bg-[#020617] text-foreground p-4 md:p-10">

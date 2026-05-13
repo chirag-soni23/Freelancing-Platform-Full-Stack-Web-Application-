@@ -44,10 +44,28 @@ export const getUserFeedbacks = async (req, res, next) => {
   try {
     const { userId } = req.params;
 
-    const feedbacks = await db.Feedback.findAll({
+    let { page = 1, limit = 10 } = req.query;
+
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      throw ApiError.BADREQUEST("Page must be a positive integer");
+    }
+
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    }
+
+    const offset = (page - 1) * limit;
+
+    const { count, rows } = await db.Feedback.findAndCountAll({
       where: {
         receiverId: userId,
       },
+
+      limit,
+      offset,
 
       include: [
         {
@@ -61,18 +79,25 @@ export const getUserFeedbacks = async (req, res, next) => {
     });
 
     // average rating
-    const totalRatings = feedbacks.reduce((acc, item) => acc + item.rating, 0);
+    const totalRatings = rows.reduce((acc, item) => acc + item.rating, 0);
 
     const averageRating =
-      feedbacks.length > 0 ? (totalRatings / feedbacks.length).toFixed(1) : 0;
+      rows.length > 0 ? (totalRatings / rows.length).toFixed(1) : 0;
 
     return successResponse(res, StatusCodes.OK, {
       message: "Feedbacks fetched successfully",
 
       data: {
         averageRating,
-        totalReviews: feedbacks.length,
-        feedbacks,
+        totalReviews: count,
+        feedbacks: rows,
+      },
+
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
       },
     });
   } catch (error) {
