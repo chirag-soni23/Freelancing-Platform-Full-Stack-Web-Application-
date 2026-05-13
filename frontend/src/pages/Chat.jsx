@@ -142,9 +142,9 @@ const Chat = () => {
      CLEAR LIVE MESSAGES
   ========================= */
 
-  useEffect(() => {
-    setLiveMessages([]);
-  }, [conversationId]);
+  // useEffect(() => {
+  //   setLiveMessages([]);
+  // }, [conversationId]);
 
   /* =========================
      RECEIVE MESSAGE
@@ -152,10 +152,7 @@ const Chat = () => {
 
   useEffect(() => {
     const handleReceiveMessage = (data) => {
-      if (Number(data.conversationId) !== Number(conversationId)) {
-        return;
-      }
-
+      // realtime message save for all conversations
       setLiveMessages((prev) => {
         const exists = prev.some((msg) => msg.id === data.id);
 
@@ -164,11 +161,11 @@ const Chat = () => {
         return [...prev, data];
       });
 
-      /* =========================
-         AUTO MARK AS READ
-      ========================= */
-
-      if (Number(data.receiverId) === Number(user?.data?.id)) {
+      // auto read only current open chat
+      if (
+        Number(data.conversationId) === Number(conversationId) &&
+        Number(data.receiverId) === Number(user?.data?.id)
+      ) {
         socket.emit("markAsRead", {
           conversationId: data.conversationId,
 
