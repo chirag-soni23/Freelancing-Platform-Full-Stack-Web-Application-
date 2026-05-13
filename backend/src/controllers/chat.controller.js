@@ -134,6 +134,17 @@ export const getMyConversations = async (req, res, next) => {
 
           attributes: ["id", "name", "profilePic"],
         },
+
+        {
+          model: db.Message,
+          as: "messages",
+
+          separate: true,
+
+          limit: 1,
+
+          order: [["createdAt", "DESC"]],
+        },
       ],
 
       order: [["updatedAt", "DESC"]],

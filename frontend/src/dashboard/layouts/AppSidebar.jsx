@@ -118,12 +118,8 @@ export function AppSidebar({ isOpen, onClose }) {
 
   const { user } = useAuth();
 
-  /* =========================
-     ROLE BASED SIDEBAR
-  ========================= */
-
   const sidebarItems =
-    user?.role === "client" ? clientItems : freelancerItems;
+    user?.data.role === "client" ? clientItems : freelancerItems;
 
   const handleLogout = () => {
     localStorage.removeItem("activeApp");

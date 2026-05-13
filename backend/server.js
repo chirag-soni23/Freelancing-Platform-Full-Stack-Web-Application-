@@ -15,79 +15,126 @@ import jobRoutes from "./src/routes/job.route.js";
 import chatRoutes from "./src/routes/chat.route.js";
 
 import db from "./src/models/index.js";
+import { emailQueue } from "./src/queue/emailQueue.js";
 
 dotenv.config();
 
 const app = express();
+
 const PORT = process.env.PORT || 5000;
 
+// http server
 const server = http.createServer(app);
 
 export const io = new Server(server, {
   cors: {
     origin: ["http://localhost:5173", "http://localhost:5174"],
+
     credentials: true,
   },
 });
 
 const onlineUsers = {};
 
+// socket connection
 io.on("connection", (socket) => {
   console.log("User Connected:", socket.id);
 
-  // JOIN USER
+  // join user
   socket.on("join", (userId) => {
     onlineUsers[userId] = socket.id;
 
     console.log("Online Users:", onlineUsers);
+
+    io.emit("onlineUsers", Object.keys(onlineUsers));
   });
 
-  // SEND MESSAGE
+  // send message
   socket.on("sendMessage", async (data) => {
     try {
-      console.log("MESSAGE EVENT:", data);
-
-      // SAVE MESSAGE IN DB
-      const message = await db.Message.create({
+      const savedMessage = await db.Message.create({
         conversationId: data.conversationId,
+
         senderId: data.senderId,
+
         receiverId: data.receiverId,
-        text: data.message,
+
+        text: data.text,
+
         isRead: false,
       });
 
+      // sender user
+      const senderUser = await db.User.findByPk(data.senderId);
+
+      // receiver user
+      const receiverUser = await db.User.findByPk(data.receiverId);
+
       const receiverSocketId = onlineUsers[data.receiverId];
 
-      console.log("Receiver Socket:", receiverSocketId);
+      const senderSocketId = onlineUsers[data.senderId];
 
-      // REALTIME MESSAGE
+      // RECEIVER REALTIME
       if (receiverSocketId) {
-        io.to(receiverSocketId).emit("receiveMessage", message);
+        io.to(receiverSocketId).emit("receiveMessage", savedMessage);
+      }
 
-        // UNREAD NOTIFICATION
-        io.to(receiverSocketId).emit("newMessageNotification", {
-          senderId: data.senderId,
-          message: data.message,
-        });
+      // SENDER REALTIME
+      if (senderSocketId) {
+        io.to(senderSocketId).emit("receiveMessage", savedMessage);
+      }
+
+      /* =========================
+       OFFLINE EMAIL
+    ========================= */
+
+      if (!receiverSocketId && receiverUser?.email) {
+        await emailQueue.add(
+          "sendEmail",
+          {
+            to: receiverUser.email,
+
+            subject: `New message from ${senderUser?.name}`,
+
+            text: `
+You received a new message from ${senderUser?.name}
+
+Message:
+${data.text}
+
+Login to reply.
+          `,
+          },
+          {
+            attempts: 1,
+
+            removeOnComplete: true,
+
+            removeOnFail: true,
+          },
+        );
+
+        console.log("Offline email sent to:", receiverUser.email);
       }
     } catch (error) {
       console.log(error.message);
     }
   });
 
-  // TYPING EVENT
+  // typing event
   socket.on("typing", (data) => {
     const receiverSocketId = onlineUsers[data.receiverId];
 
     if (receiverSocketId) {
       io.to(receiverSocketId).emit("typing", {
         senderId: data.senderId,
+
         message: "Typing...",
       });
     }
   });
 
-  // MARK AS READ
+  // mark as read
   socket.on("markAsRead", async (data) => {
     try {
       await db.Message.update(
@@ -97,7 +144,9 @@ io.on("connection", (socket) => {
         {
           where: {
             conversationId: data.conversationId,
+
             receiverId: data.receiverId,
+
             isRead: false,
           },
         },
@@ -105,10 +154,11 @@ io.on("connection", (socket) => {
 
       const senderSocketId = onlineUsers[data.senderId];
 
-      // REALTIME SEEN EVENT
+      // seen event
       if (senderSocketId) {
         io.to(senderSocketId).emit("messagesSeen", {
           conversationId: data.conversationId,
+
           seen: true,
         });
       }
@@ -119,7 +169,7 @@ io.on("connection", (socket) => {
     }
   });
 
-  // DISCONNECT
+  // disconnect
   socket.on("disconnect", () => {
     console.log("User Disconnected:", socket.id);
 
@@ -130,20 +180,19 @@ io.on("connection", (socket) => {
     }
 
     console.log("Online Users:", onlineUsers);
+
+    io.emit("onlineUsers", Object.keys(onlineUsers));
   });
 });
 
-// MIDDLEWARES
+// middlewared
 app.use(express.json());
-
 app.use(
   express.urlencoded({
     extended: true,
   }),
 );
-
 app.use(cookieParser());
-
 app.use(
   cors({
     origin: ["http://localhost:5173", "http://localhost:5174"],
@@ -161,7 +210,7 @@ app.use("/api/chat", isAuth, chatRoutes);
 // error handler
 app.use(errorHandler);
 
-
+// start server
 server.listen(PORT, async () => {
   console.log(`Server Listening on port no. ${PORT}`);
 

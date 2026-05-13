@@ -21,10 +21,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
+import { useChat } from "@/hooks/useChat";
 
 const FreelancerDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { startChat } = useChat();
   const { freelancer, isLoadingFreelancer } = useAuth(null, id);
   // console.log(freelancer);
 
@@ -208,8 +210,22 @@ const FreelancerDetails = () => {
                   <Button
                     variant="outline"
                     className="w-full h-14 rounded-2xl font-bold border-2 hover:bg-secondary/50"
+                    onClick={async () => {
+                      try {
+                        const res = await startChat({
+                          receiverId: f?.id,
+                        });
+
+                        navigate(
+                          `/dashboard/chats?conversationId=${res?.data?.id}&receiverId=${f?.id}`,
+                        );
+                      } catch (error) {
+                        console.log(error);
+                      }
+                    }}
                   >
-                    <MessageSquare size={20} className="mr-2" /> Start a Chat
+                    <MessageSquare size={20} className="mr-2" />
+                    Start a Chat
                   </Button>
                 </div>
 

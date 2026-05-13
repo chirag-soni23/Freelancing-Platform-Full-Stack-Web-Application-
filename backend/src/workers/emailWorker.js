@@ -1,8 +1,13 @@
 import dotenv from "dotenv";
 import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+
+const __dirname = path.dirname(__filename);
 
 dotenv.config({
-  path: path.resolve("backend/.env"),
+  path: path.resolve(__dirname, "../../.env"),
 });
 
 import { Worker } from "bullmq";
@@ -30,8 +35,8 @@ const worker = new Worker(
   {
     connection,
     lockDuration: 120000,
-    concurrency: 1,   
-  }
+    concurrency: 1,
+  },
 );
 
 worker.on("failed", (job, err) => {
