@@ -18,11 +18,15 @@ async function syncDatabase() {
     //   alter: true,
     // });
 
-    await db.Conversation.sync({
-      alter: true,
-    });
+    // await db.Conversation.sync({
+    //   alter: true,
+    // });
 
-    await db.Message.sync({
+    // await db.Message.sync({
+    //   alter: true,
+    // });
+
+    await db.Contact.sync({
       alter: true,
     });
 

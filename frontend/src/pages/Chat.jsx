@@ -270,48 +270,43 @@ const Chat = () => {
      AUTO SCROLL
   ========================= */
 
- /* =========================
+  /* =========================
    AUTO SCROLL
 ========================= */
 
-const scrollRef = useRef(null);
+  const scrollRef = useRef(null);
 
-const hasOpenedConversationRef = useRef(false);
+  const hasOpenedConversationRef = useRef(false);
 
-// first open conversation -> direct bottom
-useEffect(() => {
-  if (!conversationId) return;
+  // first open conversation -> direct bottom
+  useEffect(() => {
+    if (!conversationId) return;
 
-  setTimeout(() => {
-    messagesEndRef.current?.scrollIntoView();
-  }, 50);
+    setTimeout(() => {
+      messagesEndRef.current?.scrollIntoView();
+    }, 50);
 
-  hasOpenedConversationRef.current = true;
-}, [conversationId, messages.length]);
+    hasOpenedConversationRef.current = true;
+  }, [conversationId, messages.length]);
 
-// realtime new messages
-useEffect(() => {
-  if (!liveMessages.length) return;
+  // realtime new messages
+  useEffect(() => {
+    if (!liveMessages.length) return;
 
-  if (!hasOpenedConversationRef.current) return;
+    if (!hasOpenedConversationRef.current) return;
 
-  const lastMessage =
-    liveMessages[liveMessages.length - 1];
+    const lastMessage = liveMessages[liveMessages.length - 1];
 
-  // current open conversation only
-  if (
-    Number(lastMessage.conversationId) !==
-    Number(conversationId)
-  ) {
-    return;
-  }
+    // current open conversation only
+    if (Number(lastMessage.conversationId) !== Number(conversationId)) {
+      return;
+    }
 
-  // smooth scroll for new message
-  messagesEndRef.current?.scrollIntoView({
-    behavior: "smooth",
-  });
-}, [liveMessages, conversationId]);
-
+    // smooth scroll for new message
+    messagesEndRef.current?.scrollIntoView({
+      behavior: "smooth",
+    });
+  }, [liveMessages, conversationId]);
 
   /* =========================
      SEND MESSAGE
@@ -333,6 +328,30 @@ useEffect(() => {
     });
 
     setMessage("");
+  };
+
+  const formatMessageDate = (date) => {
+    const today = new Date();
+
+    const yesterday = new Date();
+
+    yesterday.setDate(today.getDate() - 1);
+
+    const msgDate = new Date(date);
+
+    const isToday = msgDate.toDateString() === today.toDateString();
+
+    const isYesterday = msgDate.toDateString() === yesterday.toDateString();
+
+    if (isToday) return "Today";
+
+    if (isYesterday) return "Yesterday";
+
+    return msgDate.toLocaleDateString([], {
+      day: "numeric",
+      month: "long",
+      year: "numeric",
+    });
   };
 
   return (
@@ -603,87 +622,104 @@ useEffect(() => {
 
               {/* MESSAGES */}
 
-            <ScrollArea
-  className="flex-1 h-0"
-  viewportRef={scrollRef}
->
+              <ScrollArea className="flex-1 h-0" viewportRef={scrollRef}>
                 <div className="p-4 sm:p-6 space-y-6 max-w-5xl mx-auto w-full min-h-full">
-                  {allMessages.map((msg) => {
+                  {allMessages.map((msg, index) => {
                     const isMe =
                       Number(msg.senderId) === Number(user?.data?.id);
 
+                    const currentDate = formatMessageDate(msg.createdAt);
+
+                    const previousDate =
+                      index > 0
+                        ? formatMessageDate(allMessages[index - 1].createdAt)
+                        : null;
+
+                    const showDate = currentDate !== previousDate;
+
                     return (
-                      <div
-                        key={msg.id}
-                        className={`flex ${
-                          isMe ? "justify-end" : "justify-start"
-                        }`}
-                      >
+                      <React.Fragment key={msg.id}>
+                        {showDate && (
+                          <div className="flex justify-center">
+                            <div className="px-4 py-1 rounded-full bg-card border border-border text-xs text-muted-foreground font-medium">
+                              {currentDate}
+                            </div>
+                          </div>
+                        )}
+
                         <div
-                          className={`flex gap-3 max-w-[75%] ${
-                            isMe ? "flex-row-reverse" : "flex-row"
+                          className={`flex ${
+                            isMe ? "justify-end" : "justify-start"
                           }`}
                         >
-                          <Avatar className="h-8 w-8">
-                            <AvatarImage
-                              src={
-                                isMe
-                                  ? user?.data?.profilePic
-                                  : receiver?.profilePic
-                              }
-                            />
-
-                            <AvatarFallback>
-                              {isMe
-                                ? user?.data?.name?.[0]
-                                : receiver?.name?.[0]}
-                            </AvatarFallback>
-                          </Avatar>
-
                           <div
-                            className={`space-y-1 ${
-                              isMe ? "text-right" : "text-left"
+                            className={`flex gap-3 max-w-[75%] ${
+                              isMe ? "flex-row-reverse" : "flex-row"
                             }`}
                           >
-                            <div
-                              className={`p-4 rounded-2xl ${
-                                isMe
-                                  ? "bg-primary text-primary-foreground rounded-br-none"
-                                  : "bg-card border border-border rounded-bl-none"
-                              }`}
-                            >
-                              <p className="text-sm break-words">{msg.text}</p>
-                            </div>
+                            <Avatar className="h-8 w-8">
+                              <AvatarImage
+                                src={
+                                  isMe
+                                    ? user?.data?.profilePic
+                                    : receiver?.profilePic
+                                }
+                              />
+
+                              <AvatarFallback>
+                                {isMe
+                                  ? user?.data?.name?.[0]
+                                  : receiver?.name?.[0]}
+                              </AvatarFallback>
+                            </Avatar>
 
                             <div
-                              className={`flex items-center gap-1 text-[10px] text-muted-foreground ${
-                                isMe ? "justify-end" : "justify-start"
+                              className={`space-y-1 ${
+                                isMe ? "text-right" : "text-left"
                               }`}
                             >
-                              <span>
-                                {new Date(msg.createdAt).toLocaleTimeString(
-                                  [],
-                                  {
-                                    hour: "2-digit",
-                                    minute: "2-digit",
-                                  },
+                              <div
+                                className={`p-4 rounded-2xl ${
+                                  isMe
+                                    ? "bg-primary text-primary-foreground rounded-br-none"
+                                    : "bg-card border border-border rounded-bl-none"
+                                }`}
+                              >
+                                <p className="text-sm break-words">
+                                  {msg.text}
+                                </p>
+                              </div>
+
+                              <div
+                                className={`flex items-center gap-1 text-[10px] text-muted-foreground ${
+                                  isMe ? "justify-end" : "justify-start"
+                                }`}
+                              >
+                                <span>
+                                  {new Date(msg.createdAt).toLocaleTimeString(
+                                    [],
+                                    {
+                                      hour: "2-digit",
+                                      minute: "2-digit",
+                                    },
+                                  )}
+                                </span>
+
+                                {isMe && (
+                                  <CheckCheck
+                                    size={12}
+                                    className={
+                                      msg.isRead
+                                        ? "text-blue-500"
+                                        : "text-gray-400"
+                                    }
+                                  />
                                 )}
-                              </span>
-
-                              {isMe && (
-                                <CheckCheck
-                                  size={12}
-                                  className={
-                                    msg.isRead
-                                      ? "text-blue-500"
-                                      : "text-gray-400"
-                                  }
-                                />
-                              )}
+                              </div>
                             </div>
                           </div>
                         </div>
-                      </div>
+                      </React.Fragment>
                     );
                   })}
 

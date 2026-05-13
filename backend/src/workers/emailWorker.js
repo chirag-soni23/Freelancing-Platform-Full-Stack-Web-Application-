@@ -26,9 +26,9 @@ const worker = new Worker(
   async (job) => {
     console.log("📥 Job received:", job.data);
 
-    const { to, subject, text } = job.data;
+    const { to, subject, text, html } = job.data;
 
-    await sendEmail({ to, subject, text });
+    await sendEmail({ to, subject, text,html });
 
     console.log(" Email sent:", to);
   },

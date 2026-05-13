@@ -6,8 +6,7 @@ dotenv.config({
   path: path.join(process.cwd(), "backend", ".env"),
 });
 
-
-export const sendEmail = async ({ to, subject, text }) => {
+export const sendEmail = async ({ to, subject, text, html }) => {
   const transporter = nodemailer.createTransport({
     service: "gmail",
     auth: {
@@ -17,9 +16,10 @@ export const sendEmail = async ({ to, subject, text }) => {
   });
 
   await transporter.sendMail({
-    from: process.env.EMAIL_USER,
+    from: `"Freelancer Platform" <${process.env.EMAIL_USER}>`,
     to,
     subject,
-    text,
+    text: text || "",
+    html: html || "",
   });
 };

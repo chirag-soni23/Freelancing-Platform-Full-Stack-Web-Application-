@@ -1,6 +1,7 @@
 import connection from "../db/db.js";
 import User from "./auth.model.js";
 import Category from "./category.model.js";
+import Contact from "./contact.model.js";
 import Conversation from "./conversation.model.js";
 import Job from "./job.model.js";
 import Message from "./message.model.js";
@@ -12,6 +13,7 @@ const db = {
   Job,
   Conversation,
   Message,
+  Contact,
 };
 
 db.User.hasMany(db.Category, {

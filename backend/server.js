@@ -13,6 +13,7 @@ import authRoutes from "./src/routes/auth.route.js";
 import categoryRoutes from "./src/routes/category.route.js";
 import jobRoutes from "./src/routes/job.route.js";
 import chatRoutes from "./src/routes/chat.route.js";
+import contactRoutes from "./src/routes/contact.route.js";
 
 import db from "./src/models/index.js";
 import { emailQueue } from "./src/queue/emailQueue.js";
@@ -206,6 +207,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/category", isAuth, categoryRoutes);
 app.use("/api/job", jobRoutes);
 app.use("/api/chat", isAuth, chatRoutes);
+app.use("/api/contact", contactRoutes);
 
 // error handler
 app.use(errorHandler);
