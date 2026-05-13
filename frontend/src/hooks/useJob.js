@@ -6,6 +6,7 @@ import {
   updateJob,
   deleteJob,
   toggleJobStatus,
+  getMyJobs,
 } from "@/features/jobApi";
 import { toast } from "./use-toast";
 
@@ -16,6 +17,12 @@ export const useJob = (jobId, params) => {
   const jobsQuery = useQuery({
     queryKey: ["jobs", params],
     queryFn: () => getJobs(params),
+    keepPreviousData: true,
+  });
+
+  const MyjobsQuery = useQuery({
+    queryKey: ["my-jobs", params],
+    queryFn: () => getMyJobs(params),
     keepPreviousData: true,
   });
 
@@ -127,6 +134,11 @@ export const useJob = (jobId, params) => {
     jobs: jobsQuery.data?.data || [],
     pagination: jobsQuery.data?.pagination || {},
     isLoadingJobs: jobsQuery.isLoading,
+
+    // my jobs
+    myJobs: MyjobsQuery.data?.data || [],
+    Mypagination: MyjobsQuery.data?.pagination || {},
+    MyisLoadingJobs: MyjobsQuery.isLoading,
 
     // toggle status
     toggleStatus: toggleJobStatusMutation.mutate,

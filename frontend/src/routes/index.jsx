@@ -77,54 +77,13 @@ const AppRoutes = () => {
           <Route index element={<Home />} />
           <Route path="/contact" element={<Contact />} />
 
-          <Route
-            path="find-work"
-            element={
-              <RoleProtectedRoute
-                disallowedRoles={["client"]}
-                allowGuest={true}
-                redirectTo="/unknown"
-              >
-                <FindWork />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="find-freelancers"
-            element={
-              <RoleProtectedRoute
-                disallowedRoles={["freelancer"]}
-                allowGuest={true}
-                redirectTo="/unknown"
-              >
-                <FindFreelancers />
-              </RoleProtectedRoute>
-            }
-          />
+          <Route path="find-work" element={<FindWork />} />
+          <Route path="find-freelancers" element={<FindFreelancers />} />
           <Route
             path="freelancer-details/:id"
-            element={
-              <RoleProtectedRoute
-                disallowedRoles={["freelancer"]}
-                allowGuest={true}
-                redirectTo="/unknown"
-              >
-                <FreelancerDetails />
-              </RoleProtectedRoute>
-            }
+            element={<FreelancerDetails />}
           />
-          <Route
-            path="job-details/:id"
-            element={
-              <RoleProtectedRoute
-                disallowedRoles={["client"]}
-                allowGuest={true}
-                redirectTo="/unknown"
-              >
-                <JobDetails/>
-              </RoleProtectedRoute>
-            }
-          />
+          <Route path="job-details/:id" element={<JobDetails />} />
           <Route path="work-detail/:id" element={<WorkDetail />} />
           <Route
             path="profile"
@@ -165,12 +124,7 @@ const AppRoutes = () => {
               </RoleProtectedRoute>
             }
           />
-          <Route
-            path="chats"
-            element={
-                <Chat />
-            }
-          />
+          <Route path="chats" element={<Chat />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

@@ -5,29 +5,13 @@ import { useTheme } from "@/hooks/useTheme";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/useAuth";
 
-const getNavLinks = (user) => {
-  const role = user?.data?.role;
-
-  let links = [{ label: "Home", href: "/" }];
-
-  if (!user) {
-    links.push(
-      { label: "Find Work", href: "/find-work" },
-      { label: "Find Freelancers", href: "/find-freelancers" },
-    );
-  }
-
-  if (role === "client") {
-    links.push({ label: "Find Freelancers", href: "/find-freelancers" });
-  }
-
-  if (role === "freelancer") {
-    links.push({ label: "Find Work", href: "/find-work" });
-  }
-
-  links.push({ label: "Contact", href: "/contact" });
-
-  return links;
+const getNavLinks = () => {
+  return [
+    { label: "Home", href: "/" },
+    { label: "Find Work", href: "/find-work" },
+    { label: "Find Freelancers", href: "/find-freelancers" },
+    { label: "Contact", href: "/contact" },
+  ];
 };
 const Navbar = () => {
   const { theme, toggle } = useTheme();

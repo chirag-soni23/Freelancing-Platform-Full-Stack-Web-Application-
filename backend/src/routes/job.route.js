@@ -5,6 +5,7 @@ import {
   deleteJob,
   getJobById,
   getJobs,
+  getMyJobs,
   toggleJobStatus,
   updateJob,
 } from "../controllers/job.controller.js";
@@ -17,11 +18,29 @@ import { isAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/", isAuth, checkRole("client"), validate(createJobSchema), createJob);
+router.post(
+  "/",
+  isAuth,
+  checkRole("client"),
+  validate(createJobSchema),
+  createJob,
+);
 router.get("/", getJobs);
+router.get("/my-jobs", isAuth, checkRole("client"), getMyJobs);
 router.get("/:id", getJobById);
-router.patch("/:id",isAuth, checkRole("client"), validate(updateJobSchema), updateJob);
-router.patch("/toggle-status/:id",isAuth, checkRole("client"), toggleJobStatus);
-router.delete("/:id",isAuth, checkRole("client"), deleteJob);
+router.patch(
+  "/:id",
+  isAuth,
+  checkRole("client"),
+  validate(updateJobSchema),
+  updateJob,
+);
+router.patch(
+  "/toggle-status/:id",
+  isAuth,
+  checkRole("client"),
+  toggleJobStatus,
+);
+router.delete("/:id", isAuth, checkRole("client"), deleteJob);
 
 export default router;

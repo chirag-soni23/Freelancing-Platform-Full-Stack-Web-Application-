@@ -14,6 +14,14 @@ export const getJobs = async (params) => {
   return res.data;
 };
 
+// get my jobs
+export const getMyJobs = async (params) => {
+  const res = await api.get("/job/my-jobs", {
+    params,
+  });
+  return res.data;
+};
+
 // get job by id
 export const getJobById = async (id) => {
   const res = await api.get(`/job/${id}`);

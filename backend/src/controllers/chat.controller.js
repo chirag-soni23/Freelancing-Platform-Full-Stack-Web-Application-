@@ -19,13 +19,13 @@ export const createConversation = async (req, res, next) => {
       throw new Error("Receiver not found");
     }
 
-    const validConversation =
-      (sender.role === "client" && receiver.role === "freelancer") ||
-      (sender.role === "freelancer" && receiver.role === "client");
+    // const validConversation =
+    //   (sender.role === "client" && receiver.role === "freelancer") ||
+    //   (sender.role === "freelancer" && receiver.role === "client");
 
-    if (!validConversation) {
-      throw new Error("Only client and freelancer can chat");
-    }
+    // if (!validConversation) {
+    //   throw new Error("Only client and freelancer can chat");
+    // }
 
     let conversation = await db.Conversation.findOne({
       where: {

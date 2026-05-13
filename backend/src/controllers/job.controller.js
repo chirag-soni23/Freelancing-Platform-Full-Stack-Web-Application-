@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import { StatusCodes } from "../config/index.js";
 import db from "../models/index.js";
 import ApiError, { successResponse } from "../utils/apiResponse.js";
+import jwt from "jsonwebtoken";
 
 // create job
 export const createJob = async (req, res, next) => {
@@ -29,7 +30,6 @@ export const createJob = async (req, res, next) => {
   }
 };
 
-// get jobs (pagination + search)
 // get jobs (pagination + search)
 export const getJobs = async (req, res, next) => {
   try {
@@ -62,6 +62,23 @@ export const getJobs = async (req, res, next) => {
       where.status = status;
     }
 
+    // token check
+    const token = req.cookies?.token;
+
+    if (token) {
+      try {
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
+        const user = await db.User.findByPk(decoded.id);
+        if (user?.role === "client") {
+          where.clientId = {
+            [Op.notIn]: [user.id],
+          };
+        }
+      } catch (error) {
+        console.log("Invalid token");
+      }
+    }
+
     const { count, rows } = await db.Job.findAndCountAll({
       where,
       limit,
@@ -72,7 +89,13 @@ export const getJobs = async (req, res, next) => {
           model: db.User,
           as: "client",
 
-          attributes: ["isEmailVerified", "createdAt"],
+          attributes: [
+            "id",
+            "name",
+            "profilePic",
+            "isEmailVerified",
+            "createdAt",
+          ],
         },
       ],
 
@@ -81,6 +104,80 @@ export const getJobs = async (req, res, next) => {
 
     return successResponse(res, StatusCodes.OK, {
       message: "Jobs fetched successfully",
+      data: rows,
+
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    });
+  } catch (error) {
+    console.log(error.message);
+    next(error);
+  }
+};
+
+// get my jobs
+export const getMyJobs = async (req, res, next) => {
+  try {
+    let { page = 1, limit = 10, search = "", status } = req.query;
+
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      throw ApiError.BADREQUEST("Page must be a positive integer");
+    }
+
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    }
+
+    const offset = (page - 1) * limit;
+
+    let where = {
+      clientId: req.user.id,
+    };
+
+    // search filter
+    if (search && search.trim().length > 0) {
+      where.title = {
+        [Op.like]: `%${search.trim()}%`,
+      };
+    }
+
+    // status filter
+    if (status) {
+      where.status = status;
+    }
+
+    const { count, rows } = await db.Job.findAndCountAll({
+      where,
+      limit,
+      offset,
+
+      include: [
+        {
+          model: db.User,
+          as: "client",
+
+          attributes: [
+            "id",
+            "name",
+            "profilePic",
+            "isEmailVerified",
+            "createdAt",
+          ],
+        },
+      ],
+
+      order: [["createdAt", "DESC"]],
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "My jobs fetched successfully",
       data: rows,
 
       pagination: {

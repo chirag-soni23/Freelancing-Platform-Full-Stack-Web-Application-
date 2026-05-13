@@ -26,7 +26,11 @@ async function syncDatabase() {
     //   alter: true,
     // });
 
-    await db.Contact.sync({
+    // await db.Contact.sync({
+    //   alter: true,
+    // });
+
+    await db.Feedback.sync({
       alter: true,
     });
 

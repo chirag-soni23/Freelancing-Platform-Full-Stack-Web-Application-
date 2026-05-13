@@ -33,14 +33,12 @@ const Jobs = () => {
   const debouncedSearch = useDebounce(search, 500);
   const [deleteId, setDeleteId] = useState(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const { jobs, pagination, toggleStatus, deleteJob, isDeletingJob } = useJob(
-    null,
-    {
+  const { myJobs, Mypagination, toggleStatus, deleteJob, isDeletingJob } =
+    useJob(null, {
       page,
       limit: 10,
       search: debouncedSearch,
-    },
-  );
+    });
   const formatDate = (date) => {
     if (!date) return "N/A";
 
@@ -93,8 +91,8 @@ const Jobs = () => {
       </div>
 
       <div className="max-w-8xl mx-auto space-y-10">
-        {jobs.length > 0 ? (
-          jobs.map((job) => (
+        {myJobs.length > 0 ? (
+          myJobs.map((job) => (
             <Card
               key={job.id}
               className="group relative overflow-hidden border-none bg-background/50 backdrop-blur-md shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 rounded-[24px]"
@@ -270,7 +268,7 @@ const Jobs = () => {
       </div>
       <WithPagination
         page={page}
-        totalPages={pagination?.totalPages}
+        totalPages={Mypagination?.totalPages}
         onPageChange={setPage}
       />
       <AddJob

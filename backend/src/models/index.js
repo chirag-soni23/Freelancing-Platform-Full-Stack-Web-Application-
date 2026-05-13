@@ -3,6 +3,7 @@ import User from "./auth.model.js";
 import Category from "./category.model.js";
 import Contact from "./contact.model.js";
 import Conversation from "./conversation.model.js";
+import Feedback from "./feedback.model.js";
 import Job from "./job.model.js";
 import Message from "./message.model.js";
 
@@ -14,6 +15,7 @@ const db = {
   Conversation,
   Message,
   Contact,
+  Feedback,
 };
 
 db.User.hasMany(db.Category, {
@@ -37,6 +39,8 @@ db.Job.belongsTo(db.User, {
   as: "client",
 });
 
+
+// conversation
 db.Conversation.hasMany(db.Message, {
   foreignKey: "conversationId",
   as: "messages",
@@ -62,6 +66,30 @@ db.Conversation.belongsTo(db.User, {
 });
 
 db.Conversation.belongsTo(db.User, {
+  foreignKey: "receiverId",
+  as: "receiver",
+});
+
+
+// feedback
+db.User.hasMany(db.Feedback, {
+  foreignKey: "senderId",
+  as: "givenFeedbacks",
+  onDelete: "CASCADE",
+});
+
+db.User.hasMany(db.Feedback, {
+  foreignKey: "receiverId",
+  as: "receivedFeedbacks",
+  onDelete: "CASCADE",
+});
+
+db.Feedback.belongsTo(db.User, {
+  foreignKey: "senderId",
+  as: "sender",
+});
+
+db.Feedback.belongsTo(db.User, {
   foreignKey: "receiverId",
   as: "receiver",
 });
