@@ -46,6 +46,9 @@ const AddJob = ({
   const [currency, setCurrency] = useState("INR");
   const [skillInput, setSkillInput] = useState("");
   const [skills, setSkills] = useState([]);
+  const [level, setLevel] = useState("Entry");
+  const [employment, setEmployment] = useState("Contract");
+  const [jobType, setJobType] = useState("Remote");
 
   const handleAddSkill = (e) => {
     if (e.key === "Enter" && skillInput.trim()) {
@@ -68,6 +71,9 @@ const AddJob = ({
       description,
       budget: Number(budget),
       currency,
+      level,
+      employment,
+      jobType,
       skills,
     };
 
@@ -102,7 +108,9 @@ const AddJob = ({
       setSkillInput("");
       setSelectedJob(null);
       setEditId(null);
-
+      setLevel("Entry");
+      setEmployment("Contract");
+      setJobType("Remote");
       setOpen(false);
     } catch (err) {
       console.log(err);
@@ -116,6 +124,10 @@ const AddJob = ({
       setBudget(selectedJob.budget);
       setCurrency(selectedJob.currency);
       setSkills(selectedJob.skills || []);
+
+      setLevel(selectedJob.level || "Entry");
+      setEmployment(selectedJob.employment || "Contract");
+      setJobType(selectedJob.jobType || "Remote");
     }
   }, [selectedJob]);
   return (
@@ -255,6 +267,101 @@ const AddJob = ({
 
                 {errors.currency && (
                   <p className="text-xs text-red-500 ml-1">{errors.currency}</p>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {/* Level */}
+              <div className="grid gap-2">
+                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">
+                  Level
+                </Label>
+
+                <Select
+                  value={level}
+                  onValueChange={(value) => {
+                    setLevel(value);
+                    setErrors((prev) => ({ ...prev, level: "" }));
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm">
+                    <SelectValue placeholder="Select level" />
+                  </SelectTrigger>
+
+                  <SelectContent className="rounded-xl border-border/60">
+                    <SelectItem value="Entry">Entry</SelectItem>
+                    <SelectItem value="Intermediate">Intermediate</SelectItem>
+                    <SelectItem value="Expert">Expert</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {errors.level && (
+                  <p className="text-xs text-red-500 ml-1">{errors.level}</p>
+                )}
+              </div>
+
+              {/* Employment */}
+              <div className="grid gap-2">
+                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">
+                  Employment
+                </Label>
+
+                <Select
+                  value={employment}
+                  onValueChange={(value) => {
+                    setEmployment(value);
+                    setErrors((prev) => ({ ...prev, employment: "" }));
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm">
+                    <SelectValue placeholder="Select employment" />
+                  </SelectTrigger>
+
+                  <SelectContent className="rounded-xl border-border/60">
+                    <SelectItem value="Contract">Contract</SelectItem>
+
+                    <SelectItem value="Full-time">Full-time</SelectItem>
+
+                    <SelectItem value="Part-time">Part-time</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {errors.employment && (
+                  <p className="text-xs text-red-500 ml-1">
+                    {errors.employment}
+                  </p>
+                )}
+              </div>
+
+              {/* Job Type */}
+              <div className="grid gap-2">
+                <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">
+                  Job Type
+                </Label>
+
+                <Select
+                  value={jobType}
+                  onValueChange={(value) => {
+                    setJobType(value);
+                    setErrors((prev) => ({ ...prev, jobType: "" }));
+                  }}
+                >
+                  <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm">
+                    <SelectValue placeholder="Select job type" />
+                  </SelectTrigger>
+
+                  <SelectContent className="rounded-xl border-border/60">
+                    <SelectItem value="Remote">Remote</SelectItem>
+
+                    <SelectItem value="On-site">On-site</SelectItem>
+
+                    <SelectItem value="Hybrid">Hybrid</SelectItem>
+                  </SelectContent>
+                </Select>
+
+                {errors.jobType && (
+                  <p className="text-xs text-red-500 ml-1">{errors.jobType}</p>
                 )}
               </div>
             </div>

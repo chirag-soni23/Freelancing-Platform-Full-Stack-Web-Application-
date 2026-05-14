@@ -23,6 +23,30 @@ export const createJobSchema = Joi.object({
     "string.empty": "Currency is required",
   }),
 
+  level: Joi.string()
+    .valid("Entry", "Intermediate", "Expert")
+    .required()
+    .messages({
+      "any.only": "Level must be Entry, Intermediate or Expert",
+      "string.empty": "Level is required",
+    }),
+
+  employment: Joi.string()
+    .valid("Contract", "Full-time", "Part-time")
+    .required()
+    .messages({
+      "any.only": "Employment must be Contract, Full-time or Part-time",
+      "string.empty": "Employment is required",
+    }),
+
+  jobType: Joi.string()
+    .valid("Remote", "On-site", "Hybrid")
+    .required()
+    .messages({
+      "any.only": "Job type must be Remote, On-site or Hybrid",
+      "string.empty": "Job type is required",
+    }),
+
   skills: Joi.array()
     .items(Joi.string().trim().min(1))
     .min(1)
@@ -36,7 +60,6 @@ export const createJobSchema = Joi.object({
   status: Joi.string().valid("open", "closed").optional(),
 });
 
-
 export const updateJobSchema = Joi.object({
   title: Joi.string().min(3).max(100).trim(),
 
@@ -46,12 +69,15 @@ export const updateJobSchema = Joi.object({
 
   currency: Joi.string().valid("INR", "USD"),
 
-  skills: Joi.array()
-    .items(Joi.string().trim().min(1))
-    .min(1)
-    .messages({
-      "array.min": "At least one skill is required",
-    }),
+  level: Joi.string().valid("Entry", "Intermediate", "Expert"),
+
+  employment: Joi.string().valid("Contract", "Full-time", "Part-time"),
+
+  jobType: Joi.string().valid("Remote", "On-site", "Hybrid"),
+
+  skills: Joi.array().items(Joi.string().trim().min(1)).min(1).messages({
+    "array.min": "At least one skill is required",
+  }),
 
   status: Joi.string().valid("open", "closed"),
 }).min(1);

@@ -7,7 +7,16 @@ import jwt from "jsonwebtoken";
 // create job
 export const createJob = async (req, res, next) => {
   try {
-    const { title, description, budget, currency, skills } = req.body;
+    const {
+      title,
+      description,
+      budget,
+      currency,
+      skills,
+      level,
+      employment,
+      jobType,
+    } = req.body;
 
     const clientId = req.user.id;
 
@@ -17,6 +26,9 @@ export const createJob = async (req, res, next) => {
       budget,
       currency,
       skills,
+      level,
+      employment,
+      jobType,
       clientId,
     });
 
@@ -33,7 +45,15 @@ export const createJob = async (req, res, next) => {
 // get jobs (pagination + search)
 export const getJobs = async (req, res, next) => {
   try {
-    let { page = 1, limit = 10, search = "", status } = req.query;
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      status,
+      level,
+      employment,
+      jobType,
+    } = req.query;
 
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -55,6 +75,18 @@ export const getJobs = async (req, res, next) => {
       where.title = {
         [Op.like]: `%${search.trim()}%`,
       };
+    }
+
+    if (level) {
+      where.level = level;
+    }
+
+    if (employment) {
+      where.employment = employment;
+    }
+
+    if (jobType) {
+      where.jobType = jobType;
     }
 
     // status filter
@@ -122,7 +154,15 @@ export const getJobs = async (req, res, next) => {
 // get my jobs
 export const getMyJobs = async (req, res, next) => {
   try {
-    let { page = 1, limit = 10, search = "", status } = req.query;
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      status,
+      level,
+      employment,
+      jobType,
+    } = req.query;
 
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -143,9 +183,49 @@ export const getMyJobs = async (req, res, next) => {
 
     // search filter
     if (search && search.trim().length > 0) {
-      where.title = {
-        [Op.like]: `%${search.trim()}%`,
-      };
+      where[Op.or] = [
+        {
+          title: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          description: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          level: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          employment: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          jobType: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+      ];
+    }
+
+    if (level) {
+      where.level = level;
+    }
+
+    if (employment) {
+      where.employment = employment;
+    }
+
+    if (jobType) {
+      where.jobType = jobType;
     }
 
     // status filter
@@ -251,13 +331,26 @@ export const updateJob = async (req, res, next) => {
       throw ApiError.NOTFOUND("Job not found");
     }
 
-    const { title, description, budget, currency, skills, status } = req.body;
+    const {
+      title,
+      description,
+      budget,
+      currency,
+      skills,
+      level,
+      employment,
+      jobType,
+      status,
+    } = req.body;
 
     if (title) job.title = title;
     if (description) job.description = description;
     if (budget) job.budget = budget;
     if (currency) job.currency = currency;
     if (skills) job.skills = skills;
+    if (level) job.level = level;
+    if (employment) job.employment = employment;
+    if (jobType) job.jobType = jobType;
     if (status) job.status = status;
 
     await job.save();

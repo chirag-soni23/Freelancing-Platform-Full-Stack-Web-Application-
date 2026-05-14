@@ -8,6 +8,9 @@ import {
   Trash2,
   Zap,
   BadgeAlert,
+  BriefcaseBusiness,
+  Layers3,
+  MonitorSmartphone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -123,15 +126,59 @@ const Jobs = () => {
                         {formatDate(job.createdAt)}
                       </span>
                     </div>
-
                     <h2 className="text-3xl font-extrabold tracking-tight text-foreground mb-4 group-hover:translate-x-1 transition-transform duration-300">
                       {job.title}
                     </h2>
-
                     <p className="text-muted-foreground/80 leading-relaxed text-base max-w-3xl mb-8 line-clamp-2">
                       {job.description}
                     </p>
 
+                    <div className="flex flex-wrap items-center gap-3 mb-8">
+                      {/* Level */}
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/5 border border-primary/10">
+                        <Layers3 className="w-4 h-4 text-primary" />
+
+                        <div className="flex flex-col leading-none">
+                          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                            Level
+                          </span>
+
+                          <span className="text-xs font-bold text-foreground">
+                            {job.level}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Employment */}
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-blue-500/5 border border-blue-500/10">
+                        <BriefcaseBusiness className="w-4 h-4 text-blue-500" />
+
+                        <div className="flex flex-col leading-none">
+                          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                            Employment
+                          </span>
+
+                          <span className="text-xs font-bold text-foreground">
+                            {job.employment}
+                          </span>
+                        </div>
+                      </div>
+
+                      {/* Job Type */}
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-500/5 border border-emerald-500/10">
+                        <MonitorSmartphone className="w-4 h-4 text-emerald-500" />
+
+                        <div className="flex flex-col leading-none">
+                          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                            Job Type
+                          </span>
+
+                          <span className="text-xs font-bold text-foreground">
+                            {job.jobType}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
                     {/* Enhanced Skill Badges */}
                     <div className="flex flex-wrap gap-2.5">
                       {job.skills.map((skill) => (

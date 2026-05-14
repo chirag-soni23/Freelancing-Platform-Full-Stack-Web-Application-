@@ -17,6 +17,9 @@ import {
   Building2,
   MessageSquare,
   Bookmark,
+  Layers3,
+  BriefcaseBusiness,
+  MonitorSmartphone,
   Share2,
   Heart,
 } from "lucide-react";
@@ -128,17 +131,58 @@ const JobDetails = () => {
 
             <Separator className="opacity-50" />
 
+            <div className="flex flex-wrap gap-3">
+              {/* Level */}
+              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-primary/5 border border-primary/10">
+                <Layers3 className="w-4 h-4 text-primary" />
+
+                <div className="flex flex-col leading-none">
+                  <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                    Level
+                  </span>
+
+                  <span className="text-xs font-bold text-foreground">
+                    {j.level}
+                  </span>
+                </div>
+              </div>
+
+              {/* Employment */}
+              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-blue-500/5 border border-blue-500/10">
+                <BriefcaseBusiness className="w-4 h-4 text-blue-500" />
+
+                <div className="flex flex-col leading-none">
+                  <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                    Employment
+                  </span>
+
+                  <span className="text-xs font-bold text-foreground">
+                    {j.employment}
+                  </span>
+                </div>
+              </div>
+
+              {/* Job Type */}
+              <div className="flex items-center gap-2 px-4 py-2 rounded-2xl bg-emerald-500/5 border border-emerald-500/10">
+                <MonitorSmartphone className="w-4 h-4 text-emerald-500" />
+
+                <div className="flex flex-col leading-none">
+                  <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                    Job Type
+                  </span>
+
+                  <span className="text-xs font-bold text-foreground">
+                    {j.jobType}
+                  </span>
+                </div>
+              </div>
+            </div>
+
             <section className="space-y-6">
               <div className="flex items-center justify-between">
                 <h3 className="text-2xl font-black tracking-tight">
                   Project Details
                 </h3>
-                <Badge
-                  variant="outline"
-                  className="rounded-full font-bold border-2"
-                >
-                  Full-Time
-                </Badge>
               </div>
               <div className="text-slate-600 dark:text-slate-400 leading-relaxed text-lg whitespace-pre-line font-medium bg-white dark:bg-white/5 p-8 rounded-[2rem] border border-border/50">
                 {j.description}
@@ -304,7 +348,9 @@ const JobDetails = () => {
             </Card>
           </aside>
         </div>
-        <Feedback id={j?.client.id}/>
+        <Separator className="bg-border/50 mt-10 w-full h-0.5" />
+
+        <Feedback id={j?.client.id} />
       </main>
     </div>
   );

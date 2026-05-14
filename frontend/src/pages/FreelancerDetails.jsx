@@ -297,6 +297,9 @@ const FreelancerDetails = () => {
             </Card>
           </aside>
         </div>
+
+        <Separator className="bg-border/50 mt-10 w-full h-0.5" />
+
         <Feedback id={f?.id} />
       </main>
     </div>

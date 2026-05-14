@@ -24,11 +24,29 @@ const Job = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    
+
     currency: {
       type: DataTypes.ENUM("INR", "USD"),
       allowNull: false,
       defaultValue: "INR",
+    },
+
+    level: {
+      type: DataTypes.ENUM("Entry", "Intermediate", "Expert"),
+      allowNull: false,
+      defaultValue: "Entry",
+    },
+
+    employment: {
+      type: DataTypes.ENUM("Contract", "Full-time", "Part-time"),
+      allowNull: false,
+      defaultValue: "Contract",
+    },
+
+    jobType: {
+      type: DataTypes.ENUM("Remote", "On-site", "Hybrid"),
+      allowNull: false,
+      defaultValue: "Remote",
     },
 
     skills: {
@@ -60,7 +78,6 @@ const Job = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
-    
   },
   {
     tableName: "jobs",
