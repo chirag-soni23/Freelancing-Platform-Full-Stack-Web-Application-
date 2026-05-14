@@ -22,6 +22,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useChat } from "@/hooks/useChat";
+import Feedback from "./Feedback";
 
 const FreelancerDetails = () => {
   const { id } = useParams();
@@ -296,6 +297,7 @@ const FreelancerDetails = () => {
             </Card>
           </aside>
         </div>
+        <Feedback id={f?.id} />
       </main>
     </div>
   );

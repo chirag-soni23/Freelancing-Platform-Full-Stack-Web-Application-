@@ -12,6 +12,7 @@ import Contact from "@/pages/Contact";
 import FreelancerDetails from "@/pages/FreelancerDetails";
 import JobDetails from "@/pages/JobDetails";
 import Chat from "@/pages/Chat";
+import Review from "@/dashboard/Review";
 
 const MainLayout = lazy(() => import("@/components/layout/MainLayout"));
 const Dashboard = lazy(() => import("@/dashboard/Dashboard"));
@@ -125,6 +126,7 @@ const AppRoutes = () => {
             }
           />
           <Route path="chats" element={<Chat />} />
+          <Route path="rating-and-reviews" element={<Review/>}/>
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>

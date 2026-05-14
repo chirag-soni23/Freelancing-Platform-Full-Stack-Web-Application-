@@ -8,6 +8,7 @@ import {
   Search,
   FileText,
   MessageCircle,
+  Star,
 } from "lucide-react";
 
 import {
@@ -65,6 +66,16 @@ const clientItems = [
       },
     ],
   },
+  {
+    title: "Rating & Reviews",
+    items: [
+      {
+        label: "Reviews",
+        icon: Star,
+        path: `${BASE}/rating-and-reviews`,
+      },
+    ],
+  },
 ];
 
 /* =========================
@@ -107,6 +118,17 @@ const freelancerItems = [
         label: "Chats",
         icon: MessageCircle,
         path: `${BASE}/chats`,
+      },
+    ],
+  },
+
+  {
+    title: "Rating & Reviews",
+    items: [
+      {
+        label: "Reviews",
+        icon: Star,
+        path: `${BASE}/rating-and-reviews`,
       },
     ],
   },

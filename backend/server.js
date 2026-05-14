@@ -15,6 +15,7 @@ import jobRoutes from "./src/routes/job.route.js";
 import chatRoutes from "./src/routes/chat.route.js";
 import contactRoutes from "./src/routes/contact.route.js";
 import feedbackRoutes from "./src/routes/feedback.route.js";
+import dashboardRoutes from "./src/routes/dashboard.route.js";
 
 import db from "./src/models/index.js";
 import { emailQueue } from "./src/queue/emailQueue.js";
@@ -210,6 +211,7 @@ app.use("/api/job", jobRoutes);
 app.use("/api/chat", isAuth, chatRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/feedback", isAuth, feedbackRoutes);
+app.use("/api/dashboard",isAuth,dashboardRoutes);
 
 // error handler
 app.use(errorHandler);

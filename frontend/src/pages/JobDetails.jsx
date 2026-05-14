@@ -26,6 +26,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useChat } from "@/hooks/useChat";
+import Feedback from "./Feedback";
 
 const JobDetails = () => {
   const { id } = useParams();
@@ -303,6 +304,7 @@ const JobDetails = () => {
             </Card>
           </aside>
         </div>
+        <Feedback id={j?.client.id}/>
       </main>
     </div>
   );
