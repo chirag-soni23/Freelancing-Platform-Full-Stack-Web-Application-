@@ -13,6 +13,7 @@ import FreelancerDetails from "@/pages/FreelancerDetails";
 import JobDetails from "@/pages/JobDetails";
 import Chat from "@/pages/Chat";
 import Review from "@/dashboard/Review";
+import ScrollToTop from "@/hoc/ScrollToTop";
 
 const MainLayout = lazy(() => import("@/components/layout/MainLayout"));
 const Dashboard = lazy(() => import("@/dashboard/Dashboard"));
@@ -41,6 +42,7 @@ const Loader = () => (
 const AppRoutes = () => {
   return (
     <Suspense fallback={<Loader />}>
+      <ScrollToTop />
       <Routes>
         {/* PUBLIC */}
         <Route
@@ -126,7 +128,7 @@ const AppRoutes = () => {
             }
           />
           <Route path="chats" element={<Chat />} />
-          <Route path="rating-and-reviews" element={<Review/>}/>
+          <Route path="rating-and-reviews" element={<Review />} />
         </Route>
         <Route path="*" element={<NotFound />} />
       </Routes>
