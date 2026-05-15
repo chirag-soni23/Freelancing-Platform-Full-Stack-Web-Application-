@@ -29,6 +29,14 @@ import { useJob } from "@/hooks/useJob";
 import { useNavigate } from "react-router-dom";
 import useDebounce from "@/hooks/useDebounce";
 import WithPagination from "@/hoc/WithPagination";
+import { useCategory } from "@/hooks/useCategory";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 const FindWork = () => {
   const [page, setPage] = useState(1);
@@ -36,7 +44,9 @@ const FindWork = () => {
   const [level, setLevel] = useState("");
   const [employment, setEmployment] = useState("");
   const [jobType, setJobType] = useState("");
+  const [category, setCategory] = useState("");
   const debouncedSearch = useDebounce(search, 500);
+  const { uniqueCategories } = useCategory();
 
   const { jobs, pagination } = useJob(null, {
     page,
@@ -45,6 +55,7 @@ const FindWork = () => {
     level,
     employment,
     jobType,
+    category,
   });
 
   const navigate = useNavigate();
@@ -78,6 +89,25 @@ const FindWork = () => {
               </button>
             )}
           </div>
+          <Select
+            value={category}
+            onValueChange={(value) => {
+              setCategory(value);
+              setPage(1);
+            }}
+          >
+            <SelectTrigger className="w-full md:w-[220px] h-14 rounded-xl border-border/50 bg-background shadow-none font-semibold">
+              <SelectValue placeholder="Select Category" />
+            </SelectTrigger>
+
+            <SelectContent className="rounded-xl">
+              {uniqueCategories?.map((cat) => (
+                <SelectItem key={cat.id} value={cat.name}>
+                  {cat.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
           <Button className="h-14 px-10 rounded-xl font-black text-base shadow-lg shadow-primary/20">
             Find Work
           </Button>
@@ -197,6 +227,7 @@ const FindWork = () => {
                       setLevel("");
                       setEmployment("");
                       setJobType("");
+                      setCategory("");
                       setSearch("");
                       setPage(1);
                     }}
@@ -242,6 +273,20 @@ const FindWork = () => {
 
                         {/* Level / Employment / JobType */}
                         <div className="flex flex-wrap items-center gap-3 pt-2">
+                          {/* Category */}
+                          <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/5 border border-orange-500/10">
+                            <Briefcase className="w-4 h-4 text-orange-500" />
+
+                            <div className="flex flex-col leading-none">
+                              <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                                Category
+                              </span>
+
+                              <span className="text-xs font-bold text-foreground">
+                                {job?.category?.name || "N/A"}
+                              </span>
+                            </div>
+                          </div>
                           {/* Level */}
                           <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/5 border border-primary/10">
                             <Layers3 className="w-4 h-4 text-primary" />
@@ -426,6 +471,7 @@ const FindWork = () => {
                     setLevel("");
                     setEmployment("");
                     setJobType("");
+                    setCategory("");
                     setSearch("");
                     setPage(1);
                   }}

@@ -40,6 +40,10 @@ export const useJob = (jobId, params) => {
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
 
+      queryClient.invalidateQueries({
+        queryKey: ["my-jobs"],
+      });
+
       toast({
         title: "Success",
         description: data?.message || "Job created successfully 🚀",
@@ -58,13 +62,17 @@ export const useJob = (jobId, params) => {
   // update job
   const updateJobMutation = useMutation({
     mutationFn: async ({ id, data }) => {
-      if (!id) throw new Error("Job ID is missing"); // 🔥 safety
+      if (!id) throw new Error("Job ID is missing");
       const res = await updateJob(id, data);
       return res;
     },
 
     onSuccess: (data, variables) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+
+      queryClient.invalidateQueries({
+        queryKey: ["my-jobs"],
+      });
       queryClient.invalidateQueries({
         queryKey: ["job", variables.id],
       });
@@ -90,6 +98,10 @@ export const useJob = (jobId, params) => {
 
     onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["jobs"] });
+
+      queryClient.invalidateQueries({
+        queryKey: ["my-jobs"],
+      });
 
       toast({
         title: "Success",

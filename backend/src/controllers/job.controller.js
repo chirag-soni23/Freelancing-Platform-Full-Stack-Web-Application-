@@ -55,6 +55,7 @@ export const getJobs = async (req, res, next) => {
       level,
       employment,
       jobType,
+      category,
     } = req.query;
 
     page = parseInt(page, 10);
@@ -78,7 +79,6 @@ export const getJobs = async (req, res, next) => {
         [Op.like]: `%${search.trim()}%`,
       };
     }
-
     if (level) {
       where.level = level;
     }
@@ -89,6 +89,12 @@ export const getJobs = async (req, res, next) => {
 
     if (jobType) {
       where.jobType = jobType;
+    }
+
+    let categoryWhere = {};
+
+    if (category) {
+      categoryWhere.name = category;
     }
 
     // status filter
@@ -136,6 +142,7 @@ export const getJobs = async (req, res, next) => {
           model: db.Category,
           as: "category",
           attributes: ["id", "name"],
+          where: categoryWhere,
         },
       ],
       order: [["createdAt", "DESC"]],
