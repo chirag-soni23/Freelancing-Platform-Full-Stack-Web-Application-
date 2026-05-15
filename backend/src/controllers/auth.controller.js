@@ -571,7 +571,14 @@ export const resendVerificationEmail = async (req, res, next) => {
 // get all freelancer
 export const getAllFreelancers = async (req, res, next) => {
   try {
-    let { page = 1, limit = 10, search = "" } = req.query;
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      category = "",
+      rating = "",
+      hourlyRate = "",
+    } = req.query;
 
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -582,12 +589,16 @@ export const getAllFreelancers = async (req, res, next) => {
       role: "freelancer",
     };
 
+    // search
     if (search && search.trim().length > 0) {
       const keyword = search.trim().toLowerCase();
 
       where[Op.or] = [
         { name: { [Op.like]: `%${keyword}%` } },
+
         { title: { [Op.like]: `%${keyword}%` } },
+
+        { bio: { [Op.like]: `%${keyword}%` } },
 
         sequelizeWhere(fn("JSON_SEARCH", col("skills"), "one", keyword), {
           [Op.ne]: null,
@@ -595,22 +606,112 @@ export const getAllFreelancers = async (req, res, next) => {
       ];
     }
 
+    // category filter
+    if (category && category.trim()) {
+      where[Op.and] = [
+        ...(where[Op.and] || []),
+
+        sequelizeWhere(
+          fn(
+            "JSON_SEARCH",
+            col("skills"),
+            "one",
+            category.trim().toLowerCase(),
+          ),
+          {
+            [Op.ne]: null,
+          },
+        ),
+      ];
+    }
+
+    // hourly rate filter
+    if (hourlyRate) {
+      if (hourlyRate === "0-500") {
+        where.hourlyRate = {
+          [Op.between]: [0, 500],
+        };
+      }
+
+      if (hourlyRate === "500-1000") {
+        where.hourlyRate = {
+          [Op.between]: [500, 1000],
+        };
+      }
+
+      if (hourlyRate === "1000-5000") {
+        where.hourlyRate = {
+          [Op.between]: [1000, 5000],
+        };
+      }
+
+      if (hourlyRate === "5000+") {
+        where.hourlyRate = {
+          [Op.gte]: 5000,
+        };
+      }
+    }
+
     const { count, rows } = await db.User.findAndCountAll({
       where,
-      attributes: { exclude: ["password"] },
+
+      attributes: {
+        exclude: ["password"],
+      },
+
+      include: [
+        {
+          model: db.Feedback,
+          as: "receivedFeedbacks",
+          attributes: [],
+          required: false,
+        },
+      ],
+
+      attributes: {
+        exclude: ["password"],
+
+        include: [
+          [
+            fn("ROUND", fn("AVG", col("receivedFeedbacks.rating")), 1),
+            "averageRating",
+          ],
+        ],
+      },
+
+      group: ["User.id"],
+
+      having:
+        rating && rating !== ""
+          ? sequelizeWhere(fn("AVG", col("receivedFeedbacks.rating")), {
+              [Op.gte]: Number(rating),
+            })
+          : undefined,
+
+      subQuery: false,
+
       limit,
       offset,
+
+      distinct: true,
+
       order: [["createdAt", "DESC"]],
     });
 
     return successResponse(res, StatusCodes.OK, {
       message: "Freelancers fetched",
+
       data: rows,
+
       pagination: {
-        total: count,
+        total: Array.isArray(count) ? count.length : count,
+
         page,
         limit,
-        totalPages: Math.ceil(count / limit),
+
+        totalPages: Math.ceil(
+          (Array.isArray(count) ? count.length : count) / limit,
+        ),
       },
     });
   } catch (error) {

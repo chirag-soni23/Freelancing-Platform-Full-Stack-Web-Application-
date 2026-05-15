@@ -34,6 +34,9 @@ import WithPagination from "@/hoc/WithPagination";
 import { Link } from "react-router-dom";
 
 const FindFreelancers = () => {
+  const [category, setCategory] = useState("");
+  const [rating, setRating] = useState("");
+  const [hourlyRate, setHourlyRate] = useState("");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
@@ -45,6 +48,9 @@ const FindFreelancers = () => {
     page,
     limit: 10,
     search: debouncedSearch,
+    category,
+    rating,
+    hourlyRate,
   });
   // console.log(freelancers);
   return (
@@ -108,23 +114,30 @@ const FindFreelancers = () => {
                   <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">
                     Category
                   </label>
-                  <Select>
+
+                  <Select
+                    value={category}
+                    onValueChange={(value) => {
+                      setCategory(value);
+                      setPage(1);
+                    }}
+                  >
                     <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm focus:ring-1 focus:ring-primary/20">
                       <SelectValue placeholder="Select Category" />
                     </SelectTrigger>
+
                     <SelectContent className="rounded-xl border-border/50 shadow-2xl">
-                      <SelectItem value="dev" className="font-medium">
-                        Development
-                      </SelectItem>
-                      <SelectItem value="design" className="font-medium">
-                        Design
-                      </SelectItem>
-                      <SelectItem value="marketing" className="font-medium">
-                        Marketing
-                      </SelectItem>
-                      <SelectItem value="writing" className="font-medium">
-                        Writing
-                      </SelectItem>
+                      <SelectItem value="react">React</SelectItem>
+
+                      <SelectItem value="mern">MERN Stack</SelectItem>
+
+                      <SelectItem value="node">Node.js</SelectItem>
+
+                      <SelectItem value="uiux">UI/UX</SelectItem>
+
+                      <SelectItem value="seo">SEO</SelectItem>
+
+                      <SelectItem value="marketing">Marketing</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -135,20 +148,25 @@ const FindFreelancers = () => {
                   <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">
                     Rating
                   </label>
-                  <Select>
+                  <Select
+                    value={rating}
+                    onValueChange={(value) => {
+                      setRating(value);
+                      setPage(1);
+                    }}
+                  >
                     <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm focus:ring-1 focus:ring-primary/20">
                       <SelectValue placeholder="Select Rating" />
                     </SelectTrigger>
+
                     <SelectContent className="rounded-xl border-border/50 shadow-2xl">
-                      <SelectItem value="4.5" className="font-medium italic">
-                        4.5 & Up
-                      </SelectItem>
-                      <SelectItem value="top" className="font-medium">
-                        Top Rated Only
-                      </SelectItem>
-                      <SelectItem value="rising" className="font-medium">
-                        Rising Talent
-                      </SelectItem>
+                      <SelectItem value="5">5 Star</SelectItem>
+
+                      <SelectItem value="4">4 Star & Up</SelectItem>
+
+                      <SelectItem value="3">3 Star & Up</SelectItem>
+
+                      <SelectItem value="2">2 Star & Up</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -159,26 +177,41 @@ const FindFreelancers = () => {
                   <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">
                     Hourly Rate
                   </label>
-                  <Select>
+
+                  <Select
+                    value={hourlyRate}
+                    onValueChange={(value) => {
+                      setHourlyRate(value);
+                      setPage(1);
+                    }}
+                  >
                     <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm focus:ring-1 focus:ring-primary/20">
                       <SelectValue placeholder="Select Range" />
                     </SelectTrigger>
+
                     <SelectContent className="rounded-xl border-border/50 shadow-2xl">
-                      <SelectItem value="0-500" className="font-medium">
-                        ₹0 - ₹500
-                      </SelectItem>
-                      <SelectItem value="500-2k" className="font-medium">
-                        ₹500 - ₹2,000
-                      </SelectItem>
-                      <SelectItem value="2k+" className="font-medium">
-                        ₹2,000+
-                      </SelectItem>
+                      <SelectItem value="0-500">₹0 - ₹500</SelectItem>
+
+                      <SelectItem value="500-1000">₹500 - ₹1000</SelectItem>
+
+                      <SelectItem value="1000-5000">₹1000 - ₹5000</SelectItem>
+
+                      <SelectItem value="5000+">₹5000+</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
 
                 <div className="pt-2">
-                  <button className="text-[11px] font-black uppercase tracking-tighter text-primary hover:opacity-80 transition-opacity w-full text-center">
+                  <button
+                    onClick={() => {
+                      setCategory("");
+                      setRating("");
+                      setHourlyRate("");
+                      setSearch("");
+                      setPage(1);
+                    }}
+                    className="text-[11px] font-black uppercase tracking-tighter text-primary hover:opacity-80 transition-opacity w-full text-center"
+                  >
                     Reset All Filters
                   </button>
                 </div>
@@ -199,6 +232,9 @@ const FindFreelancers = () => {
 
               <Button
                 onClick={() => {
+                  setCategory("");
+                  setRating("");
+                  setHourlyRate("");
                   setSearch("");
                   setPage(1);
                 }}
@@ -234,8 +270,11 @@ const FindFreelancers = () => {
                           </div>
                         )}
                       </div>
+
                       <div className="flex items-center gap-1 bg-yellow-500/10 text-yellow-600 px-3 py-1 rounded-full text-xs font-black">
-                        <Star size={14} fill="currentColor" /> 4.9
+                        <Star size={14} fill="currentColor" />
+
+                        {f?.averageRating || 0}
                       </div>
                     </div>
 
