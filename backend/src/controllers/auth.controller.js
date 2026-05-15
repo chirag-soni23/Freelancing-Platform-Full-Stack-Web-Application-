@@ -8,6 +8,9 @@ import crypto from "crypto";
 import { sendEmail } from "../utils/mailer.js";
 import { Op, fn, col, where as sequelizeWhere } from "sequelize";
 import { emailQueue } from "../queue/emailQueue.js";
+import jwt from "jsonwebtoken";
+import dotenv from "dotenv";
+dotenv.config();
 
 // register client
 export const registerClient = async (req, res, next) => {
@@ -585,20 +588,52 @@ export const getAllFreelancers = async (req, res, next) => {
 
     const offset = (page - 1) * limit;
 
+    let loggedInUser = null;
+
+    // decode token manually
+    const token = req.cookies?.token;
+
+    if (token) {
+      try {
+        loggedInUser = jwt.verify(token, process.env.JWT_SECRET);
+      } catch (err) {
+        console.log("Invalid token");
+      }
+    }
+
     let where = {
       role: "freelancer",
     };
+
+    // logged in freelancer ko exclude karo
+    if (loggedInUser && loggedInUser.role === "freelancer") {
+      where.id = {
+        [Op.ne]: loggedInUser.id,
+      };
+    }
 
     // search
     if (search && search.trim().length > 0) {
       const keyword = search.trim().toLowerCase();
 
       where[Op.or] = [
-        { name: { [Op.like]: `%${keyword}%` } },
+        {
+          name: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
 
-        { title: { [Op.like]: `%${keyword}%` } },
+        {
+          title: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
 
-        { bio: { [Op.like]: `%${keyword}%` } },
+        {
+          bio: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
 
         sequelizeWhere(fn("JSON_SEARCH", col("skills"), "one", keyword), {
           [Op.ne]: null,
@@ -655,10 +690,6 @@ export const getAllFreelancers = async (req, res, next) => {
     const { count, rows } = await db.User.findAndCountAll({
       where,
 
-      attributes: {
-        exclude: ["password"],
-      },
-
       include: [
         {
           model: db.Feedback,
@@ -669,7 +700,13 @@ export const getAllFreelancers = async (req, res, next) => {
       ],
 
       attributes: {
-        exclude: ["password"],
+        exclude: [
+          "password",
+          "resetPasswordToken",
+          "resetPasswordExpire",
+          "emailVerificationToken",
+          "emailVerificationExpire",
+        ],
 
         include: [
           [
@@ -699,7 +736,7 @@ export const getAllFreelancers = async (req, res, next) => {
     });
 
     return successResponse(res, StatusCodes.OK, {
-      message: "Freelancers fetched",
+      message: "Freelancers fetched successfully",
 
       data: rows,
 

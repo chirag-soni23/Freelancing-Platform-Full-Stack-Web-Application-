@@ -49,6 +49,11 @@ const Job = sequelize.define(
       defaultValue: "Remote",
     },
 
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+    },
+
     skills: {
       type: DataTypes.JSON,
       allowNull: true,

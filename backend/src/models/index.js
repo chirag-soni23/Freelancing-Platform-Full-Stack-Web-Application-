@@ -24,10 +24,10 @@ db.User.hasMany(db.Category, {
   onDelete: "CASCADE",
 });
 
-db.Category.belongsTo(db.User, {
-  foreignKey: "userId",
-  as: "user",
-});
+// db.Category.belongsTo(db.User, {
+//   foreignKey: "userId",
+//   as: "user",
+// });
 
 db.User.hasMany(db.Job, {
   foreignKey: "clientId",
@@ -39,6 +39,15 @@ db.Job.belongsTo(db.User, {
   as: "client",
 });
 
+db.Category.hasMany(db.Job, {
+  foreignKey: "categoryId",
+  as: "jobs",
+});
+
+db.Job.belongsTo(db.Category, {
+  foreignKey: "categoryId",
+  as: "category",
+});
 
 // conversation
 db.Conversation.hasMany(db.Message, {
@@ -69,7 +78,6 @@ db.Conversation.belongsTo(db.User, {
   foreignKey: "receiverId",
   as: "receiver",
 });
-
 
 // feedback
 db.User.hasMany(db.Feedback, {

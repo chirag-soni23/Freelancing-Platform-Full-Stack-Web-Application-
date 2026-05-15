@@ -14,6 +14,12 @@ export const getCategories = async (params) => {
   return res.data;
 };
 
+// get all unique categories
+export const getUniqueCategories = async () => {
+  const res = await api.get("/category/unique");
+  return res.data;
+};
+
 //  update category
 export const updateCategory = async (id, data) => {
   const res = await api.patch(`/category/${id}`, data);

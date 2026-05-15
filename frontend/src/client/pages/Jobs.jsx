@@ -134,6 +134,20 @@ const Jobs = () => {
                     </p>
 
                     <div className="flex flex-wrap items-center gap-3 mb-8">
+                      {/* Category */}
+                      <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-orange-500/5 border border-orange-500/10">
+                        <BriefcaseBusiness className="w-4 h-4 text-orange-500" />
+
+                        <div className="flex flex-col leading-none">
+                          <span className="text-[10px] uppercase font-black tracking-wider text-muted-foreground">
+                            Category
+                          </span>
+
+                          <span className="text-xs font-bold text-foreground">
+                            {job.category?.name || "N/A"}
+                          </span>
+                        </div>
+                      </div>
                       {/* Level */}
                       <div className="flex items-center gap-2 px-4 py-2 rounded-xl bg-primary/5 border border-primary/10">
                         <Layers3 className="w-4 h-4 text-primary" />

@@ -16,6 +16,7 @@ export const createJob = async (req, res, next) => {
       level,
       employment,
       jobType,
+      categoryId,
     } = req.body;
 
     const clientId = req.user.id;
@@ -29,6 +30,7 @@ export const createJob = async (req, res, next) => {
       level,
       employment,
       jobType,
+      categoryId,
       clientId,
     });
 
@@ -129,8 +131,13 @@ export const getJobs = async (req, res, next) => {
             "createdAt",
           ],
         },
-      ],
 
+        {
+          model: db.Category,
+          as: "category",
+          attributes: ["id", "name"],
+        },
+      ],
       order: [["createdAt", "DESC"]],
     });
 
@@ -251,6 +258,12 @@ export const getMyJobs = async (req, res, next) => {
             "createdAt",
           ],
         },
+
+        {
+          model: db.Category,
+          as: "category",
+          attributes: ["id", "name"],
+        },
       ],
 
       order: [["createdAt", "DESC"]],
@@ -340,6 +353,7 @@ export const updateJob = async (req, res, next) => {
       level,
       employment,
       jobType,
+      categoryId,
       status,
     } = req.body;
 
@@ -351,6 +365,7 @@ export const updateJob = async (req, res, next) => {
     if (level) job.level = level;
     if (employment) job.employment = employment;
     if (jobType) job.jobType = jobType;
+    if (categoryId) job.categoryId = categoryId;
     if (status) job.status = status;
 
     await job.save();

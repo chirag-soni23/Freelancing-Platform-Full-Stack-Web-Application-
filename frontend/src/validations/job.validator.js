@@ -39,6 +39,11 @@ export const createJobSchema = Joi.object({
       "string.empty": "Employment is required",
     }),
 
+  categoryId: Joi.number().integer().required().messages({
+    "number.base": "Category is required",
+    "any.required": "Category is required",
+  }),
+
   jobType: Joi.string()
     .valid("Remote", "On-site", "Hybrid")
     .required()
@@ -72,6 +77,8 @@ export const updateJobSchema = Joi.object({
   level: Joi.string().valid("Entry", "Intermediate", "Expert"),
 
   employment: Joi.string().valid("Contract", "Full-time", "Part-time"),
+
+  categoryId: Joi.number().integer(),
 
   jobType: Joi.string().valid("Remote", "On-site", "Hybrid"),
 

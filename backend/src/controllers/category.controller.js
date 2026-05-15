@@ -48,7 +48,7 @@ export const getCategories = async (req, res, next) => {
     const offset = (page - 1) * limit;
 
     let where = {
-      userId: req.user.id, 
+      userId: req.user.id,
     };
 
     if (search && search.trim().length > 0) {
@@ -95,6 +95,31 @@ export const getCategoryById = async (req, res, next) => {
     return successResponse(res, StatusCodes.OK, {
       message: "Category Fetched Successfully",
       data: category,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// get all unique categories
+export const getAllUniqueCategories = async (req, res, next) => {
+  try {
+    const categories = await db.Category.findAll({
+      attributes: [
+        "name",
+
+        [db.connection.fn("MIN", db.connection.col("id")), "id"],
+      ],
+
+      group: ["name"],
+
+      order: [["name", "ASC"]],
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Unique categories fetched successfully",
+
+      data: categories,
     });
   } catch (error) {
     next(error);

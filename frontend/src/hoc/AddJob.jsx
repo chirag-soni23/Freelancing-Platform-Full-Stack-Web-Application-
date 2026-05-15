@@ -29,6 +29,7 @@ import {
 } from "@/components/ui/select";
 import { createJobSchema } from "@/validations/job.validator";
 import { useJob } from "@/hooks/useJob";
+import { useCategory } from "@/hooks/useCategory";
 
 const AddJob = ({
   open,
@@ -49,6 +50,12 @@ const AddJob = ({
   const [level, setLevel] = useState("Entry");
   const [employment, setEmployment] = useState("Contract");
   const [jobType, setJobType] = useState("Remote");
+  const [categoryId, setCategoryId] = useState("");
+
+  const { categories } = useCategory({
+    page: 1,
+    limit: 10,
+  });
 
   const handleAddSkill = (e) => {
     if (e.key === "Enter" && skillInput.trim()) {
@@ -75,6 +82,7 @@ const AddJob = ({
       employment,
       jobType,
       skills,
+      categoryId: categoryId ? Number(categoryId) : "",
     };
 
     const { error } = createJobSchema.validate(data, { abortEarly: false });
@@ -112,6 +120,7 @@ const AddJob = ({
       setEmployment("Contract");
       setJobType("Remote");
       setOpen(false);
+      setCategoryId("");
     } catch (err) {
       console.log(err);
     }
@@ -128,6 +137,7 @@ const AddJob = ({
       setLevel(selectedJob.level || "Entry");
       setEmployment(selectedJob.employment || "Contract");
       setJobType(selectedJob.jobType || "Remote");
+      setCategoryId(selectedJob?.categoryId?.toString() || "");
     }
   }, [selectedJob]);
   return (
@@ -180,7 +190,6 @@ const AddJob = ({
                 <p className="text-xs text-red-500 ml-1">{errors.title}</p>
               )}
             </div>
-
             {/* Description */}
             <div className="grid gap-2">
               <Label
@@ -205,7 +214,6 @@ const AddJob = ({
                 </p>
               )}
             </div>
-
             {/* Budget & Currency - Fix Applied Here */}
             <div className="grid grid-cols-2 gap-4 items-start">
               {/* Budget */}
@@ -270,7 +278,39 @@ const AddJob = ({
                 )}
               </div>
             </div>
+            {/* Category */}
+            <div className="grid gap-2">
+              <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">
+                Category
+              </Label>
 
+              <Select
+                value={categoryId}
+                onValueChange={(value) => {
+                  setCategoryId(value);
+                  setErrors((prev) => ({
+                    ...prev,
+                    categoryId: "",
+                  }));
+                }}
+              >
+                <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm">
+                  <SelectValue placeholder="Select category" />
+                </SelectTrigger>
+
+                <SelectContent className="rounded-xl border-border/60">
+                  {categories.map((cat) => (
+                    <SelectItem key={cat.id} value={cat.id.toString()}>
+                      {cat.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {errors.categoryId && (
+                <p className="text-xs text-red-500 ml-1">{errors.categoryId}</p>
+              )}
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Level */}
               <div className="grid gap-2">
@@ -365,7 +405,6 @@ const AddJob = ({
                 )}
               </div>
             </div>
-
             {/* Skills Section */}
             <div className="grid gap-2">
               <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">

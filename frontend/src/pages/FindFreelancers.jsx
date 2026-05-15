@@ -32,9 +32,11 @@ import { useAuth } from "@/hooks/useAuth";
 import useDebounce from "@/hooks/useDebounce";
 import WithPagination from "@/hoc/WithPagination";
 import { Link } from "react-router-dom";
+import { useCategory } from "@/hooks/useCategory";
 
 const FindFreelancers = () => {
   const [category, setCategory] = useState("");
+  const { uniqueCategories } = useCategory();
   const [rating, setRating] = useState("");
   const [hourlyRate, setHourlyRate] = useState("");
   const [page, setPage] = useState(1);
@@ -127,17 +129,11 @@ const FindFreelancers = () => {
                     </SelectTrigger>
 
                     <SelectContent className="rounded-xl border-border/50 shadow-2xl">
-                      <SelectItem value="react">React</SelectItem>
-
-                      <SelectItem value="mern">MERN Stack</SelectItem>
-
-                      <SelectItem value="node">Node.js</SelectItem>
-
-                      <SelectItem value="uiux">UI/UX</SelectItem>
-
-                      <SelectItem value="seo">SEO</SelectItem>
-
-                      <SelectItem value="marketing">Marketing</SelectItem>
+                      {uniqueCategories?.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name.toLowerCase()}>
+                          {cat.name}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
