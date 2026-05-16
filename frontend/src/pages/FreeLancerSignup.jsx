@@ -686,7 +686,7 @@ const FreelancerSignUp = () => {
       onSuccess: () => {
         setFormData(initialState);
 
-        navigate("/");
+        navigate("/profile");
       },
     });
   };

@@ -34,10 +34,13 @@ export const registerUserSchema = Joi.object({
     "string.empty": "Confirm password is required",
   }),
 
-  role: Joi.string().valid("client", "freelancer","admin").required().messages({
-    "any.only": "Role must be client or freelancer or admin",
-    "string.empty": "Role is required",
-  }),
+  role: Joi.string()
+    .valid("client", "freelancer", "admin")
+    .required()
+    .messages({
+      "any.only": "Role must be client or freelancer or admin",
+      "string.empty": "Role is required",
+    }),
 });
 
 export const loginSchema = Joi.object({
@@ -78,6 +81,10 @@ export const updateProfileSchema = Joi.object({
 
   bio: Joi.string().min(10).messages({
     "string.min": "Bio must be at least 10 characters",
+  }),
+
+  categoryId: Joi.number().integer().messages({
+    "number.base": "Category id must be a number",
   }),
 
   skills: Joi.array().items(Joi.string()).messages({

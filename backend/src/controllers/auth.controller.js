@@ -18,7 +18,7 @@ export const registerUser = async (req, res, next) => {
     const { name, email, phone, password, role } = req.body;
 
     // role validation
-    if (!["client", "freelancer","admin"].includes(role)) {
+    if (!["client", "freelancer", "admin"].includes(role)) {
       throw ApiError.BADREQUEST("Invalid role");
     }
 
@@ -91,19 +91,29 @@ export const getMe = async (req, res, next) => {
       throw ApiError.UNAUTHORIZED("User not authenticated");
     }
 
-    const user = await db.User.findByPk(req.user.id);
+    const user = await db.User.findByPk(req.user.id, {
+      include: [
+        {
+          model: db.Category,
+          as: "categories",
+          attributes: ["id", "name"],
+        },
+      ],
+    });
 
     if (!user) {
       throw ApiError.NOTFOUND("User not found");
     }
 
     const userData = user.toJSON();
+
     delete userData.password;
 
     let filteredUser = {};
 
     const role = userData.role?.toLowerCase();
 
+    // CLIENT
     if (role === "client") {
       filteredUser = {
         id: userData.id,
@@ -113,13 +123,16 @@ export const getMe = async (req, res, next) => {
         role: userData.role,
         profilePic: userData.profilePic,
         address: userData.address,
-        requirement: user.requirement,
+        requirement: userData.requirement,
         companyName: userData.companyName,
         companyWebsite: userData.companyWebsite,
         isEmailVerified: userData.isEmailVerified,
         createdAt: userData.createdAt,
       };
-    } else if (role === "freelancer") {
+    }
+
+    // FREELANCER
+    else if (role === "freelancer") {
       filteredUser = {
         id: userData.id,
         name: userData.name,
@@ -130,6 +143,9 @@ export const getMe = async (req, res, next) => {
         address: userData.address,
         title: userData.title,
         bio: userData.bio,
+
+        category: userData.categories,
+
         skills: userData.skills,
         languages: userData.languages,
         hourlyRate: userData.hourlyRate,
@@ -138,16 +154,21 @@ export const getMe = async (req, res, next) => {
         isEmailVerified: userData.isEmailVerified,
         createdAt: userData.createdAt,
       };
-    } else {
+    }
+
+    // ADMIN
+    else {
       filteredUser = userData;
     }
 
     return successResponse(res, StatusCodes.OK, {
       message: "Profile fetched successfully",
+
       data: filteredUser,
     });
   } catch (error) {
     console.log("GET ME ERROR:", error.message);
+
     next(error);
   }
 };
@@ -197,6 +218,15 @@ export const updateProfile = async (req, res, next) => {
       if (data.hourlyRate !== undefined) user.hourlyRate = data.hourlyRate;
       if (data.currency !== undefined) user.currency = data.currency;
       if (data.portfolio !== undefined) user.portfolio = data.portfolio;
+      if (data.categoryId !== undefined) {
+        const category = await db.Category.findByPk(data.categoryId);
+
+        if (!category) {
+          throw ApiError.NOTFOUND("Category id not found");
+        }
+
+        user.categoryId = data.categoryId;
+      }
     }
 
     // client fields
@@ -584,22 +614,9 @@ export const getAllFreelancers = async (req, res, next) => {
     }
 
     // category filter
+    // category filter
     if (category && category.trim()) {
-      where[Op.and] = [
-        ...(where[Op.and] || []),
-
-        sequelizeWhere(
-          fn(
-            "JSON_SEARCH",
-            col("skills"),
-            "one",
-            category.trim().toLowerCase(),
-          ),
-          {
-            [Op.ne]: null,
-          },
-        ),
-      ];
+      where.categoryId = Number(category);
     }
 
     // hourly rate filter
@@ -634,6 +651,12 @@ export const getAllFreelancers = async (req, res, next) => {
 
       include: [
         {
+          model: db.Category,
+          as: "categories",
+          attributes: ["id", "name"],
+        },
+
+        {
           model: db.Feedback,
           as: "receivedFeedbacks",
           attributes: [],
@@ -658,7 +681,7 @@ export const getAllFreelancers = async (req, res, next) => {
         ],
       },
 
-      group: ["User.id"],
+      group: ["User.id", "categories.id"],
 
       having:
         rating && rating !== ""

@@ -10,12 +10,16 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import {
-  Select,
-  SelectTrigger,
-  SelectValue,
-  SelectContent,
-  SelectItem,
-} from "@/components/ui/select";
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { cn } from "@/lib/utils";
+
+import useDebounce from "@/hooks/useDebounce";
+
+import { useCategory } from "@/hooks/useCategory";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
@@ -34,6 +38,9 @@ import {
   X,
   LogOut,
   IndianRupee,
+  Check,
+  ChevronsUpDown,
+  Search,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -51,6 +58,14 @@ const Profile = () => {
     logout,
   } = useAuth();
   const navigate = useNavigate();
+  const [openCategory, setOpenCategory] = useState(false);
+
+  const [categorySearch, setCategorySearch] = useState("");
+
+  const debouncedCategorySearch = useDebounce(categorySearch, 500);
+  const { uniqueCategories } = useCategory({
+    search: debouncedCategorySearch,
+  });
 
   const fileInputRef = useRef(null);
   const profileData = user?.data;
@@ -76,6 +91,7 @@ const Profile = () => {
     skills: [],
     languages: [],
     portfolio: "",
+    categoryId: "",
 
     // client
     companyName: "",
@@ -98,6 +114,7 @@ const Profile = () => {
         skills: profileData.skills || [],
         languages: profileData.languages || [],
         portfolio: profileData.portfolio || "",
+        categoryId: profileData?.category?.id?.toString() || "",
 
         // client
         companyName: profileData.companyName || "",
@@ -270,6 +287,18 @@ const Profile = () => {
                 <div className="w-full h-[1px] bg-slate-100 dark:bg-white/5 my-8" />
 
                 <div className="w-full space-y-4 text-left">
+                  
+                  {isFreelancer && (
+                    <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
+                      <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-white/5 flex items-center justify-center">
+                        <Briefcase size={18} />
+                      </div>
+
+                      <span className="text-xs font-bold">
+                        {profileData?.category?.name || "No Category"}
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
                     <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-white/5 flex items-center justify-center">
                       <MapPin size={18} />
@@ -397,64 +426,152 @@ const Profile = () => {
                               />
                             </div>
 
-                            {isFreelancer && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                                    Hourly Rate
-                                  </p>
+                            {/* CATEGORY */}
+                            <div className="space-y-2">
+                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                Category
+                              </Label>
 
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-primary/10 flex items-center justify-center">
-                                      {profileData?.currency === "INR" ? (
-                                        <IndianRupee
-                                          size={24}
-                                          className="text-primary"
-                                        />
-                                      ) : (
-                                        <DollarSign
-                                          size={24}
-                                          className="text-primary"
-                                        />
-                                      )}
-                                    </div>
-
-                                    <span className="text-4xl font-black">
-                                      {profileData?.currency === "INR"
-                                        ? "₹"
-                                        : "$"}
-                                      {profileData?.hourlyRate || "0"}
-                                      <span className="text-sm text-slate-400 font-medium">
-                                        /hr
-                                      </span>
+                              <Popover
+                                open={openCategory}
+                                onOpenChange={setOpenCategory}
+                              >
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    role="combobox"
+                                    aria-expanded={openCategory}
+                                    className="
+          w-full
+          h-10
+          rounded-lg
+          justify-between
+          bg-slate-50
+          dark:bg-slate-900/50
+          border-slate-200
+          dark:border-white/10
+          hover:bg-slate-100
+          dark:hover:bg-slate-900
+        "
+                                  >
+                                    <span className="truncate font-medium">
+                                      {formData.categoryId
+                                        ? uniqueCategories.find(
+                                            (cat) =>
+                                              cat.id.toString() ===
+                                              formData.categoryId,
+                                          )?.name
+                                        : "Select category"}
                                     </span>
-                                  </div>
-                                </div>
 
-                                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                                    Success Rate
-                                  </p>
+                                    <ChevronsUpDown className="h-4 w-4 opacity-50" />
+                                  </Button>
+                                </PopoverTrigger>
 
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
-                                      <Globe
-                                        size={24}
-                                        className="text-blue-500"
+                                <PopoverContent
+                                  align="start"
+                                  className="
+        w-[var(--radix-popover-trigger-width)]
+        p-0
+        overflow-hidden
+        rounded-xl
+        border-slate-200
+        dark:border-white/10
+      "
+                                >
+                                  {/* SEARCH */}
+                                  <div className="p-3 border-b border-slate-100 dark:border-white/10">
+                                    <div className="relative">
+                                      <Search
+                                        className="
+              absolute
+              left-3
+              top-1/2
+              -translate-y-1/2
+              h-4
+              w-4
+              text-muted-foreground
+            "
+                                      />
+
+                                      <Input
+                                        placeholder="Search category..."
+                                        value={categorySearch}
+                                        onChange={(e) =>
+                                          setCategorySearch(e.target.value)
+                                        }
+                                        className="
+              pl-10
+              h-10
+              rounded-lg
+              bg-slate-50
+              dark:bg-slate-900/50
+              border-slate-200
+              dark:border-white/10
+            "
                                       />
                                     </div>
-
-                                    <span className="text-4xl font-black">
-                                      100%
-                                    </span>
                                   </div>
-                                </div>
-                              </div>
-                            )}
 
+                                  {/* LIST */}
+                                  <div className="max-h-[250px] overflow-y-auto p-2">
+                                    {uniqueCategories?.map((cat) => (
+                                      <button
+                                        key={cat.id}
+                                        type="button"
+                                        onClick={() => {
+                                          setFormData((prev) => ({
+                                            ...prev,
+                                            categoryId: cat.id.toString(),
+                                          }));
 
+                                          setOpenCategory(false);
+                                        }}
+                                        className={cn(
+                                          `
+                w-full
+                flex
+                items-center
+                gap-3
+                rounded-lg
+                px-3
+                py-2.5
+                text-sm
+                font-medium
+                transition-all
+                hover:bg-slate-100
+                dark:hover:bg-slate-800
+              `,
+                                          formData.categoryId ===
+                                            cat.id.toString() &&
+                                            "bg-primary text-white hover:bg-primary",
+                                        )}
+                                      >
+                                        <Check
+                                          className={cn(
+                                            "h-4 w-4",
+                                            formData.categoryId ===
+                                              cat.id.toString()
+                                              ? "opacity-100"
+                                              : "opacity-0",
+                                          )}
+                                        />
 
-                               {isClient && (
+                                        <span>{cat.name}</span>
+                                      </button>
+                                    ))}
+
+                                    {uniqueCategories?.length === 0 && (
+                                      <div className="py-6 text-center text-sm text-muted-foreground">
+                                        No category found
+                                      </div>
+                                    )}
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+
+                            {isClient && (
                               <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                 <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
                                   <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
@@ -462,8 +579,6 @@ const Profile = () => {
                                   </p>
 
                                   <div className="flex items-center gap-3">
-                                   
-
                                     <span className="text-4xl font-black">
                                       {/* {profileData?.currency === "INR"
                                         ? "₹"
@@ -733,85 +848,84 @@ const Profile = () => {
 
           {/* RIGHT: Main Profile Content */}
           <div className="lg:col-span-8 space-y-8">
+            {isFreelancer && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                    Hourly Rate
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-primary/10 flex items-center justify-center">
+                      {profileData?.currency === "INR" ? (
+                        <IndianRupee size={24} className="text-primary" />
+                      ) : (
+                        <DollarSign size={24} className="text-primary" />
+                      )}
+                    </div>
 
-            {isFreelancer && 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                  Hourly Rate
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-primary/10 flex items-center justify-center">
-                    {profileData?.currency === "INR" ? (
-                      <IndianRupee size={24} className="text-primary" />
-                    ) : (
-                      <DollarSign size={24} className="text-primary" />
-                    )}
-                  </div>
-
-                  <span className="text-4xl font-black">
-                    {profileData?.currency === "INR" ? "₹" : "$"}
-                    {profileData?.hourlyRate || "0"}
-                    <span className="text-sm text-slate-400 font-medium">
-                      /hr
+                    <span className="text-4xl font-black">
+                      {profileData?.currency === "INR" ? "₹" : "$"}
+                      {profileData?.hourlyRate || "0"}
+                      <span className="text-sm text-slate-400 font-medium">
+                        /hr
+                      </span>
                     </span>
-                  </span>
-                </div>
-              </div>
-              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                  Success Rate
-                </p>
-                <div className="flex items-center gap-3">
-                  <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
-                    <Globe size={24} className="text-blue-500" />
                   </div>
-                  <span className="text-4xl font-black">100%</span>
+                </div>
+                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                    Success Rate
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
+                      <Globe size={24} className="text-blue-500" />
+                    </div>
+                    <span className="text-4xl font-black">100%</span>
+                  </div>
                 </div>
               </div>
-            </div>}
+            )}
 
-               {isClient && 
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                  Company Name
-                </p>
-                <div className="flex items-center gap-3">
-               
-
-                  <span className="text-4xl font-black">
-                    {/* {profileData?.currency === "INR" ? "₹" : "$"} */}
-                    {profileData?.companyName || "0"}
-                    {/* <span className="text-sm text-slate-400 font-medium">
+            {isClient && (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                    Company Name
+                  </p>
+                  <div className="flex items-center gap-3">
+                    <span className="text-4xl font-black">
+                      {/* {profileData?.currency === "INR" ? "₹" : "$"} */}
+                      {profileData?.companyName || "0"}
+                      {/* <span className="text-sm text-slate-400 font-medium">
                       /hr
                     </span> */}
-                  </span>
+                    </span>
+                  </div>
+                </div>
+                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-6 md:p-8 shadow-sm overflow-hidden">
+                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
+                    Company Website
+                  </p>
+
+                  <div className="flex items-center justify-center gap-3">
+                    <div className="min-w-12 w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
+                      <Globe size={24} className="text-blue-500" />
+                    </div>
+
+                    <div className="flex-1 overflow-hidden">
+                      <a
+                        href={profileData?.companyWebsite}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="block text-sm md:text-lg font-bold break-all text-slate-800 dark:text-slate-200 hover:text-primary transition-colors"
+                      >
+                        {profileData?.companyWebsite || "No website added"}
+                      </a>
+                    </div>
+                  </div>
                 </div>
               </div>
-          <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-6 md:p-8 shadow-sm overflow-hidden">
-  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
-    Company Website
-  </p>
-
-  <div className="flex items-center justify-center gap-3">
-    <div className="min-w-12 w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
-      <Globe size={24} className="text-blue-500" />
-    </div>
-
-    <div className="flex-1 overflow-hidden">
-      <a
-        href={profileData?.companyWebsite}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="block text-sm md:text-lg font-bold break-all text-slate-800 dark:text-slate-200 hover:text-primary transition-colors"
-      >
-        {profileData?.companyWebsite || "No website added"}
-      </a>
-    </div>
-  </div>
-</div>
-            </div>}
+            )}
 
             {/* Narrative Box */}
             {isFreelancer && (

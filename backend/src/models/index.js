@@ -18,12 +18,15 @@ const db = {
   Feedback,
 };
 
-db.User.hasMany(db.Category, {
-  foreignKey: "userId",
+// db.User.hasMany(db.Category, {
+//   foreignKey: "userId",
+//   as: "categories",
+//   onDelete: "CASCADE",
+// });
+db.User.belongsTo(Category, {
+  foreignKey: "categoryId",
   as: "categories",
-  onDelete: "CASCADE",
 });
-
 // db.Category.belongsTo(db.User, {
 //   foreignKey: "userId",
 //   as: "user",

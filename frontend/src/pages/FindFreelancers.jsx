@@ -6,6 +6,13 @@ import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Separator } from "@/components/ui/separator";
 import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { cn } from "@/lib/utils";
+import {
   Search,
   Filter,
   Star,
@@ -19,6 +26,8 @@ import {
   DollarSign,
   X,
   ArrowUpRight,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 
 import {
@@ -41,6 +50,9 @@ const FindFreelancers = () => {
   const [hourlyRate, setHourlyRate] = useState("");
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
+  const [openCategory, setOpenCategory] = useState(false);
+
+  const [categorySearch, setCategorySearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const {
     freelancers,
@@ -116,26 +128,130 @@ const FindFreelancers = () => {
                   <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">
                     Category
                   </label>
+                  <Popover open={openCategory} onOpenChange={setOpenCategory}>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        role="combobox"
+                        aria-expanded={openCategory}
+                        className="
+        w-full
+        justify-between
+        h-12
+        rounded-xl
+        bg-background/50
+        border-none
+        font-semibold
+        shadow-sm
+      "
+                      >
+                        {category
+                          ? uniqueCategories.find(
+                              (cat) => cat.id.toString() === category,
+                            )?.name
+                          : "Select Category"}
 
-                  <Select
-                    value={category}
-                    onValueChange={(value) => {
-                      setCategory(value);
-                      setPage(1);
-                    }}
-                  >
-                    <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm focus:ring-1 focus:ring-primary/20">
-                      <SelectValue placeholder="Select Category" />
-                    </SelectTrigger>
+                        <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
+                      </Button>
+                    </PopoverTrigger>
 
-                    <SelectContent className="rounded-xl border-border/50 shadow-2xl">
-                      {uniqueCategories?.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name.toLowerCase()}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    <PopoverContent
+                      className="
+      w-[300px]
+      p-0
+      rounded-2xl
+      border-border/50
+      shadow-2xl
+    "
+                    >
+                      {/* SEARCH */}
+                      <div className="p-3 border-b border-border/50">
+                        <div className="relative">
+                          <Search
+                            className="
+            absolute
+            left-3
+            top-1/2
+            -translate-y-1/2
+            h-4
+            w-4
+            text-muted-foreground
+          "
+                          />
+
+                          <Input
+                            placeholder="Search category..."
+                            value={categorySearch}
+                            onChange={(e) => setCategorySearch(e.target.value)}
+                            className="
+            pl-10
+            h-11
+            rounded-xl
+            border-border/50
+          "
+                          />
+                        </div>
+                      </div>
+
+                      {/* LIST */}
+                      <div className="max-h-[260px] overflow-y-auto p-2">
+                        {uniqueCategories
+                          ?.filter((cat) =>
+                            cat.name
+                              .toLowerCase()
+                              .includes(categorySearch.toLowerCase()),
+                          )
+                          .map((cat) => (
+                            <button
+                              key={cat.id}
+                              type="button"
+                              onClick={() => {
+                                setCategory(cat.id.toString());
+
+                                setPage(1);
+
+                                setOpenCategory(false);
+                              }}
+                              className={cn(
+                                `
+                w-full
+                flex items-center gap-3
+                rounded-xl
+                px-4 py-3
+                text-sm
+                font-semibold
+                transition-all
+                hover:bg-secondary
+              `,
+                                category === cat.id.toString() &&
+                                  "bg-primary text-white hover:bg-primary",
+                              )}
+                            >
+                              <Check
+                                className={cn(
+                                  "h-4 w-4",
+                                  category === cat.id.toString()
+                                    ? "opacity-100"
+                                    : "opacity-0",
+                                )}
+                              />
+
+                              <span>{cat.name}</span>
+                            </button>
+                          ))}
+
+                        {uniqueCategories?.filter((cat) =>
+                          cat.name
+                            .toLowerCase()
+                            .includes(categorySearch.toLowerCase()),
+                        ).length === 0 && (
+                          <div className="py-6 text-center text-sm text-muted-foreground">
+                            No category found
+                          </div>
+                        )}
+                      </div>
+                    </PopoverContent>
+                  </Popover>
                 </div>
 
                 <Separator className="bg-border/50" />
@@ -291,6 +407,11 @@ const FindFreelancers = () => {
                         <p className="text-primary font-bold text-lg italic">
                           {f?.title}
                         </p>
+                      </div>
+                      <div className="flex flex-wrap justify-center md:justify-start gap-2">
+                        <Badge className="bg-primary/10 text-primary border-none text-[10px] font-black uppercase tracking-widest">
+                          {f?.categories?.name || "No Category"}
+                        </Badge>
                       </div>
 
                       <p className="text-muted-foreground text-[15px] leading-relaxed max-w-xl line-clamp-3">

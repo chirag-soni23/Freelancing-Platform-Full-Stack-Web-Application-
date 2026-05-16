@@ -60,6 +60,17 @@ const User = sequelize.define(
       type: DataTypes.JSON,
     },
 
+    categoryId: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "categories",
+        key: "id",
+      },
+      onUpdate: "CASCADE",
+      onDelete: "SET NULL",
+    },
+
     languages: {
       type: DataTypes.JSON,
     },
