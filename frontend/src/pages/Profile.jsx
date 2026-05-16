@@ -55,32 +55,54 @@ const Profile = () => {
   const fileInputRef = useRef(null);
   const profileData = user?.data;
 
+  const isFreelancer = profileData?.role === "freelancer";
+  const isClient = profileData?.role === "client";
+
   // Edit States
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [skillInput, setSkillInput] = useState("");
   const [langInput, setLangInput] = useState("");
   const [formData, setFormData] = useState({
+    // common
     name: "",
+    email: "",
+    address: "",
+
+    // freelancer
     title: "",
     bio: "",
-    address: "",
     hourlyRate: "",
     currency: "INR",
     skills: [],
     languages: [],
-  });
+    portfolio: "",
 
+    // client
+    companyName: "",
+    companyWebsite: "",
+    requirement: "",
+  });
   useEffect(() => {
     if (profileData) {
       setFormData({
+        // common
         name: profileData.name || "",
+        email: profileData.email || "",
+        address: profileData.address || "",
+
+        // freelancer
         title: profileData.title || "",
         bio: profileData.bio || "",
-        address: profileData.address || "",
         hourlyRate: profileData.hourlyRate || "",
         currency: profileData.currency || "INR",
         skills: profileData.skills || [],
         languages: profileData.languages || [],
+        portfolio: profileData.portfolio || "",
+
+        // client
+        companyName: profileData.companyName || "",
+        companyWebsite: profileData.companyWebsite || "",
+        requirement: profileData.requirement || "",
       });
     }
   }, [profileData, isEditDialogOpen]);
@@ -310,12 +332,14 @@ const Profile = () => {
                       className="flex flex-col overflow-hidden"
                     >
                       <div className="p-6 space-y-5 overflow-y-auto scrollbar-hide">
-                        {/* Row 1: Name & Title */}
+                        {/* COMMON FIELDS */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          {/* NAME */}
                           <div className="space-y-1.5">
                             <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
                               Full Name
                             </Label>
+
                             <Input
                               name="name"
                               value={formData.name}
@@ -323,170 +347,333 @@ const Profile = () => {
                               className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20"
                             />
                           </div>
+
+                          {/* EMAIL */}
                           <div className="space-y-1.5">
                             <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                              Title
+                              Email
                             </Label>
+
                             <Input
-                              name="title"
-                              value={formData.title}
+                              type="email"
+                              name="email"
+                              value={formData.email}
                               onChange={handleInputChange}
+                              placeholder="Enter your email"
+                              className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20"
+                            />
+                          </div>
+
+                          {/* ADDRESS */}
+                          <div className="space-y-1.5 md:col-span-2">
+                            <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                              Address
+                            </Label>
+
+                            <Input
+                              name="address"
+                              value={formData.address}
+                              onChange={handleInputChange}
+                              placeholder="Enter your address"
                               className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20"
                             />
                           </div>
                         </div>
 
-                        {/* Row 2: Rate & Location */}
-                        <div className="space-y-1.5">
-                          <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                            Hourly Rate
-                          </Label>
-
-                          <div className="flex gap-2">
-                            {/* Currency Select */}
-                            <Select
-                              value={formData.currency}
-                              onValueChange={(value) =>
-                                setFormData({ ...formData, currency: value })
-                              }
-                            >
-                              <SelectTrigger className="h-10 w-[110px] bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/10 rounded-lg font-bold">
-                                <SelectValue placeholder="Currency" />
-                              </SelectTrigger>
-
-                              <SelectContent>
-                                <SelectItem value="INR">₹ INR</SelectItem>
-                                <SelectItem value="USD">$ USD</SelectItem>
-                              </SelectContent>
-                            </Select>
-
-                            {/* Input + Dynamic Icon */}
-                            <div className="relative flex-1">
-                              {formData.currency === "INR" ? (
-                                <IndianRupee
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                  size={16}
-                                />
-                              ) : (
-                                <DollarSign
-                                  className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
-                                  size={16}
-                                />
-                              )}
+                        {/* ================= FREELANCER ================= */}
+                        {isFreelancer && (
+                          <>
+                            {/* TITLE */}
+                            <div className="space-y-1.5">
+                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                Title
+                              </Label>
 
                               <Input
-                                name="hourlyRate"
-                                type="number"
-                                value={formData.hourlyRate}
+                                name="title"
+                                value={formData.title}
                                 onChange={handleInputChange}
-                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border border-slate-200 dark:border-white/10 rounded-lg pl-10"
+                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20"
                               />
                             </div>
-                          </div>
-                        </div>
 
-                        {/* Skills Section: Input upar, tags niche */}
-                        <div className="space-y-3">
-                          <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                              Add Skills
-                            </Label>
-                            <div className="relative">
-                              <Input
-                                value={skillInput}
-                                onChange={(e) => setSkillInput(e.target.value)}
-                                onKeyDown={handleSkillKeyDown}
-                                placeholder="Type and press Enter..."
-                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20 pr-10"
-                              />
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                                ↵
+                            {isFreelancer && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
+                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                                    Hourly Rate
+                                  </p>
+
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-primary/10 flex items-center justify-center">
+                                      {profileData?.currency === "INR" ? (
+                                        <IndianRupee
+                                          size={24}
+                                          className="text-primary"
+                                        />
+                                      ) : (
+                                        <DollarSign
+                                          size={24}
+                                          className="text-primary"
+                                        />
+                                      )}
+                                    </div>
+
+                                    <span className="text-4xl font-black">
+                                      {profileData?.currency === "INR"
+                                        ? "₹"
+                                        : "$"}
+                                      {profileData?.hourlyRate || "0"}
+                                      <span className="text-sm text-slate-400 font-medium">
+                                        /hr
+                                      </span>
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
+                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                                    Success Rate
+                                  </p>
+
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
+                                      <Globe
+                                        size={24}
+                                        className="text-blue-500"
+                                      />
+                                    </div>
+
+                                    <span className="text-4xl font-black">
+                                      100%
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
+                            )}
 
-                          {/* Skills Display Area (Outside Input) */}
-                          {formData.skills.length > 0 && (
-                            <div className="flex flex-wrap gap-2 p-3 bg-slate-50/50 dark:bg-white/5 rounded-xl border border-dashed border-slate-200 dark:border-white/10">
-                              {formData.skills.map((skill) => (
-                                <Badge
-                                  key={skill}
-                                  className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 flex items-center gap-1.5 py-1 px-2.5 transition-all cursor-default shadow-sm"
-                                >
-                                  <span className="text-[11px] font-semibold">
-                                    {skill}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => removeSkill(skill)}
-                                    className="hover:scale-110"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
 
-                        {/* LANGUAGE SECTION */}
-                        <div className="space-y-3">
-                          <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                              Add Languages
-                            </Label>
-                            <div className="relative">
-                              <Input
-                                value={langInput}
-                                onChange={(e) => setLangInput(e.target.value)}
-                                onKeyDown={handleLanguageKeyDown}
-                                placeholder="Type and press Enter..."
-                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20 pr-10"
-                              />
-                              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded">
-                                ↵
+
+                               {isClient && (
+                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
+                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                                    Company Name
+                                  </p>
+
+                                  <div className="flex items-center gap-3">
+                                   
+
+                                    <span className="text-4xl font-black">
+                                      {/* {profileData?.currency === "INR"
+                                        ? "₹"
+                                        : "$"} */}
+                                      {profileData?.companyName || "0"}
+                                      {/* <span className="text-sm text-slate-400 font-medium">
+                                        /hr
+                                      </span> */}
+                                    </span>
+                                  </div>
+                                </div>
+
+                                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
+                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                                    Success Rate
+                                  </p>
+
+                                  <div className="flex items-center gap-3">
+                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
+                                      <Globe
+                                        size={24}
+                                        className="text-blue-500"
+                                      />
+                                    </div>
+
+                                    <span className="text-4xl font-black">
+                                      100%
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
-                            </div>
-                          </div>
+                            )}
 
-                          {formData.languages.length > 0 && (
-                            <div className="flex flex-wrap gap-2 p-3 bg-slate-50/50 dark:bg-white/5 rounded-xl border border-dashed border-slate-200 dark:border-white/10">
-                              {formData.languages.map((language) => (
-                                <Badge
-                                  key={language}
-                                  className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 hover:bg-destructive/10 hover:text-destructive hover:border-destructive/20 flex items-center gap-1.5 py-1 px-2.5 transition-all cursor-default shadow-sm"
-                                >
-                                  <span className="text-[11px] font-semibold">
-                                    {language}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => removeLanguage(language)}
-                                    className="hover:scale-110"
-                                  >
-                                    <X size={12} />
-                                  </button>
-                                </Badge>
-                              ))}
-                            </div>
-                          )}
-                        </div>
+                            {/* SKILLS */}
+                            <div className="space-y-3">
+                              <div className="space-y-1.5">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                  Add Skills
+                                </Label>
 
-                        {/* Bio Section */}
-                        <div className="space-y-1.5">
-                          <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                            Short Bio
-                          </Label>
-                          <Textarea
-                            name="bio"
-                            value={formData.bio}
-                            onChange={handleInputChange}
-                            className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-xl min-h-[80px] focus:ring-2 focus:ring-primary/20 transition-all resize-none text-sm leading-relaxed"
-                          />
-                        </div>
+                                <div className="relative">
+                                  <Input
+                                    value={skillInput}
+                                    onChange={(e) =>
+                                      setSkillInput(e.target.value)
+                                    }
+                                    onKeyDown={handleSkillKeyDown}
+                                    placeholder="Type and press Enter..."
+                                    className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20 pr-10"
+                                  />
+
+                                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                    ↵
+                                  </div>
+                                </div>
+                              </div>
+
+                              {formData.skills.length > 0 && (
+                                <div className="flex flex-wrap gap-2 p-3 bg-slate-50/50 dark:bg-white/5 rounded-xl border border-dashed border-slate-200 dark:border-white/10">
+                                  {formData.skills.map((skill) => (
+                                    <Badge
+                                      key={skill}
+                                      className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 py-1 px-2.5"
+                                    >
+                                      <span className="text-[11px] font-semibold">
+                                        {skill}
+                                      </span>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => removeSkill(skill)}
+                                      >
+                                        <X size={12} />
+                                      </button>
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* LANGUAGES */}
+                            <div className="space-y-3">
+                              <div className="space-y-1.5">
+                                <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                  Add Languages
+                                </Label>
+
+                                <div className="relative">
+                                  <Input
+                                    value={langInput}
+                                    onChange={(e) =>
+                                      setLangInput(e.target.value)
+                                    }
+                                    onKeyDown={handleLanguageKeyDown}
+                                    placeholder="Type and press Enter..."
+                                    className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20 pr-10"
+                                  />
+
+                                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                    ↵
+                                  </div>
+                                </div>
+                              </div>
+
+                              {formData.languages.length > 0 && (
+                                <div className="flex flex-wrap gap-2 p-3 bg-slate-50/50 dark:bg-white/5 rounded-xl border border-dashed border-slate-200 dark:border-white/10">
+                                  {formData.languages.map((language) => (
+                                    <Badge
+                                      key={language}
+                                      className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 py-1 px-2.5"
+                                    >
+                                      <span className="text-[11px] font-semibold">
+                                        {language}
+                                      </span>
+
+                                      <button
+                                        type="button"
+                                        onClick={() => removeLanguage(language)}
+                                      >
+                                        <X size={12} />
+                                      </button>
+                                    </Badge>
+                                  ))}
+                                </div>
+                              )}
+                            </div>
+
+                            {/* BIO */}
+                            <div className="space-y-1.5">
+                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                Short Bio
+                              </Label>
+
+                              <Textarea
+                                name="bio"
+                                value={formData.bio}
+                                onChange={handleInputChange}
+                                className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-xl min-h-[80px]"
+                              />
+                            </div>
+
+                            {/* PORTFOLIO */}
+                            <div className="space-y-1.5">
+                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                Portfolio
+                              </Label>
+
+                              <Input
+                                name="portfolio"
+                                value={formData.portfolio}
+                                onChange={handleInputChange}
+                                placeholder="https://portfolio.com"
+                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg"
+                              />
+                            </div>
+                          </>
+                        )}
+
+                        {/* ================= CLIENT ================= */}
+                        {isClient && (
+                          <>
+                            {/* COMPANY NAME */}
+                            <div className="space-y-1.5">
+                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                Company Name
+                              </Label>
+
+                              <Input
+                                name="companyName"
+                                value={formData.companyName}
+                                onChange={handleInputChange}
+                                placeholder="Enter company name"
+                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg"
+                              />
+                            </div>
+
+                            {/* COMPANY WEBSITE */}
+                            <div className="space-y-1.5">
+                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                Company Website
+                              </Label>
+
+                              <Input
+                                name="companyWebsite"
+                                value={formData.companyWebsite}
+                                onChange={handleInputChange}
+                                placeholder="https://company.com"
+                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg"
+                              />
+                            </div>
+
+                            {/* REQUIREMENT */}
+                            <div className="space-y-1.5">
+                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                Requirement
+                              </Label>
+
+                              <Textarea
+                                name="requirement"
+                                value={formData.requirement}
+                                onChange={handleInputChange}
+                                placeholder="Describe your project requirement..."
+                                className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-xl min-h-[120px]"
+                              />
+                            </div>
+                          </>
+                        )}
                       </div>
 
-                      {/* Footer: Compact & Fixed */}
+                      {/* FOOTER */}
                       <div className="px-6 py-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10 flex items-center justify-end gap-3">
                         <Button
                           type="button"
@@ -496,6 +683,7 @@ const Profile = () => {
                         >
                           Discard
                         </Button>
+
                         <Button
                           type="submit"
                           disabled={isUpdatingProfile}
@@ -545,7 +733,8 @@ const Profile = () => {
 
           {/* RIGHT: Main Profile Content */}
           <div className="lg:col-span-8 space-y-8">
-            {/* Stats */}
+
+            {isFreelancer && 
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
                 <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
@@ -580,77 +769,140 @@ const Profile = () => {
                   <span className="text-4xl font-black">100%</span>
                 </div>
               </div>
-            </div>
+            </div>}
+
+               {isClient && 
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
+                <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
+                  Company Name
+                </p>
+                <div className="flex items-center gap-3">
+               
+
+                  <span className="text-4xl font-black">
+                    {/* {profileData?.currency === "INR" ? "₹" : "$"} */}
+                    {profileData?.companyName || "0"}
+                    {/* <span className="text-sm text-slate-400 font-medium">
+                      /hr
+                    </span> */}
+                  </span>
+                </div>
+              </div>
+          <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-6 md:p-8 shadow-sm overflow-hidden">
+  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
+    Company Website
+  </p>
+
+  <div className="flex items-center justify-center gap-3">
+    <div className="min-w-12 w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
+      <Globe size={24} className="text-blue-500" />
+    </div>
+
+    <div className="flex-1 overflow-hidden">
+      <a
+        href={profileData?.companyWebsite}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="block text-sm md:text-lg font-bold break-all text-slate-800 dark:text-slate-200 hover:text-primary transition-colors"
+      >
+        {profileData?.companyWebsite || "No website added"}
+      </a>
+    </div>
+  </div>
+</div>
+            </div>}
 
             {/* Narrative Box */}
-            <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm relative overflow-hidden group">
-              <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-700" />
-              <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
-                About Me
-              </h3>
-              <p className="text-xl text-slate-700 dark:text-slate-300 italic font-medium leading-relaxed relative z-10">
-                "
-                {profileData?.bio ||
-                  "Tell the community about your expertise and passion..."}
-                "
-              </p>
-            </div>
+            {isFreelancer && (
+              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-700" />
+                <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
+                  About Me
+                </h3>
+                <p className="text-xl text-slate-700 dark:text-slate-300 italic font-medium leading-relaxed relative z-10">
+                  "
+                  {profileData?.bio ||
+                    "Tell the community about your expertise and passion..."}
+                  "
+                </p>
+              </div>
+            )}
+
+            {isClient && (
+              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm relative overflow-hidden group">
+                <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-700" />
+                <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
+                  Requirements
+                </h3>
+                <p className="text-xl text-slate-700 dark:text-slate-300 italic font-medium leading-relaxed relative z-10">
+                  "
+                  {profileData?.requirement ||
+                    "Tell the community about your expertise and passion..."}
+                  "
+                </p>
+              </div>
+            )}
 
             {/* Expertise Box */}
-            <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-                  Core Expertise
-                </h3>
-                <span className="text-[10px] font-bold text-slate-400">
-                  {profileData?.skills?.length || 0} Specialties
-                </span>
+            {isFreelancer && (
+              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                    Core Expertise
+                  </h3>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {profileData?.skills?.length || 0} Specialties
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {profileData?.skills?.length > 0 ? (
+                    profileData.skills.map((skill, index) => (
+                      <div
+                        key={index}
+                        className="px-6 py-3 rounded-2xl bg-slate-50 dark:bg-[#1e293b]/50 border border-slate-100 dark:border-white/5 text-sm font-bold hover:border-primary/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-default"
+                      >
+                        {skill}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-400 italic text-sm">
+                      Skills list is empty.
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-4">
-                {profileData?.skills?.length > 0 ? (
-                  profileData.skills.map((skill, index) => (
-                    <div
-                      key={index}
-                      className="px-6 py-3 rounded-2xl bg-slate-50 dark:bg-[#1e293b]/50 border border-slate-100 dark:border-white/5 text-sm font-bold hover:border-primary/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-default"
-                    >
-                      {skill}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400 italic text-sm">
-                    Skills list is empty.
-                  </p>
-                )}
-              </div>
-            </div>
+            )}
 
             {/* Language Box */}
-            <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm">
-              <div className="flex items-center justify-between mb-8">
-                <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-                  Languages
-                </h3>
-                <span className="text-[10px] font-bold text-slate-400">
-                  {profileData?.languages?.length || 0} Languages
-                </span>
+            {isFreelancer && (
+              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm">
+                <div className="flex items-center justify-between mb-8">
+                  <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                    Languages
+                  </h3>
+                  <span className="text-[10px] font-bold text-slate-400">
+                    {profileData?.languages?.length || 0} Languages
+                  </span>
+                </div>
+                <div className="flex flex-wrap gap-4">
+                  {profileData?.languages?.length > 0 ? (
+                    profileData.languages.map((language, index) => (
+                      <div
+                        key={index}
+                        className="px-6 py-3 rounded-2xl bg-slate-50 dark:bg-[#1e293b]/50 border border-slate-100 dark:border-white/5 text-sm font-bold hover:border-primary/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-default"
+                      >
+                        {language}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-slate-400 italic text-sm">
+                      Language list is empty.
+                    </p>
+                  )}
+                </div>
               </div>
-              <div className="flex flex-wrap gap-4">
-                {profileData?.languages?.length > 0 ? (
-                  profileData.languages.map((language, index) => (
-                    <div
-                      key={index}
-                      className="px-6 py-3 rounded-2xl bg-slate-50 dark:bg-[#1e293b]/50 border border-slate-100 dark:border-white/5 text-sm font-bold hover:border-primary/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-default"
-                    >
-                      {language}
-                    </div>
-                  ))
-                ) : (
-                  <p className="text-slate-400 italic text-sm">
-                    Language list is empty.
-                  </p>
-                )}
-              </div>
-            </div>
+            )}
           </div>
         </div>
       </div>

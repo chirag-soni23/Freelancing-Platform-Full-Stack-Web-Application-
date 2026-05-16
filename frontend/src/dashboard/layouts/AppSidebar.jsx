@@ -9,6 +9,9 @@ import {
   FileText,
   MessageCircle,
   Star,
+  ShieldCheck,
+  Users,
+  FolderKanban,
 } from "lucide-react";
 
 import {
@@ -43,12 +46,6 @@ const clientItems = [
     title: "Management",
     items: [
       {
-        label: "Category",
-        icon: Coins,
-        path: `${BASE}/category`,
-      },
-
-      {
         label: "Jobs",
         icon: Briefcase,
         path: `${BASE}/jobs`,
@@ -66,6 +63,7 @@ const clientItems = [
       },
     ],
   },
+
   {
     title: "Rating & Reviews",
     items: [
@@ -134,22 +132,79 @@ const freelancerItems = [
   },
 ];
 
+/* =========================
+   ADMIN SIDEBAR ITEMS
+========================= */
+
+const adminItems = [
+  {
+    title: "Admin Panel",
+    items: [
+      {
+        label: "Dashboard",
+        icon: ShieldCheck,
+        path: `${BASE}/admin`,
+      },
+    ],
+  },
+
+  {
+    title: "Management",
+    items: [
+      {
+        label: "Users",
+        icon: Users,
+        path: `${BASE}/admin/users`,
+      },
+
+      {
+        label: "Categories",
+        icon: FolderKanban,
+        path: `${BASE}/admin/category`,
+      },
+
+      {
+        label: "Jobs",
+        icon: Briefcase,
+        path: `${BASE}/admin/jobs`,
+      },
+    ],
+  },
+];
+
 export function AppSidebar({ isOpen, onClose }) {
   const location = useLocation();
   const navigate = useNavigate();
 
   const { user } = useAuth();
 
-  const sidebarItems =
-    user?.data.role === "client" ? clientItems : freelancerItems;
+  /* =========================
+     ROLE BASED SIDEBAR
+  ========================= */
+
+  let sidebarItems = freelancerItems;
+
+  if (user?.data?.role === "client") {
+    sidebarItems = clientItems;
+  } else if (user?.data?.role === "admin") {
+    sidebarItems = adminItems;
+  }
+
+  /* =========================
+     LOGOUT
+  ========================= */
 
   const handleLogout = () => {
     localStorage.removeItem("activeApp");
+    localStorage.removeItem("token");
+
     navigate("/login");
   };
 
   return (
     <>
+      {/* MOBILE OVERLAY */}
+
       {isOpen && (
         <div
           className="fixed inset-0 z-40 bg-background/80 backdrop-blur-sm md:hidden"
@@ -157,17 +212,19 @@ export function AppSidebar({ isOpen, onClose }) {
         />
       )}
 
+      {/* SIDEBAR */}
+
       <aside
         className={`fixed top-0 left-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 ${
           isOpen ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } md:translate-x-0`}
       >
         <div className="flex flex-col h-full">
           {/* LOGO */}
 
           <div className="flex border-b items-center gap-2 h-14 px-4">
             <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold text-sm">
-              P
+              V
             </div>
 
             <div>
@@ -184,7 +241,7 @@ export function AppSidebar({ isOpen, onClose }) {
           <nav className="flex-1 pb-3 px-3 mt-2 overflow-y-auto">
             {sidebarItems.map((section, index) => (
               <div key={index} className="mb-4">
-                <p className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase">
+                <p className="px-3 mb-2 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   {section.title}
                 </p>
 
@@ -196,10 +253,10 @@ export function AppSidebar({ isOpen, onClose }) {
                       <NavLink
                         key={item.label}
                         to={item.path}
-                        className={`w-full dark:text-white flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                        className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${
                           isActive
-                            ? "bg-sidebar-accent text-sidebar-accent-foreground"
-                            : "text-sidebar-foreground hover:bg-secondary"
+                            ? "bg-primary text-white shadow-sm"
+                            : "text-sidebar-foreground hover:bg-secondary dark:hover:bg-slate-800"
                         }`}
                       >
                         <item.icon className="h-[18px] w-[18px]" />
@@ -208,9 +265,7 @@ export function AppSidebar({ isOpen, onClose }) {
 
                         {item.badge && (
                           <span
-                            className={`ml-auto flex items-center justify-center 
-                            min-w-[20px] h-[20px] text-[10px] font-semibold 
-                            rounded-full ${item.badgeColor}`}
+                            className={`ml-auto flex items-center justify-center min-w-[20px] h-[20px] text-[10px] font-semibold rounded-full ${item.badgeColor}`}
                           >
                             {item.badge}
                           </span>
@@ -224,27 +279,28 @@ export function AppSidebar({ isOpen, onClose }) {
           </nav>
 
           {/* PROFILE */}
+
           <div className="border-t border-border px-3 py-4">
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div className="flex items-center gap-3 cursor-pointer hover:bg-secondary p-2 rounded-lg transition">
-                  <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-xs font-semibold">
-                    {user?.name?.charAt(0) || "U"}
+                <div className="flex items-center gap-3 cursor-pointer hover:bg-secondary dark:hover:bg-slate-800 p-2 rounded-xl transition">
+                  <div className="w-9 h-9 rounded-full bg-primary flex items-center justify-center text-primary-foreground text-sm font-semibold uppercase">
+                    {user?.data?.name?.charAt(0) || "U"}
                   </div>
 
-                  <div>
-                    <p className="text-sm font-medium">
-                      {user?.name || "User"}
+                  <div className="overflow-hidden">
+                    <p className="text-sm font-medium truncate">
+                      {user?.data?.name || "User"}
                     </p>
 
-                    <p className="text-xs text-muted-foreground">
-                      {user?.email || "user@email.com"}
+                    <p className="text-xs text-muted-foreground truncate">
+                      {user?.data?.email || "user@email.com"}
                     </p>
                   </div>
                 </div>
               </DropdownMenuTrigger>
 
-              <DropdownMenuContent className="w-48 ml-2 mb-2">
+              <DropdownMenuContent className="w-52 ml-2 mb-2">
                 <DropdownMenuItem onClick={() => navigate("/settings")}>
                   <SettingsIcon className="mr-2 h-4 w-4" />
                   Settings

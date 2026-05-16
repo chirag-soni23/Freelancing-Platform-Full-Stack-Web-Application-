@@ -15,8 +15,8 @@ export const getCategories = async (params) => {
 };
 
 // get all unique categories
-export const getUniqueCategories = async () => {
-  const res = await api.get("/category/unique");
+export const getUniqueCategories = async (params) => {
+  const res = await api.get("/category/unique", { params });
   return res.data;
 };
 

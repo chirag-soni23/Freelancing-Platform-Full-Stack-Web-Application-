@@ -1,8 +1,4 @@
-import {
-  useMutation,
-  useQuery,
-  useQueryClient,
-} from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import {
   createCategory,
@@ -28,9 +24,9 @@ export const useCategory = (params) => {
 
   // get unique categories
   const uniqueCategoryQuery = useQuery({
-    queryKey: ["unique-categories"],
+    queryKey: ["unique-categories", params],
 
-    queryFn: getUniqueCategories,
+    queryFn: () => getUniqueCategories(params),
   });
 
   // create category
@@ -49,8 +45,7 @@ export const useCategory = (params) => {
       toast({
         title: "Success",
 
-        description:
-          data?.message || "Category created",
+        description: data?.message || "Category created",
       });
     },
 
@@ -59,8 +54,7 @@ export const useCategory = (params) => {
         title: "Error",
 
         description:
-          err?.response?.data?.message ||
-          "Failed to create category",
+          err?.response?.data?.message || "Failed to create category",
 
         variant: "destructive",
       });
@@ -69,8 +63,7 @@ export const useCategory = (params) => {
 
   // update category
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }) =>
-      updateCategory(id, data),
+    mutationFn: ({ id, data }) => updateCategory(id, data),
 
     onSuccess: (data) => {
       queryClient.invalidateQueries({
@@ -84,8 +77,7 @@ export const useCategory = (params) => {
       toast({
         title: "Success",
 
-        description:
-          data?.message || "Category updated",
+        description: data?.message || "Category updated",
       });
     },
 
@@ -94,8 +86,7 @@ export const useCategory = (params) => {
         title: "Error",
 
         description:
-          err?.response?.data?.message ||
-          "Failed to update category",
+          err?.response?.data?.message || "Failed to update category",
 
         variant: "destructive",
       });
@@ -118,8 +109,7 @@ export const useCategory = (params) => {
       toast({
         title: "Success",
 
-        description:
-          data?.message || "Category deleted",
+        description: data?.message || "Category deleted",
       });
     },
 
@@ -128,8 +118,7 @@ export const useCategory = (params) => {
         title: "Error",
 
         description:
-          err?.response?.data?.message ||
-          "Failed to delete category",
+          err?.response?.data?.message || "Failed to delete category",
 
         variant: "destructive",
       });
@@ -138,40 +127,29 @@ export const useCategory = (params) => {
 
   return {
     // data
-    categories:
-      categoryQuery.data?.data || [],
+    categories: categoryQuery.data?.data || [],
 
-    uniqueCategories:
-      uniqueCategoryQuery.data?.data || [],
+    uniqueCategories: uniqueCategoryQuery.data?.data || [],
 
-    pagination:
-      categoryQuery.data?.pagination || {},
+    pagination: categoryQuery.data?.pagination || {},
 
-    isLoading:
-      categoryQuery.isLoading,
+    isLoading: categoryQuery.isLoading,
 
-    isUniqueLoading:
-      uniqueCategoryQuery.isLoading,
+    isUniqueLoading: uniqueCategoryQuery.isLoading,
 
     // create
-    createCategory:
-      createMutation.mutate,
+    createCategory: createMutation.mutate,
 
-    isCreating:
-      createMutation.isPending,
+    isCreating: createMutation.isPending,
 
     // update
-    updateCategory:
-      updateMutation.mutate,
+    updateCategory: updateMutation.mutate,
 
-    isUpdating:
-      updateMutation.isPending,
+    isUpdating: updateMutation.isPending,
 
     // delete
-    deleteCategory:
-      deleteMutation.mutate,
+    deleteCategory: deleteMutation.mutate,
 
-    isDeleting:
-      deleteMutation.isPending,
+    isDeleting: deleteMutation.isPending,
   };
 };

@@ -1,28 +1,32 @@
 import Joi from "joi";
 
-export const registerClientSchema = Joi.object({
-  name: Joi.string().min(3).max(50).required().messages({
+export const registerUserSchema = Joi.object({
+  name: Joi.string().trim().min(3).max(50).required().messages({
     "string.empty": "Name is required",
     "string.min": "Name must be at least 3 characters",
+    "string.max": "Name cannot exceed 50 characters",
   }),
 
-  email: Joi.string().email().required().messages({
-    "string.email": "Invalid email",
+  email: Joi.string().trim().email().required().messages({
     "string.empty": "Email is required",
+    "string.email": "Invalid email address",
   }),
 
-  phone: Joi.string().min(10).max(15).required().messages({
-    "string.empty": "Phone is required",
-    "string.min": "Phone must be at least 10 digits",
-  }),
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .required()
+    .messages({
+      "string.empty": "Phone number is required",
+      "string.pattern.base": "Phone number must be 10 digits",
+    }),
 
   password: Joi.string()
-    .pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/)
+    .pattern(/^(?=.*[A-Z])(?=.*[a-z])(?=.*\d)(?=.*[@$!%*?&]).{8,}$/)
     .required()
     .messages({
       "string.empty": "Password is required",
       "string.pattern.base":
-        "Password must be 8+ chars, include uppercase & special character",
+        "Password must contain 8+ characters, uppercase, lowercase, number and special character",
     }),
 
   confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
@@ -30,76 +34,9 @@ export const registerClientSchema = Joi.object({
     "string.empty": "Confirm password is required",
   }),
 
-  companyName: Joi.string().min(2).max(100).optional().allow("").messages({
-    "string.min": "Company name must be at least 2 characters",
-  }),
-
-  companyWebsite: Joi.string().uri().allow("", null).messages({
-    "string.uri": "Invalid website URL",
-  }),
-
-  address: Joi.string().required().messages({
-    "string.empty": "Address is required",
-  }),
-});
-
-export const registerFreelancerSchema = Joi.object({
-  name: Joi.string().min(3).max(50).required().messages({
-    "string.empty": "Name is required",
-    "string.min": "Name must be at least 3 characters",
-  }),
-
-  email: Joi.string().email().required().messages({
-    "string.email": "Invalid email",
-    "string.empty": "Email is required",
-  }),
-
-  phone: Joi.string().min(10).max(15).required().messages({
-    "string.empty": "Phone is required",
-  }),
-
-  password: Joi.string()
-    .pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/)
-    .required()
-    .messages({
-      "string.empty": "Password is required",
-      "string.pattern.base":
-        "Password must be 8+ chars, include uppercase & special character",
-    }),
-
-  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
-    "any.only": "Passwords do not match",
-    "string.empty": "Confirm password is required",
-  }),
-
-  title: Joi.string().min(3).max(100).required().messages({
-    "string.empty": "Professional title is required",
-  }),
-
-  bio: Joi.string().min(20).required().messages({
-    "string.empty": "Bio is required",
-    "string.min": "Bio must be at least 20 characters",
-  }),
-
-  skills: Joi.array().items(Joi.string()).min(1).required().messages({
-    "array.min": "At least one skill is required",
-  }),
-
-  hourlyRate: Joi.number().min(1).required().messages({
-    "number.base": "Hourly rate must be a number",
-    "number.min": "Hourly rate must be greater than 0",
-  }),
-
-  currency: Joi.string().valid("INR", "USD").required().messages({
-    "any.only": "Currency must be INR or USD",
-    "string.empty": "Currency is required",
-  }),
-  portfolio: Joi.string().uri().allow("", null).messages({
-    "string.uri": "Invalid portfolio URL",
-  }),
-
-  address: Joi.string().required().messages({
-    "string.empty": "Address is required",
+  role: Joi.string().valid("client", "freelancer","admin").required().messages({
+    "any.only": "Role must be client or freelancer or admin",
+    "string.empty": "Role is required",
   }),
 });
 
@@ -158,6 +95,11 @@ export const updateProfileSchema = Joi.object({
 
   currency: Joi.string().valid("INR", "USD").messages({
     "any.only": "Currency must be INR or USD",
+  }),
+
+  requirement: Joi.string().min(10).max(1000).messages({
+    "string.min": "Requirement must be at least 10 characters",
+    "string.max": "Requirement cannot exceed 1000 characters",
   }),
 
   portfolio: Joi.string().uri().allow("", null).messages({

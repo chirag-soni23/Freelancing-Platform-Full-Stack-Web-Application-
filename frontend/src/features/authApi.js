@@ -1,14 +1,8 @@
 import { api } from "@/services/api";
 
-// register client
-export const registerClient = async (data) => {
-  const res = await api.post("/auth/register-client", data);
-  return res.data;
-};
-
-// register freelancer
-export const registerFreelancer = async (data) => {
-  const res = await api.post("/auth/register-freelancer", data);
+// register user
+export const registerUser = async (data) => {
+  const res = await api.post("/auth/register", data);
   return res.data;
 };
 

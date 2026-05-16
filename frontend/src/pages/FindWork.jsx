@@ -23,6 +23,8 @@ import {
   BriefcaseBusiness,
   MonitorSmartphone,
   X,
+  Check,
+  ChevronsUpDown,
 } from "lucide-react";
 import Header from "@/components/work/Header";
 import { useJob } from "@/hooks/useJob";
@@ -38,6 +40,14 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { cn } from "@/lib/utils";
+
 const FindWork = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
@@ -45,6 +55,8 @@ const FindWork = () => {
   const [employment, setEmployment] = useState("");
   const [jobType, setJobType] = useState("");
   const [category, setCategory] = useState("");
+  const [openCategory, setOpenCategory] = useState(false);
+  const [categorySearch, setCategorySearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const { uniqueCategories } = useCategory();
 
@@ -89,25 +101,123 @@ const FindWork = () => {
               </button>
             )}
           </div>
-          <Select
-            value={category}
-            onValueChange={(value) => {
-              setCategory(value);
-              setPage(1);
-            }}
-          >
-            <SelectTrigger className="w-full md:w-[220px] h-14 rounded-xl border-border/50 bg-background shadow-none font-semibold">
-              <SelectValue placeholder="Select Category" />
-            </SelectTrigger>
+          <Popover open={openCategory} onOpenChange={setOpenCategory}>
+            <PopoverTrigger asChild>
+              <Button
+                variant="outline"
+                role="combobox"
+                aria-expanded={openCategory}
+                className="
+        w-full md:w-[260px]
+        h-14
+        rounded-2xl
+        border-border/50
+        bg-background
+        justify-between
+        px-4
+        font-semibold
+        shadow-none
+      "
+              >
+                <span className="truncate">
+                  {category || "Select Category"}
+                </span>
 
-            <SelectContent className="rounded-xl">
-              {uniqueCategories?.map((cat) => (
-                <SelectItem key={cat.id} value={cat.name}>
-                  {cat.name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+                <ChevronsUpDown className="h-4 w-4 opacity-50" />
+              </Button>
+            </PopoverTrigger>
+
+            <PopoverContent
+              align="start"
+              className="
+      w-fit
+      p-0
+      overflow-hidden
+      rounded-2xl
+      border-border/60
+    "
+            >
+              {/* SEARCH */}
+              <div className="p-3 border-b">
+                <div className="relative">
+                  <Search
+                    className="
+            absolute
+            left-3
+            top-1/2
+            -translate-y-1/2
+            h-4 w-4
+            text-muted-foreground
+          "
+                  />
+
+                  <Input
+                    placeholder="Search category..."
+                    value={categorySearch}
+                    onChange={(e) => setCategorySearch(e.target.value)}
+                    className="
+            pl-10
+            h-11
+            rounded-xl
+            border-border/50
+            focus-visible:ring-1
+          "
+                  />
+                </div>
+              </div>
+
+              {/* LIST */}
+              <div className="max-h-[260px] overflow-y-auto p-2">
+                {uniqueCategories
+                  ?.filter((cat) =>
+                    cat.name
+                      .toLowerCase()
+                      .includes(categorySearch.toLowerCase()),
+                  )
+                  .map((cat) => (
+                    <button
+                      key={cat.id}
+                      type="button"
+                      onClick={() => {
+                        setCategory(cat.name);
+                        setOpenCategory(false);
+                      }}
+                      className={cn(
+                        `
+                w-full
+                flex items-center gap-3
+                rounded-xl
+                px-4 py-3
+                text-sm
+                font-semibold
+                transition-all
+                hover:bg-secondary
+              `,
+                        category === cat.name &&
+                          "bg-primary text-white hover:bg-primary",
+                      )}
+                    >
+                      <Check
+                        className={cn(
+                          "h-4 w-4",
+                          category === cat.name ? "opacity-100" : "opacity-0",
+                        )}
+                      />
+
+                      <span>{cat.name}</span>
+                    </button>
+                  ))}
+
+                {uniqueCategories?.filter((cat) =>
+                  cat.name.toLowerCase().includes(categorySearch.toLowerCase()),
+                ).length === 0 && (
+                  <div className="py-6 text-center text-sm text-muted-foreground">
+                    No category found
+                  </div>
+                )}
+              </div>
+            </PopoverContent>
+          </Popover>
           <Button className="h-14 px-10 rounded-xl font-black text-base shadow-lg shadow-primary/20">
             Find Work
           </Button>

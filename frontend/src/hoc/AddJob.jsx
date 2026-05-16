@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
-  Plus,
   X,
   Briefcase,
   IndianRupee,
   BadgeCheck,
   DollarSign,
+  Check,
+  ChevronsUpDown,
+  Search,
 } from "lucide-react";
 
 import {
@@ -31,6 +33,16 @@ import { createJobSchema } from "@/validations/job.validator";
 import { useJob } from "@/hooks/useJob";
 import { useCategory } from "@/hooks/useCategory";
 
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+
+import { cn } from "@/lib/utils";
+
+import useDebounce from "@/hooks/useDebounce";
+
 const AddJob = ({
   open,
   setOpen,
@@ -51,10 +63,16 @@ const AddJob = ({
   const [employment, setEmployment] = useState("Contract");
   const [jobType, setJobType] = useState("Remote");
   const [categoryId, setCategoryId] = useState("");
+  const [openCategory, setOpenCategory] = useState(false);
 
-  const { categories } = useCategory({
+  const [categorySearch, setCategorySearch] = useState("");
+
+  const debouncedCategory = useDebounce(categorySearch);
+
+  const { uniqueCategories } = useCategory({
     page: 1,
     limit: 10,
+    search: debouncedCategory,
   });
 
   const handleAddSkill = (e) => {
@@ -278,39 +296,174 @@ const AddJob = ({
                 )}
               </div>
             </div>
-            {/* Category */}
-            <div className="grid gap-2">
-              <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">
-                Category
-              </Label>
 
-              <Select
-                value={categoryId}
-                onValueChange={(value) => {
-                  setCategoryId(value);
+            {/* Category */}
+           {/* Category */}
+<div className="grid gap-2">
+  <Label className="text-[10px] font-bold uppercase tracking-[0.2em] text-muted-foreground ml-1">
+    Category
+  </Label>
+
+  <Popover
+    open={openCategory}
+    onOpenChange={setOpenCategory}
+  >
+    <PopoverTrigger asChild>
+      <Button
+        variant="outline"
+        role="combobox"
+        aria-expanded={openCategory}
+        className="
+          w-full h-12 justify-between rounded-2xl
+          border border-border/60
+          bg-background/70
+          backdrop-blur-xl
+          px-4
+          font-medium
+          shadow-sm
+          hover:bg-accent/40
+          dark:bg-[#111827]/80
+          dark:hover:bg-[#1f2937]
+          transition-all
+        "
+      >
+        <span className="truncate">
+          {categoryId
+            ? uniqueCategories.find(
+                (cat) =>
+                  cat.id.toString() === categoryId,
+              )?.name
+            : "Select category"}
+        </span>
+
+        <ChevronsUpDown className="h-4 w-4 shrink-0 opacity-50" />
+      </Button>
+    </PopoverTrigger>
+
+    <PopoverContent
+      align="center"
+      sideOffset={8}
+      className="
+        w-[420px]
+        p-0
+        overflow-hidden
+        rounded-2xl
+        border border-border/60
+        bg-background/95
+        backdrop-blur-2xl
+        shadow-2xl
+        dark:bg-[#0f172a]/95
+      "
+    >
+      {/* SEARCH */}
+      <div className="border-b border-border/50 p-3">
+        <div
+          className="
+            flex items-center gap-3
+            h-12
+            rounded-xl
+            border border-border/60
+            bg-background
+            px-4
+            dark:bg-[#111827]
+          "
+        >
+          <Search className="h-4 w-4 text-muted-foreground shrink-0" />
+
+          <Input
+            placeholder="Search category..."
+            value={categorySearch}
+            onChange={(e) =>
+              setCategorySearch(e.target.value)
+            }
+            className="
+              border-0
+              bg-transparent
+              shadow-none
+              focus-visible:ring-0
+              focus-visible:ring-offset-0
+              dark:text-white
+            "
+          />
+        </div>
+      </div>
+
+      {/* CATEGORY LIST */}
+      <div
+        className="
+          max-h-[280px]
+          overflow-y-auto
+          overflow-x-hidden
+          p-2
+        "
+      >
+        {uniqueCategories.length === 0 ? (
+          <div className="py-6 text-center text-sm text-muted-foreground">
+            No category found.
+          </div>
+        ) : (
+          <div className="space-y-1">
+            {uniqueCategories.map((cat) => (
+              <button
+                key={cat.id}
+                type="button"
+                onClick={() => {
+                  setCategoryId(
+                    cat.id.toString(),
+                  );
+
+                  setOpenCategory(false);
+
                   setErrors((prev) => ({
                     ...prev,
                     categoryId: "",
                   }));
                 }}
+                className={cn(
+                  `
+                  w-full
+                  flex items-center gap-3
+                  rounded-xl
+                  px-4 py-3
+                  text-sm
+                  font-medium
+                  transition-all
+                  hover:bg-accent
+                  dark:hover:bg-[#1e293b]
+                `,
+                  categoryId ===
+                    cat.id.toString() &&
+                    "bg-primary text-white hover:bg-primary",
+                )}
               >
-                <SelectTrigger className="w-full bg-background/50 border-none rounded-xl h-12 font-semibold shadow-sm">
-                  <SelectValue placeholder="Select category" />
-                </SelectTrigger>
+                <Check
+                  className={cn(
+                    "h-4 w-4 shrink-0",
+                    categoryId ===
+                      cat.id.toString()
+                      ? "opacity-100"
+                      : "opacity-0",
+                  )}
+                />
 
-                <SelectContent className="rounded-xl border-border/60">
-                  {categories.map((cat) => (
-                    <SelectItem key={cat.id} value={cat.id.toString()}>
-                      {cat.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+                <span className="truncate">
+                  {cat.name}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    </PopoverContent>
+  </Popover>
 
-              {errors.categoryId && (
-                <p className="text-xs text-red-500 ml-1">{errors.categoryId}</p>
-              )}
-            </div>
+  {errors.categoryId && (
+    <p className="text-xs text-red-500 ml-1">
+      {errors.categoryId}
+    </p>
+  )}
+</div>
+
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               {/* Level */}
               <div className="grid gap-2">

@@ -3,11 +3,12 @@ import { Route, Routes } from "react-router-dom";
 
 import ProtectedRoute from "./ProtectedRoute";
 import PublicRoute from "./PublicRoute";
+import RoleProtectedRoute from "./RoleProtectedRoute";
+
 import Profile from "@/pages/Profile";
 import VerifyEmailPage from "@/pages/VerifyEmailPage";
-import Category from "@/client/pages/Category";
+import Category from "@/admin/pages/Category";
 import Jobs from "@/client/pages/Jobs";
-import RoleProtectedRoute from "./RoleProtectedRoute";
 import Contact from "@/pages/Contact";
 import FreelancerDetails from "@/pages/FreelancerDetails";
 import JobDetails from "@/pages/JobDetails";
@@ -15,8 +16,14 @@ import Chat from "@/pages/Chat";
 import Review from "@/dashboard/Review";
 import ScrollToTop from "@/hoc/ScrollToTop";
 
+/* =========================
+   LAZY IMPORTS
+========================= */
+
 const MainLayout = lazy(() => import("@/components/layout/MainLayout"));
+
 const Dashboard = lazy(() => import("@/dashboard/Dashboard"));
+
 const AppLayout = lazy(() =>
   import("@/dashboard/layouts/AppLayout").then((m) => ({
     default: m.AppLayout,
@@ -24,14 +31,40 @@ const AppLayout = lazy(() =>
 );
 
 const ClientSignUp = lazy(() => import("@/pages/ClientSignUp"));
-const FindFreelancers = lazy(() => import("@/pages/FindFreelancers"));
+
+const FindFreelancers = lazy(() =>
+  import("@/pages/FindFreelancers"),
+);
+
 const FindWork = lazy(() => import("@/pages/FindWork"));
-const FreeLancerSignUp = lazy(() => import("@/pages/FreeLancerSignup"));
+
+const FreeLancerSignUp = lazy(() =>
+  import("@/pages/FreeLancerSignup"),
+);
+
 const Home = lazy(() => import("@/pages/Home"));
+
 const Login = lazy(() => import("@/pages/Login"));
-const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
+
+const ResetPassword = lazy(() =>
+  import("@/pages/ResetPassword"),
+);
+
 const WorkDetail = lazy(() => import("@/pages/WorkDetail"));
+
 const NotFound = lazy(() => import("@/pages/NotFound"));
+
+/* =========================
+   ADMIN PAGES
+========================= */
+
+const AdminDashboard = lazy(() =>
+  import("@/admin/pages/AdminDashboard"),
+);
+
+/* =========================
+   LOADER
+========================= */
 
 const Loader = () => (
   <div className="flex items-center justify-center h-screen">
@@ -39,12 +72,20 @@ const Loader = () => (
   </div>
 );
 
+/* =========================
+   ROUTES
+========================= */
+
 const AppRoutes = () => {
   return (
     <Suspense fallback={<Loader />}>
       <ScrollToTop />
+
       <Routes>
-        {/* PUBLIC */}
+        {/* =========================
+            PUBLIC
+        ========================= */}
+
         <Route
           path="/client-signup"
           element={
@@ -72,22 +113,47 @@ const AppRoutes = () => {
           }
         />
 
-        <Route path="/reset-password/:token" element={<ResetPassword />} />
-        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
+        <Route
+          path="/reset-password/:token"
+          element={<ResetPassword />}
+        />
 
-        {/* MAIN */}
+        <Route
+          path="/verify-email/:token"
+          element={<VerifyEmailPage />}
+        />
+
+        {/* =========================
+            MAIN
+        ========================= */}
+
         <Route path="/" element={<MainLayout />}>
           <Route index element={<Home />} />
-          <Route path="/contact" element={<Contact />} />
+
+          <Route path="contact" element={<Contact />} />
 
           <Route path="find-work" element={<FindWork />} />
-          <Route path="find-freelancers" element={<FindFreelancers />} />
+
+          <Route
+            path="find-freelancers"
+            element={<FindFreelancers />}
+          />
+
           <Route
             path="freelancer-details/:id"
             element={<FreelancerDetails />}
           />
-          <Route path="job-details/:id" element={<JobDetails />} />
-          <Route path="work-detail/:id" element={<WorkDetail />} />
+
+          <Route
+            path="job-details/:id"
+            element={<JobDetails />}
+          />
+
+          <Route
+            path="work-detail/:id"
+            element={<WorkDetail />}
+          />
+
           <Route
             path="profile"
             element={
@@ -98,7 +164,10 @@ const AppRoutes = () => {
           />
         </Route>
 
-        {/* PROTECTED */}
+        {/* =========================
+            DASHBOARD
+        ========================= */}
+
         <Route
           path="dashboard"
           element={
@@ -107,29 +176,60 @@ const AppRoutes = () => {
             </ProtectedRoute>
           }
         >
+          {/* COMMON */}
+
           <Route index element={<Dashboard />} />
 
-          {/* CLIENT */}
+          <Route path="chats" element={<Chat />} />
+
           <Route
-            path="category"
-            element={
-              <RoleProtectedRoute allowedRoles={["client"]}>
-                <Category />
-              </RoleProtectedRoute>
-            }
+            path="rating-and-reviews"
+            element={<Review />}
           />
+
+          {/* CLIENT */}
+
 
           <Route
             path="jobs"
             element={
-              <RoleProtectedRoute allowedRoles={["client"]}>
+              <RoleProtectedRoute
+                allowedRoles={["client"]}
+              >
                 <Jobs />
               </RoleProtectedRoute>
             }
           />
-          <Route path="chats" element={<Chat />} />
-          <Route path="rating-and-reviews" element={<Review />} />
+
+          {/* ADMIN */}
+
+          <Route
+            path="admin"
+            element={
+              <RoleProtectedRoute
+                allowedRoles={["admin"]}
+              >
+                <AdminDashboard />
+              </RoleProtectedRoute>
+            }
+          />
+
+          <Route
+            path="admin/category"
+            element={
+              <RoleProtectedRoute
+                allowedRoles={["admin"]}
+              >
+                <Category />
+              </RoleProtectedRoute>
+            }
+          />
         </Route>
+
+        {/* =========================
+            NOT FOUND
+        ========================= */}
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </Suspense>

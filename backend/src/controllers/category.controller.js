@@ -104,10 +104,21 @@ export const getCategoryById = async (req, res, next) => {
 // get all unique categories
 export const getAllUniqueCategories = async (req, res, next) => {
   try {
+    const { search = "" } = req.query;
+
+    let where = {};
+
+    if (search && search.trim().length > 0) {
+      where.name = {
+        [Op.like]: `%${search.trim()}%`,
+      };
+    }
+
     const categories = await db.Category.findAll({
+      where,
+
       attributes: [
         "name",
-
         [db.connection.fn("MIN", db.connection.col("id")), "id"],
       ],
 

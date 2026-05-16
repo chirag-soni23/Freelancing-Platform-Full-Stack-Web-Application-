@@ -1,6 +1,7 @@
 import Joi from "joi";
 
-export const freelancerSchema = Joi.object({
+// register user
+export const registerUserSchema = Joi.object({
   name: Joi.string().min(3).max(50).required().messages({
     "string.empty": "Name is required",
     "string.min": "Name must be at least 3 characters",
@@ -13,27 +14,59 @@ export const freelancerSchema = Joi.object({
 
   phone: Joi.string().min(10).max(15).required().messages({
     "string.empty": "Phone is required",
+    "string.min": "Phone must be at least 10 digits",
   }),
 
-  title: Joi.string().min(3).required().messages({
-    "string.empty": "Professional title is required",
+  role: Joi.string()
+    .valid("client", "freelancer","admin")
+    .required()
+    .messages({
+      "any.only": "Role must be client or freelancer or admin",
+      "string.empty": "Role is required",
+    }),
+
+  password: Joi.string()
+    .pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/)
+    .required()
+    .messages({
+      "string.empty": "Password is required",
+      "string.pattern.base":
+        "Password must have 1 uppercase & 1 special character",
+    }),
+
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({
+      "any.only": "Passwords do not match",
+      "string.empty": "Confirm password is required",
+    }),
+});
+
+// update freelancer profile
+export const freelancerSchema = Joi.object({
+  name: Joi.string().min(3).max(50).messages({
+    "string.min": "Name must be at least 3 characters",
   }),
 
-  bio: Joi.string().min(20).required().messages({
-    "string.empty": "Bio is required",
+  title: Joi.string().allow("").min(3).messages({
+    "string.min": "Professional title must be at least 3 characters",
   }),
 
-  address: Joi.string().required().messages({
+  bio: Joi.string().allow("").min(20).messages({
+    "string.min": "Bio must be at least 20 characters",
+  }),
+
+  address: Joi.string().allow("").messages({
     "string.empty": "Address is required",
   }),
 
-  hourlyRate: Joi.number().min(1).required().messages({
+  hourlyRate: Joi.number().allow(null).min(1).messages({
     "number.base": "Hourly rate must be a number",
   }),
 
-  currency: Joi.string().valid("INR", "USD").required().messages({
+  currency: Joi.string().allow("").valid("INR", "USD").messages({
     "any.only": "Currency must be INR or USD",
-    "string.empty": "Currency is required",
   }),
 
   skills: Joi.array()
@@ -43,11 +76,9 @@ export const freelancerSchema = Joi.object({
         "string.max": "Skill cannot exceed 30 characters",
       }),
     )
-    .min(1)
     .optional()
     .messages({
       "array.base": "Skills must be an array",
-      "array.min": "At least one skill is required",
     }),
 
   languages: Joi.array()
@@ -57,34 +88,19 @@ export const freelancerSchema = Joi.object({
         "string.max": "Language cannot exceed 30 characters",
       }),
     )
-    .min(1)
     .optional()
     .messages({
       "array.base": "Language must be an array",
-      "array.min": "At least one language is required",
     }),
 
-  portfolio: Joi.string().uri().required().messages({
-    "string.empty": "Portfolio is required",
+  portfolio: Joi.string().allow("", null).uri().messages({
     "string.uri": "Invalid portfolio URL",
-  }),
-
-  password: Joi.string()
-    .pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/)
-    .required()
-    .messages({
-      "string.empty": "Password is required",
-      "string.pattern.base":
-        "Password must have 1 uppercase & 1 special character",
-    }),
-  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
-    "any.only": "Passwords do not match",
   }),
 });
 
+// update client profile
 export const clientSchema = Joi.object({
-  name: Joi.string().min(3).max(50).required().messages({
-    "string.empty": "Name is required",
+  name: Joi.string().min(3).max(50).messages({
     "string.min": "Name must be at least 3 characters",
   }),
 
@@ -92,39 +108,21 @@ export const clientSchema = Joi.object({
     "string.min": "Company name must be at least 2 characters",
   }),
 
-  email: Joi.string().email().required().messages({
-    "string.email": "Invalid email",
-    "string.empty": "Email is required",
-  }),
-
   companyWebsite: Joi.string().uri().allow("", null).messages({
     "string.uri": "Invalid website URL",
   }),
 
-  address: Joi.string().required().messages({
+  requirement: Joi.string().min(10).max(1000).messages({
+    "string.min": "Requirement must be at least 10 characters",
+    "string.max": "Requirement cannot exceed 1000 characters",
+  }),
+
+  address: Joi.string().messages({
     "string.empty": "Address is required",
-  }),
-
-  phone: Joi.string().min(10).max(15).required().messages({
-    "string.empty": "Phone is required",
-  }),
-
-  password: Joi.string()
-
-    .pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/)
-    .required()
-    .messages({
-      "string.empty": "Password is required",
-      "string.pattern.base":
-        "Password must have 1 uppercase & 1 special character",
-    }),
-
-  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
-    "any.only": "Passwords do not match",
-    "string.empty": "Confirm password is required",
   }),
 });
 
+// reset password with token
 export const resetPasswordWithTokenSchema = Joi.object({
   password: Joi.string()
     .pattern(/^(?=.*[A-Z])(?=.*[!@#$%^&*]).{8,}$/)
@@ -135,12 +133,16 @@ export const resetPasswordWithTokenSchema = Joi.object({
         "Password must have 1 uppercase & 1 special character",
     }),
 
-  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
-    "any.only": "Passwords do not match",
-    "string.empty": "Confirm password is required",
-  }),
+  confirmPassword: Joi.string()
+    .valid(Joi.ref("password"))
+    .required()
+    .messages({
+      "any.only": "Passwords do not match",
+      "string.empty": "Confirm password is required",
+    }),
 });
 
+// login
 export const loginSchema = Joi.object({
   email: Joi.string().email().required().messages({
     "string.email": "Invalid email",

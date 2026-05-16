@@ -2,11 +2,9 @@ import express from "express";
 import validate from "../middlewares/validate.middleware.js";
 import {
   loginSchema,
-  registerClientSchema,
-  registerFreelancerSchema,
+  registerUserSchema,
   resetPasswordSchema,
   resetPasswordWithTokenSchema,
-  updateProfileSchema,
 } from "../validation/auth.validator.js";
 import {
   forgotPassword,
@@ -16,8 +14,7 @@ import {
   getMe,
   login,
   logout,
-  registerClient,
-  registerFreelancer,
+  registerUser,
   resendVerificationEmail,
   resetPassword,
   resetPasswordWithToken,
@@ -31,12 +28,8 @@ import upload from "../middlewares/multer.js";
 
 const router = express.Router();
 
-router.post("/register-client", validate(registerClientSchema), registerClient);
-router.post(
-  "/register-freelancer",
-  validate(registerFreelancerSchema),
-  registerFreelancer,
-);
+router.post("/register", validate(registerUserSchema), registerUser);
+
 router.post("/login", validate(loginSchema), login);
 router.get("/me", isAuth, getMe);
 router.get("/verify-email/:token", isAuth, verifyEmail);
@@ -46,7 +39,6 @@ router.get("/freelancer/:id",getFreelancerById);
 router.patch(
   "/update-profile",
   isAuth,
-  validate(updateProfileSchema),
   updateProfile,
 );
 router.post(

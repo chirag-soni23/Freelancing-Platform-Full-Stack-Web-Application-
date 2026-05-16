@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-  registerClient,
-  registerFreelancer,
+  // registerClient,
+  // registerFreelancer,
   login,
   getMe,
   logout,
@@ -16,6 +16,7 @@ import {
   getFreelancers,
   getClients,
   getFreelancerById,
+  registerUser,
 } from "@/features/authApi";
 import { toast } from "./use-toast";
 
@@ -51,13 +52,13 @@ export const useAuth = (params,freelancerId) => {
     refetchOnWindowFocus: false,
   });
 
-  const registerClientMutation = useMutation({
-    mutationFn: registerClient,
+  const registerMutation = useMutation({
+    mutationFn: registerUser,
 
     onSuccess: (data) => {
       toast({
         title: "Success",
-        description: data?.message || "Client registered successfully 🚀",
+        description: data?.message || "registered successfully 🚀",
       });
     },
 
@@ -70,24 +71,24 @@ export const useAuth = (params,freelancerId) => {
     },
   });
 
-  const registerFreelancerMutation = useMutation({
-    mutationFn: registerFreelancer,
+  // const registerFreelancerMutation = useMutation({
+  //   mutationFn: registerFreelancer,
 
-    onSuccess: (data) => {
-      toast({
-        title: "Success",
-        description: data?.message || "Freelancer registered successfully 🚀",
-      });
-    },
+  //   onSuccess: (data) => {
+  //     toast({
+  //       title: "Success",
+  //       description: data?.message || "Freelancer registered successfully 🚀",
+  //     });
+  //   },
 
-    onError: (err) => {
-      toast({
-        title: "Error",
-        description: err?.response?.data?.message || err.message,
-        variant: "destructive",
-      });
-    },
-  });
+  //   onError: (err) => {
+  //     toast({
+  //       title: "Error",
+  //       description: err?.response?.data?.message || err.message,
+  //       variant: "destructive",
+  //     });
+  //   },
+  // });
 
   const loginMutation = useMutation({
     mutationFn: login,
@@ -297,11 +298,14 @@ export const useAuth = (params,freelancerId) => {
     isLoadingUser: meQuery.isLoading,
 
     // register
-    registerClient: registerClientMutation.mutate,
-    isRegisteringClient: registerClientMutation.isPending,
+    // registerClient: registerClientMutation.mutate,
+    // isRegisteringClient: registerClientMutation.isPending,
 
-    registerFreelancer: registerFreelancerMutation.mutate,
-    isRegisteringFreelancer: registerFreelancerMutation.isPending,
+    register:registerMutation.mutate,
+    isRegistering:registerMutation.isPending,
+
+    // registerFreelancer: registerFreelancerMutation.mutate,
+    // isRegisteringFreelancer: registerFreelancerMutation.isPending,
 
     // login
     login: loginMutation.mutate,

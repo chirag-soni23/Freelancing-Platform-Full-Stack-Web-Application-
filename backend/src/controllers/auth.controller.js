@@ -12,99 +12,47 @@ import jwt from "jsonwebtoken";
 import dotenv from "dotenv";
 dotenv.config();
 
-// register client
-export const registerClient = async (req, res, next) => {
+// register user (freelancer + client)
+export const registerUser = async (req, res, next) => {
   try {
-    const {
-      name,
-      email,
-      phone,
-      password,
-      companyName,
-      companyWebsite,
-      address,
-    } = req.body;
+    const { name, email, phone, password, role } = req.body;
 
-    const existEmail = await db.User.findOne({ where: { email } });
+    // role validation
+    if (!["client", "freelancer","admin"].includes(role)) {
+      throw ApiError.BADREQUEST("Invalid role");
+    }
+
+    // check existing email
+    const existEmail = await db.User.findOne({
+      where: { email },
+    });
+
     if (existEmail) {
       throw ApiError.CONFLICT("Email already exists");
     }
 
+    // hash password
     const hashedPassword = await bcrypt.hash(password, 10);
 
+    // create user
     const user = await db.User.create({
       name,
       email,
       phone,
       password: hashedPassword,
-      role: "client",
-      companyName,
-      companyWebsite,
-      address,
+      role,
     });
 
+    // generate token
     await generateToken(user, res);
 
     return successResponse(res, StatusCodes.CREATED, {
-      message: "Client registered successfully",
+      message: `${role} registered successfully`,
       data: user,
     });
   } catch (error) {
     next(error);
     console.log(error.message);
-  }
-};
-
-// register freelancer
-export const registerFreelancer = async (req, res, next) => {
-  try {
-    const {
-      name,
-      email,
-      phone,
-      password,
-      title,
-      bio,
-      skills,
-      languages,
-      hourlyRate,
-      currency,
-      portfolio,
-      address,
-    } = req.body;
-
-    const existEmail = await db.User.findOne({ where: { email } });
-
-    if (existEmail) {
-      throw ApiError.CONFLICT("Email already exists");
-    }
-
-    const hashedPassword = await bcrypt.hash(password, 10);
-
-    const user = await db.User.create({
-      name,
-      email,
-      phone,
-      password: hashedPassword,
-      role: "freelancer",
-      title,
-      bio,
-      skills,
-      languages,
-      hourlyRate,
-      currency,
-      portfolio,
-      address,
-    });
-
-    await generateToken(user, res);
-
-    return successResponse(res, StatusCodes.CREATED, {
-      message: "Freelancer registered successfully",
-      data: user,
-    });
-  } catch (error) {
-    next(error);
   }
 };
 
@@ -165,6 +113,7 @@ export const getMe = async (req, res, next) => {
         role: userData.role,
         profilePic: userData.profilePic,
         address: userData.address,
+        requirement: user.requirement,
         companyName: userData.companyName,
         companyWebsite: userData.companyWebsite,
         isEmailVerified: userData.isEmailVerified,
@@ -232,12 +181,14 @@ export const updateProfile = async (req, res, next) => {
 
     const data = req.body;
 
+    // common fields
     if (data.name !== undefined) user.name = data.name;
     if (data.phone !== undefined) user.phone = data.phone;
     if (data.email !== undefined) user.email = data.email;
     if (data.address !== undefined) user.address = data.address;
     if (data.profilePic !== undefined) user.profilePic = data.profilePic;
 
+    // freelancer fields
     if (user.role === "freelancer") {
       if (data.title !== undefined) user.title = data.title;
       if (data.bio !== undefined) user.bio = data.bio;
@@ -248,29 +199,20 @@ export const updateProfile = async (req, res, next) => {
       if (data.portfolio !== undefined) user.portfolio = data.portfolio;
     }
 
+    // client fields
     if (user.role === "client") {
       if (data.companyName !== undefined) user.companyName = data.companyName;
+
       if (data.companyWebsite !== undefined)
         user.companyWebsite = data.companyWebsite;
+
+      if (data.requirement !== undefined) user.requirement = data.requirement;
     }
 
     await user.save();
 
     const userData = user.toJSON();
     delete userData.password;
-
-    if (user.role === "client") {
-      delete userData.title;
-      delete userData.bio;
-      delete userData.skills;
-      delete userData.hourlyRate;
-      delete userData.portfolio;
-    }
-
-    if (user.role === "freelancer") {
-      delete userData.companyName;
-      delete userData.companyWebsite;
-    }
 
     return successResponse(res, StatusCodes.OK, {
       message: "Profile updated successfully",

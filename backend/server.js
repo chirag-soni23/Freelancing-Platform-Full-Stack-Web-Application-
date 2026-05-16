@@ -206,7 +206,7 @@ app.use(
 
 // routes
 app.use("/api/auth", authRoutes);
-app.use("/api/category", isAuth, categoryRoutes);
+app.use("/api/category", categoryRoutes);
 app.use("/api/job", jobRoutes);
 app.use("/api/chat", isAuth, chatRoutes);
 app.use("/api/contact", contactRoutes);

@@ -13,19 +13,27 @@ import {
   updateCategorySchema,
 } from "../validation/category.validator.js";
 import { checkRole } from "../middlewares/role.middleware.js";
+import { isAuth } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
 
-router.post("/", validate(categorySchema), checkRole("client"), createCategory);
-router.get("/", getCategories);
+router.post(
+  "/",
+  isAuth,
+  validate(categorySchema),
+  checkRole("admin"),
+  createCategory,
+);
+router.get("/", isAuth, getCategories);
 router.get("/unique", getAllUniqueCategories);
 router.get("/:id", getCategoryById);
 router.patch(
   "/:id",
+  isAuth,
   validate(updateCategorySchema),
-  checkRole("client"),
+  checkRole("admin"),
   updateCategory,
 );
-router.delete("/:id", checkRole("client"), deleteCategory);
+router.delete("/:id", isAuth, checkRole("admin"), deleteCategory);
 
 export default router;

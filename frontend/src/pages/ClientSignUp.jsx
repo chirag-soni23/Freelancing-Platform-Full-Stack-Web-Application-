@@ -19,29 +19,30 @@ import {
   FileText,
 } from "lucide-react";
 import { Link, useNavigate } from "react-router-dom";
-import { clientSchema } from "@/validations/auth.validator";
+import { clientSchema, registerUserSchema } from "@/validations/auth.validator";
 import { useAuth } from "@/hooks/useAuth";
 import { Textarea } from "@/components/ui/textarea";
 
 const ClientSignUp = () => {
   const initialState = {
     name: "",
-    companyName: "",
+    // companyName: "",
     email: "",
-    companyWebsite: "",
-    address: "",
-    requirements: "",
+    // companyWebsite: "",
+    // address: "",
+    // requirements: "",
     phone: "",
     password: "",
     confirmPassword: "",
+    role:"client"
   };
   const [formData, setFormData] = useState(initialState);
-  const { registerClient, isRegisteringClient } = useAuth();
+  const { register,isRegistering } = useAuth();
   const navigate = useNavigate();
 
   const [errors, setErrors] = useState({});
   const validateForm = () => {
-    const { error } = clientSchema.validate(formData, {
+    const { error } = registerUserSchema.validate(formData, {
       abortEarly: false,
     });
 
@@ -76,7 +77,7 @@ const ClientSignUp = () => {
       ...formData,
     };
 
-    registerClient(finalData, {
+    register(finalData, {
       onSuccess: () => {
         setFormData(initialState);
 
@@ -208,7 +209,7 @@ const ClientSignUp = () => {
                   )}
                 </div>
 
-                {/* Company Name */}
+                {/* Company Name
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
                     Company Name
@@ -229,7 +230,7 @@ const ClientSignUp = () => {
                   {errors.companyName && (
                     <p className="text-red-500 text-xs">{errors.companyName}</p>
                   )}
-                </div>
+                </div> */}
 
                 {/* Work Email */}
                 <div className="space-y-2 group">
@@ -256,7 +257,7 @@ const ClientSignUp = () => {
                 </div>
 
                 {/* Company Website */}
-                <div className="space-y-2 group">
+                {/* <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
                     Company Website
                   </Label>
@@ -278,9 +279,9 @@ const ClientSignUp = () => {
                       {errors.companyWebsite}
                     </p>
                   )}
-                </div>
+                </div> */}
 
-                <div className="space-y-2 group">
+                {/* <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
                     Address <span className="text-red-500">*</span>
                   </Label>
@@ -299,7 +300,7 @@ const ClientSignUp = () => {
                   {errors.address && (
                     <p className="text-red-500 text-xs">{errors.address}</p>
                   )}
-                </div>
+                </div> */}
 
                 <div className="space-y-2 group">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
@@ -322,7 +323,7 @@ const ClientSignUp = () => {
                   )}
                 </div>
 
-                 <div className="space-y-2 group md:col-span-2">
+                {/* <div className="space-y-2 group md:col-span-2">
                   <Label className="text-[10px] font-black uppercase tracking-widest ml-1 text-muted-foreground group-focus-within:text-primary transition-colors">
                     Requirements{" "}
                     <span className="text-red-500">*</span>
@@ -347,7 +348,7 @@ const ClientSignUp = () => {
                   {errors.bio && (
                     <p className="text-red-500 text-xs">{errors.bio}</p>
                   )}
-                </div>
+                </div> */}
 
                 {/* Password (Full width logic optionally or half) */}
                 <div className="space-y-2 group md:col-span-2">
@@ -427,10 +428,10 @@ const ClientSignUp = () => {
               </div>
 
               <Button
-                disabled={isRegisteringClient}
+                disabled={isRegistering}
                 className="w-full h-16 rounded-3xl font-black text-lg shadow-xl shadow-primary/20 hover:scale-[1.01] active:scale-[0.98] transition-all group overflow-hidden"
               >
-                {isRegisteringClient ? "Creating..." : "Create Account"}
+                {isRegistering ? "Creating..." : "Create Account"}
                 <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform" />
               </Button>
             </form>
