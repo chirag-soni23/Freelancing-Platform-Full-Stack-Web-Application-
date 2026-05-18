@@ -1,4 +1,4 @@
-import { Op } from "sequelize";
+import { Op, fn, col, where as sequelizeWhere } from "sequelize";
 import db from "../models/index.js";
 import ApiError, { successResponse } from "../utils/apiResponse.js";
 
@@ -98,20 +98,87 @@ export const toggleSaveJob = async (req, res, next) => {
 // get saved freelancer
 export const getSavedFreelancers = async (req, res, next) => {
   try {
-    let { page = 1, limit = 10 } = req.query;
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      category = "",
+      rating = "",
+      hourlyRate = "",
+    } = req.query;
 
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
 
-    if (isNaN(page) || page < 1) {
-      throw ApiError.BADREQUEST("Page must be a positive integer");
-    }
-
-    if (isNaN(limit) || limit < 1 || limit > 50) {
-      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
-    }
-
     const offset = (page - 1) * limit;
+
+    let freelancerWhere = {
+      role: "freelancer",
+    };
+
+    // search
+    if (search?.trim()) {
+      const keyword = search.trim();
+
+      freelancerWhere[Op.or] = [
+        {
+          name: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
+
+        {
+          title: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
+
+        {
+          bio: {
+            [Op.like]: `%${keyword}%`,
+          },
+        },
+
+        sequelizeWhere(
+          fn("JSON_SEARCH", col("freelancer.skills"), "one", keyword),
+          {
+            [Op.ne]: null,
+          },
+        ),
+      ];
+    }
+
+    // category
+    if (category && category.trim()) {
+      freelancerWhere.categoryId = Number(category);
+    }
+
+    // hourly rate
+    if (hourlyRate) {
+      if (hourlyRate === "0-500") {
+        freelancerWhere.hourlyRate = {
+          [Op.between]: [0, 500],
+        };
+      }
+
+      if (hourlyRate === "500-1000") {
+        freelancerWhere.hourlyRate = {
+          [Op.between]: [500, 1000],
+        };
+      }
+
+      if (hourlyRate === "1000-5000") {
+        freelancerWhere.hourlyRate = {
+          [Op.between]: [1000, 5000],
+        };
+      }
+
+      if (hourlyRate === "5000+") {
+        freelancerWhere.hourlyRate = {
+          [Op.gte]: 5000,
+        };
+      }
+    }
 
     const { count, rows } = await db.SavedFreelancer.findAndCountAll({
       where: {
@@ -123,6 +190,8 @@ export const getSavedFreelancers = async (req, res, next) => {
           model: db.User,
           as: "freelancer",
 
+          where: freelancerWhere,
+
           attributes: {
             exclude: [
               "password",
@@ -130,9 +199,18 @@ export const getSavedFreelancers = async (req, res, next) => {
               "resetPasswordExpire",
               "emailVerificationToken",
               "emailVerificationExpire",
-              "companyName",
-              "companyWebsite",
-              "requirement",
+            ],
+
+            include: [
+              [
+                fn(
+                  "ROUND",
+                  fn("AVG", col("freelancer.receivedFeedbacks.rating")),
+                  1,
+                ),
+
+                "averageRating",
+              ],
             ],
           },
 
@@ -142,12 +220,36 @@ export const getSavedFreelancers = async (req, res, next) => {
               as: "categories",
               attributes: ["id", "name"],
             },
+
+            {
+              model: db.Feedback,
+              as: "receivedFeedbacks",
+              attributes: [],
+              required: false,
+            },
           ],
         },
       ],
 
+      having: rating
+        ? sequelizeWhere(
+            fn("AVG", col("freelancer.receivedFeedbacks.rating")),
+            {
+              [Op.gte]: Number(rating),
+            },
+          )
+        : undefined,
+
+      group: [
+        "SavedFreelancer.id",
+        "freelancer.id",
+        "freelancer->categories.id",
+      ],
+
       limit,
       offset,
+
+      distinct: true,
 
       order: [["createdAt", "DESC"]],
     });
@@ -158,17 +260,20 @@ export const getSavedFreelancers = async (req, res, next) => {
       data: rows,
 
       pagination: {
-        total: count,
+        total: Array.isArray(count) ? count.length : count,
+
         page,
         limit,
-        totalPages: Math.ceil(count / limit),
+
+        totalPages: Math.ceil(
+          (Array.isArray(count) ? count.length : count) / limit,
+        ),
       },
     });
   } catch (error) {
     next(error);
   }
 };
-
 // get saved job
 export const getSavedJobs = async (req, res, next) => {
   try {

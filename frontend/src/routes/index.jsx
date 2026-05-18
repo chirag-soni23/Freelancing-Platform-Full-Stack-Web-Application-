@@ -16,6 +16,7 @@ import Chat from "@/pages/Chat";
 import Review from "@/dashboard/Review";
 import ScrollToTop from "@/hoc/ScrollToTop";
 import SavedProjects from "@/pages/SavedProjects";
+import SavedFreelancers from "@/pages/SaveFreelancers";
 
 /* =========================
    LAZY IMPORTS
@@ -146,6 +147,15 @@ const AppRoutes = () => {
             element={
               <ProtectedRoute>
                 <SavedProjects />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="saved-freelancers"
+            element={
+              <ProtectedRoute>
+                <SavedFreelancers />
               </ProtectedRoute>
             }
           />

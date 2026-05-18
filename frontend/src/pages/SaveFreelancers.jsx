@@ -46,7 +46,7 @@ import { Link } from "react-router-dom";
 import { useCategory } from "@/hooks/useCategory";
 import { useSaved } from "@/hooks/useSaved";
 
-const FindFreelancers = () => {
+const SavedFreelancers = () => {
   const [category, setCategory] = useState("");
   const { uniqueCategories } = useCategory();
   const [rating, setRating] = useState("");
@@ -58,10 +58,11 @@ const FindFreelancers = () => {
   const [categorySearch, setCategorySearch] = useState("");
   const debouncedSearch = useDebounce(search, 500);
   const {
-    freelancers,
-    freelancerPagination: pagination,
-    isFetchingFreelancers,
-  } = useAuth({
+    savedFreelancers,
+    savedFreelancerPagination: pagination,
+    toggleSaveFreelancer,
+    isTogglingFreelancer,
+  } = useSaved({
     page,
     limit: 10,
     search: debouncedSearch,
@@ -69,8 +70,6 @@ const FindFreelancers = () => {
     rating,
     hourlyRate,
   });
-  const { savedFreelancers, toggleSaveFreelancer, isTogglingFreelancer } =
-    useSaved();
   // console.log(freelancers);
   return (
     <div className="min-h-screen bg-[#fcfdfe] dark:bg-[#020617] text-foreground p-4 md:p-10">
@@ -78,26 +77,26 @@ const FindFreelancers = () => {
         <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="space-y-4">
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-orange-500/10 text-orange-600 dark:text-orange-400 text-[10px] font-black uppercase tracking-[0.2em]">
-              <Users size={14} /> Top 1% Verified Experts
+              <Users size={14} /> Your Saved Experts
             </div>
 
             <h1 className="text-4xl md:text-6xl font-black tracking-tighter">
-              Hire the <span className="text-primary">Best Talent.</span>
+              Saved <span className="text-primary">Freelancers.</span>
             </h1>
 
             <p className="text-muted-foreground text-lg max-w-2xl font-medium">
-              Connect with specialized freelancers who have a proven track
-              record of delivering excellence.
+              Manage your saved experts and quickly reconnect with top talent.
             </p>
           </div>
 
-          <Link to={"/saved-freelancers"}>
+          <Link to={"/find-freelancers"}>
             <Button className="rounded-xl px-8 py-6 text-md font-bold shadow-2xl shadow-primary/20 hover:scale-[1.02] transition-transform">
-              Saved Freelancers
+              Explore Freelancers
             </Button>
           </Link>
         </div>
       </div>
+
       <div className="max-w-7xl mx-auto mb-12">
         <div className="flex flex-col md:flex-row gap-4 p-2 bg-white dark:bg-card/50 border border-border/50 rounded-[1.5rem] shadow-xl shadow-black/5">
           <div className="relative flex-[3] flex items-center">
@@ -349,7 +348,7 @@ const FindFreelancers = () => {
         </aside>
 
         <main className="lg:col-span-9 space-y-6">
-          {freelancers.length === 0 && !isFetchingFreelancers ? (
+          {savedFreelancers.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-20 text-center">
               <h2 className="text-2xl font-black mb-2">
                 No Freelancers Found 😕
@@ -372,10 +371,10 @@ const FindFreelancers = () => {
               </Button>
             </div>
           ) : (
-            freelancers.map((f, i) => {
-              const isSaved = savedFreelancers?.some(
-                (saved) => saved?.freelancer?.id === f.id,
-              );
+            savedFreelancers.map((saved, i) => {
+              const f = saved.freelancer;
+
+              const isSaved = true;
               return (
                 <Card
                   key={i}
@@ -566,4 +565,4 @@ const FindFreelancers = () => {
   );
 };
 
-export default FindFreelancers;
+export default SavedFreelancers;
