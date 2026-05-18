@@ -76,9 +76,7 @@ export const getClientReviewDashboard = async (req, res, next) => {
     );
 
     const averageRating =
-      totalReviews > 0
-        ? Number(totalRatings / totalReviews).toFixed(1)
-        : 0;
+      totalReviews > 0 ? Number(totalRatings / totalReviews).toFixed(1) : 0;
 
     // rating breakdown
     const ratingBreakdown = {
@@ -150,11 +148,7 @@ export const getClientReviewDashboard = async (req, res, next) => {
 };
 
 // freelancer review dashboard
-export const getFreelancerReviewDashboard = async (
-  req,
-  res,
-  next,
-) => {
+export const getFreelancerReviewDashboard = async (req, res, next) => {
   try {
     let { page = 1, limit = 10 } = req.query;
 
@@ -182,9 +176,7 @@ export const getFreelancerReviewDashboard = async (
     });
 
     if (!freelancer) {
-      throw ApiError.FORBIDDEN(
-        "Only freelancers can access this dashboard",
-      );
+      throw ApiError.FORBIDDEN("Only freelancers can access this dashboard");
     }
 
     // total reviews
@@ -229,9 +221,7 @@ export const getFreelancerReviewDashboard = async (
     );
 
     const averageRating =
-      totalReviews > 0
-        ? Number(totalRatings / totalReviews).toFixed(1)
-        : 0;
+      totalReviews > 0 ? Number(totalRatings / totalReviews).toFixed(1) : 0;
 
     // breakdown
     const ratingBreakdown = {
@@ -292,6 +282,7 @@ export const getFreelancerReviewDashboard = async (
         pagination: {
           total: totalReviews,
           page,
+
           limit,
           totalPages: Math.ceil(totalReviews / limit),
         },
@@ -368,9 +359,7 @@ export const getReviewDashboard = async (req, res, next) => {
     );
 
     const averageRating =
-      totalReviews > 0
-        ? Number(totalRatings / totalReviews).toFixed(1)
-        : 0;
+      totalReviews > 0 ? Number(totalRatings / totalReviews).toFixed(1) : 0;
 
     // breakdown
     const ratingBreakdown = {
@@ -434,6 +423,281 @@ export const getReviewDashboard = async (req, res, next) => {
           limit,
           totalPages: Math.ceil(totalReviews / limit),
         },
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// admin freelancers
+export const getAdminFreelancers = async (req, res, next) => {
+  try {
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      throw ApiError.BADREQUEST("Page must be positive integer");
+    }
+
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    }
+
+    const offset = (page - 1) * limit;
+
+    let where = {
+      role: "freelancer",
+    };
+
+    if (search && search.trim().length > 0) {
+      where.name = {
+        [Op.like]: `%${search.trim()}%`,
+      };
+    }
+
+    const { count, rows } = await db.User.findAndCountAll({
+      where,
+
+      attributes: {
+        exclude: ["password"],
+      },
+
+      limit,
+      offset,
+
+      order: [["createdAt", "DESC"]],
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Freelancers fetched",
+
+      totalFreelancers: count,
+
+      data: rows,
+
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// admin clients
+export const getAdminClients = async (req, res, next) => {
+  try {
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      throw ApiError.BADREQUEST("Page must be positive integer");
+    }
+
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    }
+
+    const offset = (page - 1) * limit;
+
+    let where = {
+      role: "client",
+    };
+
+    if (search && search.trim().length > 0) {
+      where.name = {
+        [Op.like]: `%${search.trim()}%`,
+      };
+    }
+
+    const { count, rows } = await db.User.findAndCountAll({
+      where,
+
+      attributes: {
+        exclude: ["password"],
+      },
+
+      limit,
+      offset,
+
+      order: [["createdAt", "DESC"]],
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Clients fetched",
+
+      totalClients: count,
+
+      data: rows,
+
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// admin categories
+export const getAdminCategories = async (req, res, next) => {
+  try {
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page, 10);
+
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      throw ApiError.BADREQUEST("Page must be positive integer");
+    }
+
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    }
+
+    const offset = (page - 1) * limit;
+
+    let where = {};
+
+    if (search && search.trim().length > 0) {
+      where.name = {
+        [Op.like]: `%${search.trim()}%`,
+      };
+    }
+
+    const { count, rows } = await db.Category.findAndCountAll({
+      where,
+
+      limit,
+      offset,
+
+      order: [["createdAt", "DESC"]],
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Categories fetched",
+
+      totalCategories: count,
+
+      data: rows,
+
+      pagination: {
+        total: count,
+        page,
+        limit,
+
+        totalPages: Math.ceil(count / limit),
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// admin jobs
+export const getAdminJobs = async (req, res, next) => {
+  try {
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page, 10);
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      throw ApiError.BADREQUEST("Page must be positive integer");
+    }
+
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    }
+
+    const offset = (page - 1) * limit;
+
+    let where = {};
+
+    if (search && search.trim().length > 0) {
+      where[Op.or] = [
+        {
+          title: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          description: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          level: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          employment: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          jobType: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+      ];
+    }
+
+    const { count, rows } = await db.Job.findAndCountAll({
+      where,
+
+      include: [
+        {
+          model: db.User,
+          as: "client",
+
+          attributes: ["id", "name", "profilePic"],
+        },
+
+        {
+          model: db.Category,
+          as: "category",
+
+          attributes: ["id", "name"],
+        },
+      ],
+
+      limit,
+      offset,
+
+      order: [["createdAt", "DESC"]],
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Jobs fetched",
+
+      totalJobs: count,
+
+      data: rows,
+
+      pagination: {
+        total: count,
+        page,
+        limit,
+
+        totalPages: Math.ceil(count / limit),
       },
     });
   } catch (error) {

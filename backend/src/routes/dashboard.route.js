@@ -1,5 +1,9 @@
 import express from "express";
 import {
+  getAdminCategories,
+  getAdminClients,
+  getAdminFreelancers,
+  getAdminJobs,
   getClientReviewDashboard,
   getFreelancerReviewDashboard,
 } from "../controllers/dashboard.controller.js";
@@ -13,5 +17,8 @@ router.get(
   checkRole("freelancer"),
   getFreelancerReviewDashboard,
 );
-
+router.get("/total-freelancer", checkRole("admin"), getAdminFreelancers);
+router.get("/total-client", checkRole("admin"), getAdminClients);
+router.get("/total-categories", checkRole("admin"), getAdminCategories);
+router.get("/total-job",checkRole("admin"),getAdminJobs);
 export default router;
