@@ -19,9 +19,7 @@ export const useFeedback = (userId, params) => {
     queryFn: () => getUserFeedbacks(userId, params),
 
     enabled: !!userId,
-
     keepPreviousData: true,
-
     staleTime: 5000,
   });
 

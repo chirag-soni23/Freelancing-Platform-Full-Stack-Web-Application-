@@ -6,6 +6,8 @@ import Conversation from "./conversation.model.js";
 import Feedback from "./feedback.model.js";
 import Job from "./job.model.js";
 import Message from "./message.model.js";
+import SavedJob from "./savedJob.model.js";
+import SavedFreelancer from "./saveFreelancer.model.js";
 
 const db = {
   connection,
@@ -16,6 +18,8 @@ const db = {
   Message,
   Contact,
   Feedback,
+  SavedFreelancer,
+  SavedJob,
 };
 
 // db.User.hasMany(db.Category, {
@@ -103,6 +107,48 @@ db.Feedback.belongsTo(db.User, {
 db.Feedback.belongsTo(db.User, {
   foreignKey: "receiverId",
   as: "receiver",
+});
+
+// saved freelancer
+db.User.hasMany(db.SavedFreelancer, {
+  foreignKey: "clientId",
+  as: "savedFreelancers",
+});
+
+db.SavedFreelancer.belongsTo(db.User, {
+  foreignKey: "clientId",
+  as: "client",
+});
+
+db.User.hasMany(db.SavedFreelancer, {
+  foreignKey: "freelancerId",
+  as: "freelancerSavedBy",
+});
+
+db.SavedFreelancer.belongsTo(db.User, {
+  foreignKey: "freelancerId",
+  as: "freelancer",
+});
+
+// saved job
+db.User.hasMany(db.SavedJob, {
+  foreignKey: "freelancerId",
+  as: "savedJobs",
+});
+
+db.SavedJob.belongsTo(db.User, {
+  foreignKey: "freelancerId",
+  as: "freelancer",
+});
+
+db.Job.hasMany(db.SavedJob, {
+  foreignKey: "jobId",
+  as: "savedBy",
+});
+
+db.SavedJob.belongsTo(db.Job, {
+  foreignKey: "jobId",
+  as: "job",
 });
 
 // db.Job.hasMany(db.Bid, { foreignKey: "jobId" });

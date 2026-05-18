@@ -34,6 +34,14 @@ async function syncDatabase() {
     //   alter: true,
     // });
 
+    await db.SavedFreelancer.sync({
+      alter:true
+    })
+
+    await db.SavedJob.sync({
+      alter:true
+    })
+
     await db.connection.query("SET FOREIGN_KEY_CHECKS = 1");
     console.log("Database synchronized successfully.");
   } catch (error) {
