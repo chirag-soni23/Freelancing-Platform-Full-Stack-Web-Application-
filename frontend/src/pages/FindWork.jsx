@@ -71,7 +71,7 @@ const FindWork = () => {
     jobType,
     category,
   });
-
+  console.log(jobs);
   const navigate = useNavigate();
   const { savedJobs, toggleSaveJob, isTogglingJob } = useSaved();
   return (
@@ -372,10 +372,23 @@ const FindWork = () => {
                       <div className="flex justify-between gap-4">
                         <div className="space-y-4 flex-1">
                           <div className="flex flex-wrap items-center gap-3">
-                            <Badge className="bg-primary/10 text-primary border-none font-black text-[10px] uppercase tracking-wider px-3 py-1">
-                              Verified Client
+                            <Badge
+                              className={`
+    border-none
+    font-black
+    text-[10px]
+    uppercase
+    tracking-wider
+    px-3 py-1
+    ${
+      job?.status === "open"
+        ? "bg-emerald-500/10 text-emerald-600"
+        : "bg-red-500/10 text-red-600"
+    }
+  `}
+                            >
+                              {job?.status === "open" ? "Open" : "Closed"}
                             </Badge>
-
                             <span className="text-[13px] text-muted-foreground font-bold flex items-center gap-1.5">
                               <Clock size={14} /> Posted 2h ago
                             </span>

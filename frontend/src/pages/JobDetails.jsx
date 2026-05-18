@@ -21,6 +21,7 @@ import {
   BriefcaseBusiness,
   MonitorSmartphone,
   Share2,
+  BookmarkCheck,
   Heart,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -30,8 +31,11 @@ import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 import { useChat } from "@/hooks/useChat";
 import Feedback from "./Feedback";
+import { useSaved } from "@/hooks/useSaved";
 
 const JobDetails = () => {
+  const { savedJobs, toggleSaveJob, isTogglingJob } = useSaved();
+
   const { id } = useParams();
   const navigate = useNavigate();
   const { job, isLoadingJob } = useJob(id);
@@ -64,9 +68,10 @@ const JobDetails = () => {
   }
 
   const j = job.data;
+  const isSaved = savedJobs?.some((saved) => saved?.job?.id === j?.id);
 
   return (
-    <div className="min-h-screen bg-[#fafbfc] dark:bg-[#020617] text-foreground font-sans">
+    <div className="min-h-screen bg-[#fafbfc] dark:bg-[#020617] text-foreground font--sans">
       <nav className=" bg-white/80 dark:bg-[#020617]/80 backdrop-blur-xl border-b border-border/40">
         <div className="max-w-7xl mx-auto px-6 h-20 flex items-center justify-between">
           <Button
@@ -270,9 +275,37 @@ const JobDetails = () => {
                   <div className="flex gap-2">
                     <Button
                       variant="ghost"
-                      className="flex-1 h-12 rounded-xl font-bold text-muted-foreground gap-2"
+                      className="
+    flex-1
+    h-12
+    rounded-xl
+    font-bold
+    gap-2
+  "
+                      disabled={isTogglingJob}
+                      onClick={() =>
+                        toggleSaveJob({
+                          jobId: j?.id,
+                        })
+                      }
                     >
-                      <Bookmark size={18} /> Save
+                      {isSaved ? (
+                        <>
+                          <BookmarkCheck
+                            size={18}
+                            className="
+          text-primary
+          fill-primary
+        "
+                          />
+                          Saved
+                        </>
+                      ) : (
+                        <>
+                          <Bookmark size={18} />
+                          Save
+                        </>
+                      )}
                     </Button>
                     <Button
                       variant="ghost"
@@ -291,8 +324,19 @@ const JobDetails = () => {
                     <h4 className="font-black text-xs uppercase tracking-widest text-muted-foreground">
                       About Client
                     </h4>
-                    <Badge className="bg-blue-500/10 text-blue-500 border-none font-bold text-[10px]">
-                      VERIFIED
+                    <Badge
+                      className={`
+    border-none
+    font-bold
+    text-[10px]
+    ${
+      j?.client?.isEmailVerified
+        ? "bg-emerald-500/10 text-emerald-600"
+        : "bg-red-500/10 text-red-600"
+    }
+  `}
+                    >
+                      {j?.client?.isEmailVerified ? "VERIFIED" : "NOT VERIFIED"}
                     </Badge>
                   </div>
 
