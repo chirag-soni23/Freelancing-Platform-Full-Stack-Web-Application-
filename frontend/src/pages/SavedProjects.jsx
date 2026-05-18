@@ -50,7 +50,7 @@ import {
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/hooks/useSaved";
 
-const FindWork = () => {
+const SavedProjects = () => {
   const [page, setPage] = useState(1);
   const [search, setSearch] = useState("");
   const [level, setLevel] = useState("");
@@ -62,18 +62,18 @@ const FindWork = () => {
   const debouncedSearch = useDebounce(search, 500);
   const { uniqueCategories } = useCategory();
 
-  const { jobs, pagination } = useJob(null, {
-    page,
-    limit: 10,
-    search: debouncedSearch,
-    level,
-    employment,
-    jobType,
-    category,
-  });
-
   const navigate = useNavigate();
-  const { savedJobs, toggleSaveJob, isTogglingJob } = useSaved();
+  const { savedJobs, toggleSaveJob, savedJobsPagination, isTogglingJob } =
+    useSaved({
+      page,
+      limit: 10,
+
+      search: debouncedSearch,
+      level,
+      employment,
+      jobType,
+      category,
+    });
   return (
     <div className="min-h-screen bg-[#fcfdfe] dark:bg-[#020617] text-foreground p-4 md:p-10">
       <Header />
@@ -356,10 +356,10 @@ const FindWork = () => {
         </aside>
 
         <main className="lg:col-span-9 space-y-6">
-          {jobs.length > 0 ? (
-            jobs.map((job, i) => {
+          {savedJobs.length > 0 ? (
+            savedJobs.map((job, i) => {
               const isSaved = savedJobs?.some(
-                (saved) => saved?.job?.id === job.id,
+                (saved) => saved?.job?.id === job.job.id,
               );
 
               return (
@@ -382,11 +382,11 @@ const FindWork = () => {
                           </div>
 
                           <h2 className="text-2xl md:text-3xl font-bold tracking-tight group-hover:text-primary transition-all duration-300">
-                            {job?.title}
+                            {job?.job.title}
                           </h2>
 
                           <p className="text-muted-foreground text-[16px] leading-relaxed max-w-2xl line-clamp-2">
-                            {job?.description}
+                            {job?.job.description}
                           </p>
 
                           {/* Level / Employment / JobType */}
@@ -401,7 +401,7 @@ const FindWork = () => {
                                 </span>
 
                                 <span className="text-xs font-bold text-foreground">
-                                  {job?.category?.name || "N/A"}
+                                  {job?.job.category?.name || "N/A"}
                                 </span>
                               </div>
                             </div>
@@ -415,7 +415,7 @@ const FindWork = () => {
                                 </span>
 
                                 <span className="text-xs font-bold text-foreground">
-                                  {job.level}
+                                  {job?.job.level}
                                 </span>
                               </div>
                             </div>
@@ -430,7 +430,7 @@ const FindWork = () => {
                                 </span>
 
                                 <span className="text-xs font-bold text-foreground">
-                                  {job.employment}
+                                  {job?.job.employment}
                                 </span>
                               </div>
                             </div>
@@ -445,7 +445,7 @@ const FindWork = () => {
                                 </span>
 
                                 <span className="text-xs font-bold text-foreground">
-                                  {job.jobType}
+                                  {job?.job.jobType}
                                 </span>
                               </div>
                             </div>
@@ -453,7 +453,7 @@ const FindWork = () => {
 
                           {/* Skills */}
                           <div className="flex flex-wrap gap-2 pt-2">
-                            {job?.skills.map((s) => (
+                            {job?.job.skills.map((s) => (
                               <span
                                 key={s}
                                 className="px-4 py-1.5 rounded-full bg-secondary text-secondary-foreground text-[12px] font-bold"
@@ -475,7 +475,7 @@ const FindWork = () => {
                           disabled={isTogglingJob}
                           onClick={() =>
                             toggleSaveJob({
-                              jobId: job.id,
+                              jobId: job?.job.id,
                             })
                           }
                         >
@@ -513,7 +513,7 @@ const FindWork = () => {
                               />
                             )}
 
-                            <span>{job?.budget}</span>
+                            <span>{job?.job.budget}</span>
                           </div>
                         </div>
 
@@ -565,7 +565,7 @@ const FindWork = () => {
                       {/* Buttons */}
                       <div className="flex flex-col md:flex-row gap-3">
                         <Button
-                          onClick={() => navigate(`/job-details/${job.id}`)}
+                          onClick={() => navigate(`/job-details/${job?.job.id}`)}
                           className="w-full md:w-auto rounded-2xl px-10 h-12 font-black group/btn shadow-lg shadow-primary/20 transition-all hover:-translate-y-1"
                         >
                           View Details
@@ -621,10 +621,10 @@ const FindWork = () => {
             </Card>
           )}
 
-          {jobs.length > 0 && (
+          {savedJobs.length > 0 && (
             <WithPagination
               page={page}
-              totalPages={pagination?.totalPages}
+              totalPages={savedJobsPagination?.totalPages}
               onPageChange={setPage}
             />
           )}
@@ -634,4 +634,4 @@ const FindWork = () => {
   );
 };
 
-export default FindWork;
+export default SavedProjects;

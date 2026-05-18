@@ -1,3 +1,4 @@
+import { Op } from "sequelize";
 import db from "../models/index.js";
 import ApiError, { successResponse } from "../utils/apiResponse.js";
 
@@ -171,7 +172,15 @@ export const getSavedFreelancers = async (req, res, next) => {
 // get saved job
 export const getSavedJobs = async (req, res, next) => {
   try {
-    let { page = 1, limit = 10 } = req.query;
+    let {
+      page = 1,
+      limit = 10,
+      search = "",
+      level,
+      employment,
+      jobType,
+      category,
+    } = req.query;
 
     page = parseInt(page, 10);
     limit = parseInt(limit, 10);
@@ -186,6 +195,44 @@ export const getSavedJobs = async (req, res, next) => {
 
     const offset = (page - 1) * limit;
 
+    let jobWhere = {};
+
+    // search
+    if (search?.trim()) {
+      jobWhere[Op.or] = [
+        {
+          title: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+
+        {
+          description: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+      ];
+    }
+
+    // filters
+    if (level) {
+      jobWhere.level = level;
+    }
+
+    if (employment) {
+      jobWhere.employment = employment;
+    }
+
+    if (jobType) {
+      jobWhere.jobType = jobType;
+    }
+
+    let categoryWhere = {};
+
+    if (category) {
+      categoryWhere.name = category;
+    }
+
     const { count, rows } = await db.SavedJob.findAndCountAll({
       where: {
         freelancerId: req.user.id,
@@ -195,12 +242,14 @@ export const getSavedJobs = async (req, res, next) => {
         {
           model: db.Job,
           as: "job",
+          where: jobWhere,
 
           include: [
             {
               model: db.Category,
               as: "category",
               attributes: ["id", "name"],
+              where: categoryWhere,
             },
           ],
         },

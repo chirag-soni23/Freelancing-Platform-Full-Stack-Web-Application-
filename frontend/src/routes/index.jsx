@@ -15,6 +15,7 @@ import JobDetails from "@/pages/JobDetails";
 import Chat from "@/pages/Chat";
 import Review from "@/dashboard/Review";
 import ScrollToTop from "@/hoc/ScrollToTop";
+import SavedProjects from "@/pages/SavedProjects";
 
 /* =========================
    LAZY IMPORTS
@@ -32,23 +33,17 @@ const AppLayout = lazy(() =>
 
 const ClientSignUp = lazy(() => import("@/pages/ClientSignUp"));
 
-const FindFreelancers = lazy(() =>
-  import("@/pages/FindFreelancers"),
-);
+const FindFreelancers = lazy(() => import("@/pages/FindFreelancers"));
 
 const FindWork = lazy(() => import("@/pages/FindWork"));
 
-const FreeLancerSignUp = lazy(() =>
-  import("@/pages/FreeLancerSignup"),
-);
+const FreeLancerSignUp = lazy(() => import("@/pages/FreeLancerSignup"));
 
 const Home = lazy(() => import("@/pages/Home"));
 
 const Login = lazy(() => import("@/pages/Login"));
 
-const ResetPassword = lazy(() =>
-  import("@/pages/ResetPassword"),
-);
+const ResetPassword = lazy(() => import("@/pages/ResetPassword"));
 
 const WorkDetail = lazy(() => import("@/pages/WorkDetail"));
 
@@ -58,9 +53,7 @@ const NotFound = lazy(() => import("@/pages/NotFound"));
    ADMIN PAGES
 ========================= */
 
-const AdminDashboard = lazy(() =>
-  import("@/admin/pages/AdminDashboard"),
-);
+const AdminDashboard = lazy(() => import("@/admin/pages/AdminDashboard"));
 
 /* =========================
    LOADER
@@ -113,15 +106,9 @@ const AppRoutes = () => {
           }
         />
 
-        <Route
-          path="/reset-password/:token"
-          element={<ResetPassword />}
-        />
+        <Route path="/reset-password/:token" element={<ResetPassword />} />
 
-        <Route
-          path="/verify-email/:token"
-          element={<VerifyEmailPage />}
-        />
+        <Route path="/verify-email/:token" element={<VerifyEmailPage />} />
 
         {/* =========================
             MAIN
@@ -134,31 +121,31 @@ const AppRoutes = () => {
 
           <Route path="find-work" element={<FindWork />} />
 
-          <Route
-            path="find-freelancers"
-            element={<FindFreelancers />}
-          />
+          <Route path="find-freelancers" element={<FindFreelancers />} />
 
           <Route
             path="freelancer-details/:id"
             element={<FreelancerDetails />}
           />
 
-          <Route
-            path="job-details/:id"
-            element={<JobDetails />}
-          />
+          <Route path="job-details/:id" element={<JobDetails />} />
 
-          <Route
-            path="work-detail/:id"
-            element={<WorkDetail />}
-          />
+          <Route path="work-detail/:id" element={<WorkDetail />} />
 
           <Route
             path="profile"
             element={
               <ProtectedRoute>
                 <Profile />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="saved-projects"
+            element={
+              <ProtectedRoute>
+                <SavedProjects />
               </ProtectedRoute>
             }
           />
@@ -182,20 +169,14 @@ const AppRoutes = () => {
 
           <Route path="chats" element={<Chat />} />
 
-          <Route
-            path="rating-and-reviews"
-            element={<Review />}
-          />
+          <Route path="rating-and-reviews" element={<Review />} />
 
           {/* CLIENT */}
-
 
           <Route
             path="jobs"
             element={
-              <RoleProtectedRoute
-                allowedRoles={["client"]}
-              >
+              <RoleProtectedRoute allowedRoles={["client"]}>
                 <Jobs />
               </RoleProtectedRoute>
             }
@@ -206,9 +187,7 @@ const AppRoutes = () => {
           <Route
             path="admin"
             element={
-              <RoleProtectedRoute
-                allowedRoles={["admin"]}
-              >
+              <RoleProtectedRoute allowedRoles={["admin"]}>
                 <AdminDashboard />
               </RoleProtectedRoute>
             }
@@ -217,9 +196,7 @@ const AppRoutes = () => {
           <Route
             path="admin/category"
             element={
-              <RoleProtectedRoute
-                allowedRoles={["admin"]}
-              >
+              <RoleProtectedRoute allowedRoles={["admin"]}>
                 <Category />
               </RoleProtectedRoute>
             }
