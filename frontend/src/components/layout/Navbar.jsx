@@ -23,7 +23,7 @@ const Navbar = () => {
 
     if (user?.data.role === "client") return "/client-dashboard";
     if (user?.data.role === "freelancer") return "/freelancer-dashboard";
-    if (user?.data.role === "admin") return "/admin-dashboard";
+    if (user?.data.role === "admin") return "/admin/dashboard";
 
     return "/";
   };
@@ -118,7 +118,7 @@ const Navbar = () => {
                     <Button
                       size="sm"
                       className="rounded-xl gradient-primary border-0 font-bold shadow-lg shadow-primary/20"
-                      onClick={() => navigate("/dashboard")}
+                      onClick={() => navigate(getDashboardRoute())}
                     >
                       Dashboard
                     </Button>
@@ -208,8 +208,9 @@ const Navbar = () => {
                   Profile
                 </Button>
                 <Button
-                  className="w-full gradient-primary border-0"
-                  onClick={() => navigate("/dashboard")}
+                  size="sm"
+                  className="rounded-xl gradient-primary border-0 font-bold shadow-lg shadow-primary/20"
+                  onClick={() => navigate(getDashboardRoute())}
                 >
                   Dashboard
                 </Button>

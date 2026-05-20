@@ -12,6 +12,9 @@ import {
   ShieldCheck,
   Users,
   FolderKanban,
+  User2,
+  UsersIcon,
+  Users2,
 } from "lucide-react";
 
 import {
@@ -143,7 +146,7 @@ const adminItems = [
       {
         label: "Dashboard",
         icon: ShieldCheck,
-        path: `${BASE}/admin`,
+        path: `/admin/dashboard`,
       },
     ],
   },
@@ -152,21 +155,26 @@ const adminItems = [
     title: "Management",
     items: [
       {
-        label: "Users",
+        label: "Freelancers",
         icon: Users,
-        path: `${BASE}/admin/users`,
+        path: `/admin/freelancers`,
       },
 
       {
+        label: "Clients",
+        icon: Users2,
+        path: `/admin/clients`,
+      },
+      {
         label: "Categories",
         icon: FolderKanban,
-        path: `${BASE}/admin/category`,
+        path: `/admin/category`,
       },
 
       {
         label: "Jobs",
         icon: Briefcase,
-        path: `${BASE}/admin/jobs`,
+        path: `/admin/jobs`,
       },
     ],
   },
@@ -214,11 +222,15 @@ export function AppSidebar({ isOpen, onClose }) {
 
       {/* SIDEBAR */}
 
-      <aside
-        className={`fixed top-0 left-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col transition-transform duration-300 ${
-          isOpen ? "translate-x-0" : "-translate-x-full"
-        } md:translate-x-0`}
-      >
+   <aside
+  className={`fixed top-0 left-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col
+  transition-transform duration-500 ease-in-out
+  ${
+    isOpen
+      ? "translate-x-0"
+      : "-translate-x-full"
+  }`}
+>
         <div className="flex flex-col h-full">
           {/* LOGO */}
 

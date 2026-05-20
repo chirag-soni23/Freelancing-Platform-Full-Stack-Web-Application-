@@ -26,3 +26,39 @@ export const getReviewDashboard = async (params) => {
 
   return res.data;
 };
+
+// admin freelancers
+export const getAdminFreelancers = async (params) => {
+  const res = await api.get("/dashboard/total-freelancer", {
+    params,
+  });
+
+  return res.data;
+};
+
+// admin clients
+export const getAdminClients = async (params) => {
+  const res = await api.get("/dashboard/total-client", {
+    params,
+  });
+
+  return res.data;
+};
+
+// admin categories
+export const getAdminCategories = async (params) => {
+  const res = await api.get("/dashboard/total-categories", {
+    params,
+  });
+
+  return res.data;
+};
+
+// admin jobs
+export const getAdminJobs = async (params) => {
+  const res = await api.get("/dashboard/total-job", {
+    params,
+  });
+
+  return res.data;
+};

@@ -1,6 +1,7 @@
 import db from "../models/index.js";
 import ApiError, { successResponse } from "../utils/apiResponse.js";
 import { StatusCodes } from "../config/index.js";
+import { Op } from "sequelize";
 
 // client review dashboard
 export const getClientReviewDashboard = async (req, res, next) => {
@@ -453,9 +454,18 @@ export const getAdminFreelancers = async (req, res, next) => {
     };
 
     if (search && search.trim().length > 0) {
-      where.name = {
-        [Op.like]: `%${search.trim()}%`,
-      };
+      where[Op.or] = [
+        {
+          name: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+        {
+          email: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+      ];
     }
 
     const { count, rows } = await db.User.findAndCountAll({
@@ -513,9 +523,18 @@ export const getAdminClients = async (req, res, next) => {
     };
 
     if (search && search.trim().length > 0) {
-      where.name = {
-        [Op.like]: `%${search.trim()}%`,
-      };
+      where[Op.or] = [
+        {
+          name: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+        {
+          email: {
+            [Op.like]: `%${search.trim()}%`,
+          },
+        },
+      ];
     }
 
     const { count, rows } = await db.User.findAndCountAll({
@@ -687,16 +706,13 @@ export const getAdminJobs = async (req, res, next) => {
 
     return successResponse(res, StatusCodes.OK, {
       message: "Jobs fetched",
-
       totalJobs: count,
-
       data: rows,
 
       pagination: {
         total: count,
         page,
         limit,
-
         totalPages: Math.ceil(count / limit),
       },
     });

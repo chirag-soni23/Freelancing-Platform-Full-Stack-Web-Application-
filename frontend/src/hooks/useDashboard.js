@@ -1,101 +1,137 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, keepPreviousData } from "@tanstack/react-query";
 
 import {
   getClientReviewDashboard,
   getFreelancerReviewDashboard,
   getReviewDashboard,
+  getAdminFreelancers,
+  getAdminClients,
+  getAdminCategories,
+  getAdminJobs,
 } from "@/features/dashboardApi";
 
-import { toast } from "@/hooks/use-toast";
-
-export const useDashboard = (role, params) => {
+export const useDashboard = (role, params = {}) => {
   // freelancer dashboard
   const freelancerDashboardQuery = useQuery({
     queryKey: ["freelancer-review-dashboard", params],
-
     queryFn: () => getFreelancerReviewDashboard(params),
-
     enabled: role === "freelancer",
-
-    keepPreviousData: true,
-
-    onError: (err) => {
-      toast({
-        title: "Error",
-        description:
-          err?.response?.data?.message ||
-          "Failed to fetch freelancer dashboard",
-        variant: "destructive",
-      });
-    },
+    placeholderData: keepPreviousData,
   });
 
   // client dashboard
   const clientDashboardQuery = useQuery({
     queryKey: ["client-review-dashboard", params],
-
     queryFn: () => getClientReviewDashboard(params),
-
     enabled: role === "client",
-
-    keepPreviousData: true,
-
-    onError: (err) => {
-      toast({
-        title: "Error",
-        description:
-          err?.response?.data?.message ||
-          "Failed to fetch client dashboard",
-        variant: "destructive",
-      });
-    },
+    placeholderData: keepPreviousData,
   });
 
   // common dashboard
   const reviewDashboardQuery = useQuery({
     queryKey: ["review-dashboard", params],
-
     queryFn: () => getReviewDashboard(params),
-
     enabled: !role,
+    placeholderData: keepPreviousData,
+  });
 
-    keepPreviousData: true,
+  // admin freelancers
+  const adminFreelancersQuery = useQuery({
+    queryKey: ["admin-freelancers", params],
+    queryFn: () => getAdminFreelancers(params),
+    enabled: role === "admin",
+    placeholderData: keepPreviousData,
+  });
 
-    onError: (err) => {
-      toast({
-        title: "Error",
-        description:
-          err?.response?.data?.message ||
-          "Failed to fetch dashboard",
-        variant: "destructive",
-      });
-    },
+  // admin clients
+  const adminClientsQuery = useQuery({
+    queryKey: ["admin-clients", params],
+    queryFn: () => getAdminClients(params),
+    enabled: role === "admin",
+    placeholderData: keepPreviousData,
+  });
+
+  // admin categories
+  const adminCategoriesQuery = useQuery({
+    queryKey: ["admin-categories", params],
+    queryFn: () => getAdminCategories(params),
+    enabled: role === "admin",
+    placeholderData: keepPreviousData,
+  });
+
+  // admin jobs
+  const adminJobsQuery = useQuery({
+    queryKey: ["admin-jobs", params],
+    queryFn: () => getAdminJobs(params),
+    enabled: role === "admin",
+    placeholderData: keepPreviousData,
   });
 
   const dashboardData =
     role === "freelancer"
       ? freelancerDashboardQuery.data?.data
       : role === "client"
-        ? clientDashboardQuery.data?.data
-        : reviewDashboardQuery.data?.data;
+      ? clientDashboardQuery.data?.data
+      : reviewDashboardQuery.data?.data;
 
   return {
-    // dashboard
     dashboard: dashboardData || {},
-
-    // stats
     stats: dashboardData?.stats || {},
-
-    // reviews
     reviews: dashboardData?.reviews || [],
-
-    // pagination
     pagination: dashboardData?.pagination || {},
 
-    // loading
+    totalFreelancers:
+      adminFreelancersQuery.data?.totalFreelancers || 0,
+
+    freelancers:
+      adminFreelancersQuery.data?.data || [],
+
+    freelancersPagination:
+      adminFreelancersQuery.data?.pagination || {},
+
+    totalClients:
+      adminClientsQuery.data?.totalClients || 0,
+
+    clients:
+      adminClientsQuery.data?.data || [],
+
+    clientsPagination:
+      adminClientsQuery.data?.pagination || {},
+
+    totalCategories:
+      adminCategoriesQuery.data?.totalCategories || 0,
+
+    categories:
+      adminCategoriesQuery.data?.data || [],
+
+    categoriesPagination:
+      adminCategoriesQuery.data?.pagination || {},
+
+    totalJobs:
+      adminJobsQuery.data?.totalJobs || 0,
+
+    jobs:
+      adminJobsQuery.data?.data || [],
+
+    jobsPagination:
+      adminJobsQuery.data?.pagination || {},
+
     isLoading:
       freelancerDashboardQuery.isLoading ||
       clientDashboardQuery.isLoading ||
-      reviewDashboardQuery.isLoading,
+      reviewDashboardQuery.isLoading ||
+      adminFreelancersQuery.isLoading ||
+      adminClientsQuery.isLoading ||
+      adminCategoriesQuery.isLoading ||
+      adminJobsQuery.isLoading,
+
+    isFetching:
+      freelancerDashboardQuery.isFetching ||
+      clientDashboardQuery.isFetching ||
+      reviewDashboardQuery.isFetching ||
+      adminFreelancersQuery.isFetching ||
+      adminClientsQuery.isFetching ||
+      adminCategoriesQuery.isFetching ||
+      adminJobsQuery.isFetching,
   };
 };
