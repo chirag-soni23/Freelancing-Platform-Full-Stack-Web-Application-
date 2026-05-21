@@ -21,8 +21,8 @@ const Navbar = () => {
   const getDashboardRoute = () => {
     if (!user) return "/";
 
-    if (user?.data.role === "client") return "/client-dashboard";
-    if (user?.data.role === "freelancer") return "/freelancer-dashboard";
+    if (user?.data.role === "client") return "/dashboard";
+    if (user?.data.role === "freelancer") return "/dashboard";
     if (user?.data.role === "admin") return "/admin/dashboard";
 
     return "/";

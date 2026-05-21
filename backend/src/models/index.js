@@ -1,5 +1,6 @@
 import connection from "../db/db.js";
 import User from "./auth.model.js";
+import Bid from "./bid.model.js";
 import Category from "./category.model.js";
 import Contact from "./contact.model.js";
 import Conversation from "./conversation.model.js";
@@ -20,6 +21,7 @@ const db = {
   Feedback,
   SavedFreelancer,
   SavedJob,
+  Bid,
 };
 
 // db.User.hasMany(db.Category, {
@@ -147,6 +149,43 @@ db.Job.hasMany(db.SavedJob, {
 });
 
 db.SavedJob.belongsTo(db.Job, {
+  foreignKey: "jobId",
+  as: "job",
+});
+
+
+db.User.hasMany(db.Bid, {
+  foreignKey: "freelancerId",
+  as: "myBids",
+
+  onDelete: "CASCADE",
+});
+
+db.Bid.belongsTo(db.User, {
+  foreignKey: "freelancerId",
+  as: "freelancer",
+});
+
+db.User.hasMany(db.Bid, {
+  foreignKey: "clientId",
+  as: "receivedBids",
+
+  onDelete: "CASCADE",
+});
+
+db.Bid.belongsTo(db.User, {
+  foreignKey: "clientId",
+  as: "client",
+});
+
+db.Job.hasMany(db.Bid, {
+  foreignKey: "jobId",
+  as: "bids",
+
+  onDelete: "CASCADE",
+});
+
+db.Bid.belongsTo(db.Job, {
   foreignKey: "jobId",
   as: "job",
 });
