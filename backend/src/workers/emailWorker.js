@@ -42,3 +42,4 @@ const worker = new Worker(
 worker.on("failed", (job, err) => {
   console.log(" Email failed:", err.message);
 });
+

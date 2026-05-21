@@ -614,7 +614,6 @@ export const getAllFreelancers = async (req, res, next) => {
     }
 
     // category filter
-    // category filter
     if (category && category.trim()) {
       where.categoryId = Number(category);
     }
@@ -772,3 +771,4 @@ export const getFreelancerById = async (req, res, next) => {
     next(error);
   }
 };
+
