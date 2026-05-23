@@ -95,7 +95,7 @@ const ClientBid = ({ jobId: propJobId }) => {
   const isMutating = isAcceptingBid || isRejectingBid;
 
   return (
-    <div className="p-4 md:p-8 min-h-screen transition-colors duration-500 bg-background">
+    <div className="mt-10 min-h-screen">
       <div className="max-w-8xl mx-auto space-y-6 md:space-y-8">
         <div>
           <h1 className="text-2xl md:text-4xl font-bold tracking-tight gradient-text text-foreground">
@@ -240,8 +240,7 @@ const ClientBid = ({ jobId: propJobId }) => {
           )}
         </div>
 
-        {/* --- DESKTOP TABLE VIEW (Hidden on small screens) --- */}
-        <div className="hidden md:block glass rounded-[2rem] overflow-hidden border border-border/40 shadow-card">
+        <div className="hidden md:block glass rounded-xl overflow-hidden border border-border/40 shadow-card">
           <Table>
             <TableHeader className="bg-secondary/40">
               <TableRow className="hover:bg-transparent border-border/50">
@@ -407,7 +406,7 @@ const ClientBid = ({ jobId: propJobId }) => {
 
         {/* --- DETAILS MODAL DIALOG --- */}
         <Dialog open={proposalOpen} onOpenChange={setProposalOpen}>
-          <DialogContent className="glass border-border/40 w-[92%] sm:max-w-[550px] rounded-[2rem] p-4 md:p-6 mx-auto">
+          <DialogContent className="glass border-border/40 w-[92%] sm:max-w-[550px] rounded-xl p-4 md:p-6 mx-auto">
             <DialogHeader>
               <DialogTitle className="text-xl md:text-2xl font-bold gradient-text">
                 Cover Letter & Proposal
