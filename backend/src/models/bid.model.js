@@ -22,7 +22,7 @@ const Bid = sequelize.define(
 
       defaultValue: "INR",
     },
-    
+
     proposal: {
       type: DataTypes.TEXT,
       allowNull: false,

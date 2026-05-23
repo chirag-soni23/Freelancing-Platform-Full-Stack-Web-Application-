@@ -550,7 +550,7 @@ const FindWork = () => {
                               <Gavel size={18} className="text-blue-500" />
 
                               <span className="font-bold text-lg leading-none">
-                                18 Bids
+                                {job?.bidCount} Bids
                               </span>
                             </div>
 
@@ -592,19 +592,54 @@ const FindWork = () => {
                           />
                         </Button>
 
-                        <Button
-                          onClick={() => {
-                            setSelectedJob(job);
-                            setOpenBidModal(true);
-                          }}
-                          className="w-full md:w-auto rounded-2xl px-10 h-12 font-black group/btn shadow-lg shadow-primary/20 transition-all hover:-translate-y-1"
-                        >
-                          Place a Bid
-                          <ArrowUpRight
-                            className="ml-2 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
-                            size={18}
-                          />
-                        </Button>
+                        {job?.myBid?.status === "pending" ? (
+                          <Button
+                            disabled
+                            className="
+      w-full md:w-auto
+      rounded-2xl
+      px-10
+      h-12
+      font-black
+      bg-yellow-500
+      hover:bg-yellow-500
+    "
+                          >
+                            Pending
+                          </Button>
+                        ) : job?.myBid?.status === "accepted" ? (
+                          <Button
+                            disabled
+                            className="
+      w-full md:w-auto
+      rounded-2xl
+      px-10
+      h-12
+      font-black
+      bg-emerald-600
+      hover:bg-emerald-600
+    "
+                          >
+                            Success
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => {
+                              setSelectedJob(job);
+                              setOpenBidModal(true);
+                            }}
+                            className="
+      w-full md:w-auto
+      rounded-2xl
+      px-10
+      h-12
+      font-black
+    "
+                          >
+                            Place a Bid
+                            <ArrowUpRight className="ml-2" size={18} />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>
@@ -655,14 +690,10 @@ const FindWork = () => {
       </div>
 
       <BidModal
-  isOpen={openBidModal}
-
-  onClose={() =>
-    setOpenBidModal(false)
-  }
-
-  job={selectedJob}
-/>
+        isOpen={openBidModal}
+        onClose={() => setOpenBidModal(false)}
+        job={selectedJob}
+      />
     </div>
   );
 };

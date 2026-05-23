@@ -17,6 +17,10 @@ export const createBid = async (req, res, next) => {
       throw ApiError.NOTFOUND("Job not found");
     }
 
+    if (job.clientId === freelancerId) {
+      throw ApiError.BADREQUEST("You cannot bid on your own job");
+    }
+
     if (job.status === "closed") {
       throw ApiError.BADREQUEST("Job already closed");
     }
@@ -34,11 +38,8 @@ export const createBid = async (req, res, next) => {
 
     const bid = await db.Bid.create({
       amount,
-
       currency,
-
       proposal,
-
       deliveryDays,
 
       freelancerId,
@@ -46,6 +47,15 @@ export const createBid = async (req, res, next) => {
       clientId: job.clientId,
 
       jobId,
+    });
+
+    // update bid count
+    await db.Job.increment("bidCount", {
+      by: 1,
+
+      where: {
+        id: jobId,
+      },
     });
 
     return successResponse(res, StatusCodes.CREATED, {
@@ -373,9 +383,21 @@ export const deleteBid = async (req, res, next) => {
       throw ApiError.NOTFOUND("Bid not found");
     }
 
-    if (bid.status === "accepted") {
-      throw ApiError.BADREQUEST("Accepted bid cannot be deleted");
+    if (bid.status === "accepted" || bid.status === "rejected") {
+      throw ApiError.BADREQUEST("Bid cannot be deleted");
     }
+
+    await db.Job.decrement("bidCount", {
+      by: 1,
+
+      where: {
+        id: bid.jobId,
+
+        bidCount: {
+          [Op.gt]: 0,
+        },
+      },
+    });
 
     await bid.destroy();
 

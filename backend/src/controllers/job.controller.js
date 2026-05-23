@@ -44,7 +44,6 @@ export const createJob = async (req, res, next) => {
   }
 };
 
-// get jobs (pagination + search)
 export const getJobs = async (req, res, next) => {
   try {
     let {
@@ -62,109 +61,225 @@ export const getJobs = async (req, res, next) => {
     limit = parseInt(limit, 10);
 
     if (isNaN(page) || page < 1) {
-      throw ApiError.BADREQUEST("Page must be a positive integer");
+      throw ApiError.BADREQUEST(
+        "Page must be a positive integer"
+      );
     }
 
-    if (isNaN(limit) || limit < 1 || limit > 50) {
-      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    if (
+      isNaN(limit) ||
+      limit < 1 ||
+      limit > 50
+    ) {
+      throw ApiError.BADREQUEST(
+        "Limit must be between 1 and 50"
+      );
     }
 
-    const offset = (page - 1) * limit;
+    const offset =
+      (page - 1) * limit;
 
     let where = {};
+    let user = null;
 
-    // search filter
-    if (search && search.trim().length > 0) {
+    // search
+    if (search?.trim()) {
       where.title = {
-        [Op.like]: `%${search.trim()}%`,
+        [Op.like]:
+          `%${search.trim()}%`,
       };
     }
+
     if (level) {
       where.level = level;
     }
 
     if (employment) {
-      where.employment = employment;
+      where.employment =
+        employment;
     }
 
     if (jobType) {
-      where.jobType = jobType;
+      where.jobType =
+        jobType;
     }
 
-    let categoryWhere = {};
-
-    if (category) {
-      categoryWhere.name = category;
-    }
-
-    // status filter
     if (status) {
       where.status = status;
     }
 
+    let categoryWhere =
+      {};
+
+    if (category) {
+      categoryWhere.name =
+        category;
+    }
+
     // token check
-    const token = req.cookies?.token;
+    const token =
+      req.cookies?.token;
 
     if (token) {
       try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await db.User.findByPk(decoded.id);
-        if (user?.role === "client") {
+        const decoded =
+          jwt.verify(
+            token,
+            process.env.JWT_SECRET
+          );
+
+        user =
+          await db.User.findByPk(
+            decoded.id
+          );
+
+        // client apni jobs na dekhe
+        if (
+          user?.role ===
+          "client"
+        ) {
           where.clientId = {
-            [Op.notIn]: [user.id],
+            [Op.ne]:
+              user.id,
           };
         }
-      } catch (error) {
-        console.log("Invalid token");
+      } catch {
+        console.log(
+          "Invalid token"
+        );
       }
     }
 
-    const { count, rows } = await db.Job.findAndCountAll({
-      where,
-      limit,
-      offset,
-
-      include: [
+    const {
+      count,
+      rows,
+    } =
+      await db.Job.findAndCountAll(
         {
-          model: db.User,
-          as: "client",
+          where,
 
-          attributes: [
-            "id",
-            "name",
-            "profilePic",
-            "isEmailVerified",
-            "createdAt",
+          limit,
+          offset,
+
+          include: [
+            {
+              model:
+                db.User,
+
+              as: "client",
+
+              attributes:
+                [
+                  "id",
+                  "name",
+                  "profilePic",
+                  "isEmailVerified",
+                  "createdAt",
+                ],
+            },
+
+            {
+              model:
+                db.Bid,
+
+              as: "bids",
+
+              required:
+                false,
+
+              attributes:
+                [
+                  "id",
+                  "status",
+                  "freelancerId",
+                ],
+            },
+
+            {
+              model:
+                db.Category,
+
+              as: "category",
+
+              attributes:
+                [
+                  "id",
+                  "name",
+                ],
+
+              where:
+                categoryWhere,
+            },
           ],
+
+          distinct: true,
+
+          order: [
+            [
+              "createdAt",
+              "DESC",
+            ],
+          ],
+        }
+      );
+
+    const jobs = rows.map(
+      (job) => {
+        const myBid =
+          user?.role ===
+          "freelancer"
+            ? job.bids?.find(
+                (
+                  bid
+                ) =>
+                  bid.freelancerId ===
+                  user.id
+              ) ||
+              null
+            : null;
+
+        const jobData =
+          job.toJSON();
+
+        delete jobData.bids;
+
+        return {
+          ...jobData,
+          myBid,
+        };
+      }
+    );
+
+    return successResponse(
+      res,
+      StatusCodes.OK,
+      {
+        message:
+          "Jobs fetched successfully",
+
+        data: jobs,
+
+        pagination: {
+          total: count,
+          page,
+          limit,
+
+          totalPages:
+            Math.ceil(
+              count /
+                limit
+            ),
         },
-
-        {
-          model: db.Category,
-          as: "category",
-          attributes: ["id", "name"],
-          where: categoryWhere,
-        },
-      ],
-      order: [["createdAt", "DESC"]],
-    });
-
-    return successResponse(res, StatusCodes.OK, {
-      message: "Jobs fetched successfully",
-      data: rows,
-
-      pagination: {
-        total: count,
-        page,
-        limit,
-        totalPages: Math.ceil(count / limit),
-      },
-    });
+      }
+    );
   } catch (error) {
-    console.log(error.message);
+    console.log(
+      error.message
+    );
+
     next(error);
   }
 };
-
 // get my jobs
 export const getMyJobs = async (req, res, next) => {
   try {
