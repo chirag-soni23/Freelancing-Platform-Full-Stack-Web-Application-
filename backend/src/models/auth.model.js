@@ -85,6 +85,11 @@ const User = sequelize.define(
       defaultValue: "INR",
     },
 
+    profileCompletion: {
+      type: DataTypes.INTEGER,
+      defaultValue: 10,
+    },
+
     isAvailable: {
       type: DataTypes.BOOLEAN,
       allowNull: false,

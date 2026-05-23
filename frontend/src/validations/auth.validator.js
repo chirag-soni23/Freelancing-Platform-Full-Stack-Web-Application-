@@ -18,7 +18,7 @@ export const registerUserSchema = Joi.object({
   }),
 
   role: Joi.string()
-    .valid("client", "freelancer","admin")
+    .valid("client", "freelancer", "admin")
     .required()
     .messages({
       "any.only": "Role must be client or freelancer or admin",
@@ -34,13 +34,10 @@ export const registerUserSchema = Joi.object({
         "Password must have 1 uppercase & 1 special character",
     }),
 
-  confirmPassword: Joi.string()
-    .valid(Joi.ref("password"))
-    .required()
-    .messages({
-      "any.only": "Passwords do not match",
-      "string.empty": "Confirm password is required",
-    }),
+  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
+    "any.only": "Passwords do not match",
+    "string.empty": "Confirm password is required",
+  }),
 });
 
 // update freelancer profile
@@ -133,13 +130,10 @@ export const resetPasswordWithTokenSchema = Joi.object({
         "Password must have 1 uppercase & 1 special character",
     }),
 
-  confirmPassword: Joi.string()
-    .valid(Joi.ref("password"))
-    .required()
-    .messages({
-      "any.only": "Passwords do not match",
-      "string.empty": "Confirm password is required",
-    }),
+  confirmPassword: Joi.string().valid(Joi.ref("password")).required().messages({
+    "any.only": "Passwords do not match",
+    "string.empty": "Confirm password is required",
+  }),
 });
 
 // login
@@ -151,5 +145,84 @@ export const loginSchema = Joi.object({
 
   password: Joi.string().required().messages({
     "string.empty": "Password is required",
+  }),
+});
+
+// update profile
+export const updateProfileSchema = Joi.object({
+  // common
+  name: Joi.string().min(3).max(50).messages({
+    "string.min": "Name must be at least 3 characters",
+    "string.max": "Name cannot exceed 50 characters",
+  }),
+
+  email: Joi.string().email().messages({
+    "string.email": "Invalid email",
+  }),
+
+  address: Joi.string().allow("").messages({
+    "string.empty": "Address is required",
+  }),
+
+  // freelancer
+  title: Joi.string().allow("").min(3).max(100).messages({
+    "string.min": "Professional title must be at least 3 characters",
+    "string.max": "Title cannot exceed 100 characters",
+  }),
+
+  bio: Joi.string().allow("").min(50).max(1000).messages({
+    "string.min": "Bio must be at least 50 characters",
+    "string.max": "Bio cannot exceed 1000 characters",
+  }),
+
+  hourlyRate: Joi.number().allow(null).min(1).messages({
+    "number.base": "Hourly rate must be a number",
+    "number.min": "Hourly rate must be greater than 0",
+  }),
+
+  currency: Joi.string().allow("").valid("INR", "USD").messages({
+    "any.only": "Currency must be INR or USD",
+  }),
+
+  categoryId: Joi.number().allow(null).messages({
+    "number.base": "Category is required",
+  }),
+
+  skills: Joi.array()
+    .items(
+      Joi.string().min(2).max(30).messages({
+        "string.min": "Skill must be at least 2 characters",
+        "string.max": "Skill cannot exceed 30 characters",
+      }),
+    )
+    .optional(),
+
+  languages: Joi.array()
+    .items(
+      Joi.string().min(2).max(30).messages({
+        "string.min": "Language must be at least 2 characters",
+        "string.max": "Language cannot exceed 30 characters",
+      }),
+    )
+    .optional(),
+
+  portfolio: Joi.string().allow("", null).uri().messages({
+    "string.uri": "Invalid portfolio URL",
+  }),
+
+  isAvailable: Joi.boolean(),
+
+  // client
+  companyName: Joi.string().allow("").min(2).max(100).messages({
+    "string.min": "Company name must be at least 2 characters",
+  }),
+
+  companyWebsite: Joi.string().allow("", null).uri().messages({
+    "string.uri": "Invalid company website URL",
+  }),
+
+  requirement: Joi.string().allow("").min(10).max(1000).messages({
+    "string.min": "Requirement must be at least 10 characters",
+    "string.max": "Requirement cannot exceed 1000 characters",
   }),
 });

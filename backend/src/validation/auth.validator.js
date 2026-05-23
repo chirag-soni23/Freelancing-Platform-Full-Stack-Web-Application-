@@ -79,8 +79,9 @@ export const updateProfileSchema = Joi.object({
     "string.min": "Title must be at least 3 characters",
   }),
 
-  bio: Joi.string().min(10).messages({
-    "string.min": "Bio must be at least 10 characters",
+  bio: Joi.string().min(50).max(1000).messages({
+    "string.min": "Bio must be at least 50 characters",
+    "string.max": "Bio cannot exceed 1000 characters",
   }),
 
   categoryId: Joi.number().integer().messages({
@@ -107,6 +108,15 @@ export const updateProfileSchema = Joi.object({
   isAvailable: Joi.boolean().messages({
     "boolean.base": "Availability must be true or false",
   }),
+
+  profileCompletion: Joi.number()
+    .integer()
+    .min(0)
+    .max(100)
+    .forbidden()
+    .messages({
+      "any.unknown": "Profile completion cannot be updated manually",
+    }),
 
   requirement: Joi.string().min(10).max(1000).messages({
     "string.min": "Requirement must be at least 10 characters",

@@ -148,6 +148,7 @@ export const getMe = async (req, res, next) => {
 
         skills: userData.skills,
         languages: userData.languages,
+        profileCompletion: userData.profileCompletion,
         hourlyRate: userData.hourlyRate,
         currency: userData.currency,
         portfolio: userData.portfolio,
@@ -230,6 +231,21 @@ export const updateProfile = async (req, res, next) => {
 
         user.categoryId = data.categoryId;
       }
+    }
+
+    if (user.role === "freelancer") {
+      let completion = 10;
+      if (user.profilePic) completion += 10;
+      if (user.title) completion += 10;
+      if (user.bio) completion += 10;
+      if (user.categoryId) completion += 10;
+      if (user.skills?.length) completion += 15;
+      if (user.languages?.length) completion += 10;
+      if (user.hourlyRate) completion += 5;
+      if (user.portfolio) completion += 10;
+      if (user.address) completion += 5;
+      if (user.isAvailable !== undefined) completion += 5;
+      user.profileCompletion = Math.min(completion, 100);
     }
 
     // client fields

@@ -15,6 +15,14 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+
 import { cn } from "@/lib/utils";
 
 import useDebounce from "@/hooks/useDebounce";
@@ -45,6 +53,7 @@ import {
   ToggleRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
+import { updateProfileSchema } from "@/validations/auth.validator";
 
 const Profile = () => {
   const {
@@ -61,6 +70,7 @@ const Profile = () => {
   } = useAuth();
   const navigate = useNavigate();
   const [openCategory, setOpenCategory] = useState(false);
+  const [errors, setErrors] = useState({});
 
   const [categorySearch, setCategorySearch] = useState("");
 
@@ -169,14 +179,57 @@ const Profile = () => {
     }));
   };
 
+  const validateField = (name, value) => {
+    const fieldSchema = updateProfileSchema.extract(name);
+
+    const { error } = fieldSchema.validate(value);
+
+    setErrors((prev) => ({
+      ...prev,
+      [name]: error?.details?.[0]?.message || "",
+    }));
+  };
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+
+    validateField(name, value);
   };
 
   const handleUpdateProfile = (e) => {
     e.preventDefault();
-    updateProfile(formData, { onSuccess: () => setIsEditDialogOpen(false) });
+
+    const payload = {
+      ...formData,
+      hourlyRate:
+        formData.hourlyRate === "" ? null : Number(formData.hourlyRate),
+    };
+
+    const { error } = updateProfileSchema.validate(payload, {
+      abortEarly: false,
+    });
+
+    if (error) {
+      const obj = {};
+
+      error.details.forEach((err) => {
+        obj[err.path[0]] = err.message;
+      });
+
+      setErrors(obj);
+      return;
+    }
+
+    setErrors({});
+
+    updateProfile(payload, {
+      onSuccess: () => setIsEditDialogOpen(false),
+    });
   };
 
   const handleImageChange = (e) => {
@@ -339,303 +392,301 @@ const Profile = () => {
                   open={isEditDialogOpen}
                   onOpenChange={setIsEditDialogOpen}
                 >
-                  <Dialog
-                    open={isEditDialogOpen}
-                    onOpenChange={setIsEditDialogOpen}
-                  >
-                    <div className="flex items-center justify-between gap-4">
-                      <DialogTrigger asChild>
-                        <Button className="flex-1 mt-8 rounded-xl h-12 bg-primary text-white font-bold flex items-center justify-center gap-2">
-                          <Edit3 size={18} />
-                          <span>Edit Profile</span>
-                        </Button>
-                      </DialogTrigger>
-
-                      <Button
-                        onClick={handleLogout}
-                        className="flex-1 mt-8 rounded-xl h-12 bg-red-500 text-white font-bold flex items-center justify-center gap-2"
-                      >
-                        <LogOut size={18} />
-                        <span>Logout</span>
+                  {/* Buttons Container */}
+                  <div className="flex items-center justify-between gap-4 w-full">
+                    <DialogTrigger asChild>
+                      <Button className="flex-1 mt-8 rounded-xl h-12 bg-primary hover:bg-primary/90 text-primary-foreground font-bold flex items-center justify-center gap-2 shadow-lg shadow-primary/20 transition-all duration-200 active:scale-[0.98]">
+                        <Edit3 size={18} />
+                        <span>Edit Profile</span>
                       </Button>
-                    </div>
+                    </DialogTrigger>
 
-                    {/* DialogContent same rahega */}
-                  </Dialog>
+                    <Button
+                      onClick={handleLogout}
+                      className="flex-1 mt-8 rounded-xl h-12 bg-destructive hover:bg-destructive/90 text-destructive-foreground font-bold flex items-center justify-center gap-2 shadow-lg shadow-destructive/10 transition-all duration-200 active:scale-[0.98]"
+                    >
+                      <LogOut size={18} />
+                      <span>Logout</span>
+                    </Button>
+                  </div>
 
-                  <DialogContent className="sm:max-w-[580px] p-0 overflow-hidden border-none bg-white dark:bg-[#0f172a] shadow-2xl max-h-[85vh] flex flex-col">
-                    {/* Header Section */}
-                    <div className="px-6 py-5 bg-slate-50/50 dark:bg-white/5 border-b border-slate-100 dark:border-white/10">
+                  {/* Dialog Content */}
+                  <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden border-border bg-card text-card-foreground shadow-2xl max-h-[85vh] flex flex-col rounded-xl animate-in fade-in-50 zoom-in-95 duration-200">
+                    {/* Header Section with subtle gradient background using theme colors */}
+                    <div className="px-6 py-6 bg-muted/40 border-b border-border/60 backdrop-blur-sm">
                       <DialogHeader>
-                        <DialogTitle className="text-xl font-black tracking-tight text-slate-900 dark:text-white">
+                        <DialogTitle className="text-xl font-extrabold tracking-tight text-foreground flex items-center gap-2">
+                          <span className="h-2 w-2 rounded-full bg-primary animate-pulse" />
                           Edit Profile
                         </DialogTitle>
+                        <p className="text-xs text-muted-foreground mt-1 font-medium">
+                          Update your profile details and preferences
+                          seamlessly.
+                        </p>
                       </DialogHeader>
                     </div>
 
+                    {/* Form */}
                     <form
                       onSubmit={handleUpdateProfile}
-                      className="flex flex-col overflow-hidden"
+                      className="flex flex-col overflow-hidden flex-1"
                     >
-                      <div className="p-6 space-y-5 overflow-y-auto scrollbar-hide">
-                        {/* COMMON FIELDS */}
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                          {/* NAME */}
-                          <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                              Full Name
-                            </Label>
+                      <div className="p-6 space-y-6 overflow-y-auto scrollbar-thin scrollbar-thumb-muted-foreground/20">
+                        {/* COMMON FIELDS CONTAINER */}
+                        <div className="space-y-4">
+                          <h4 className="text-xs font-bold text-primary uppercase tracking-widest border-b border-border/40 pb-1">
+                            Personal Information
+                          </h4>
 
-                            <Input
-                              name="name"
-                              value={formData.name}
-                              onChange={handleInputChange}
-                              className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20"
-                            />
-                          </div>
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            {/* NAME */}
+                            <div className="space-y-2">
+                              <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                Full Name
+                              </Label>
+                              <Input
+                                name="name"
+                                value={formData.name}
+                                onChange={handleInputChange}
+                                className={cn(
+                                  "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                  errors.name
+                                    ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                    : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                )}
+                              />
+                              {errors.name && (
+                                <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                  {errors.name}
+                                </p>
+                              )}
+                            </div>
 
-                          {/* EMAIL */}
-                          <div className="space-y-1.5">
-                            <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                              Email
-                            </Label>
+                            {/* EMAIL */}
+                            <div className="space-y-2">
+                              <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                Email Address
+                              </Label>
+                              <Input
+                                type="email"
+                                name="email"
+                                value={formData.email}
+                                onChange={handleInputChange}
+                                placeholder="Enter your email"
+                                className={cn(
+                                  "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                  errors.email
+                                    ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                    : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                )}
+                              />
+                              {errors.email && (
+                                <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                  {errors.email}
+                                </p>
+                              )}
+                            </div>
 
-                            <Input
-                              type="email"
-                              name="email"
-                              value={formData.email}
-                              onChange={handleInputChange}
-                              placeholder="Enter your email"
-                              className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20"
-                            />
-                          </div>
-
-                          {/* ADDRESS */}
-                          <div className="space-y-1.5 md:col-span-2">
-                            <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                              Address
-                            </Label>
-
-                            <Input
-                              name="address"
-                              value={formData.address}
-                              onChange={handleInputChange}
-                              placeholder="Enter your address"
-                              className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20"
-                            />
+                            {/* ADDRESS */}
+                            <div className="space-y-2 md:col-span-2">
+                              <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                Current Address
+                              </Label>
+                              <Input
+                                name="address"
+                                value={formData.address}
+                                onChange={handleInputChange}
+                                placeholder="Enter your address"
+                                className={cn(
+                                  "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                  errors.address
+                                    ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                    : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                )}
+                              />
+                              {errors.address && (
+                                <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                  {errors.address}
+                                </p>
+                              )}
+                            </div>
                           </div>
                         </div>
 
-                        {/* ================= FREELANCER ================= */}
+                        {/* ================= FREELANCER SECTION ================= */}
                         {isFreelancer && (
-                          <>
-                            {/* TITLE */}
-                            <div className="space-y-1.5">
-                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                Title
-                              </Label>
+                          <div className="space-y-4 pt-2">
+                            <h4 className="text-xs font-bold text-primary uppercase tracking-widest border-b border-border/40 pb-1">
+                              Freelancer Profile
+                            </h4>
 
-                              <Input
-                                name="title"
-                                value={formData.title}
-                                onChange={handleInputChange}
-                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20"
-                              />
-                            </div>
+                            <div className="space-y-4">
+                              {/* TITLE */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Professional Title
+                                </Label>
+                                <Input
+                                  name="title"
+                                  value={formData.title}
+                                  onChange={handleInputChange}
+                                  placeholder="e.g. Senior Full Stack Developer"
+                                  className={cn(
+                                    "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                    errors.title
+                                      ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                      : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                  )}
+                                />
+                                {errors.title && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.title}
+                                  </p>
+                                )}
+                              </div>
 
-                            {/* CATEGORY */}
-                            <div className="space-y-2">
-                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                Category
-                              </Label>
-
-                              <Popover
-                                open={openCategory}
-                                onOpenChange={setOpenCategory}
-                              >
-                                <PopoverTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    role="combobox"
-                                    aria-expanded={openCategory}
-                                    className="
-          w-full
-          h-10
-          rounded-lg
-          justify-between
-          bg-slate-50
-          dark:bg-slate-900/50
-          border-slate-200
-          dark:border-white/10
-          hover:bg-slate-100
-          dark:hover:bg-slate-900
-        "
-                                  >
-                                    <span className="truncate font-medium">
-                                      {formData.categoryId
-                                        ? uniqueCategories.find(
-                                            (cat) =>
-                                              cat.id.toString() ===
-                                              formData.categoryId,
-                                          )?.name
-                                        : "Select category"}
-                                    </span>
-
-                                    <ChevronsUpDown className="h-4 w-4 opacity-50" />
-                                  </Button>
-                                </PopoverTrigger>
-
-                                <PopoverContent
-                                  align="start"
-                                  className="
-        w-[var(--radix-popover-trigger-width)]
-        p-0
-        overflow-hidden
-        rounded-xl
-        border-slate-200
-        dark:border-white/10
-      "
+                              {/* CATEGORY */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Category
+                                </Label>
+                                <Popover
+                                  open={openCategory}
+                                  onOpenChange={setOpenCategory}
                                 >
-                                  {/* SEARCH */}
-                                  <div className="p-3 border-b border-slate-100 dark:border-white/10">
-                                    <div className="relative">
-                                      <Search
-                                        className="
-              absolute
-              left-3
-              top-1/2
-              -translate-y-1/2
-              h-4
-              w-4
-              text-muted-foreground
-            "
-                                      />
+                                  <PopoverTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      role="combobox"
+                                      aria-expanded={openCategory}
+                                      className={cn(
+                                        "w-full h-10 rounded-lg justify-between bg-muted/30 text-sm font-medium transition-all",
+                                        errors.categoryId
+                                          ? "border-destructive hover:bg-destructive/5 text-destructive"
+                                          : "border-input hover:bg-muted/50 text-foreground",
+                                      )}
+                                    >
+                                      <span className="truncate">
+                                        {formData.categoryId
+                                          ? uniqueCategories.find(
+                                              (cat) =>
+                                                cat.id.toString() ===
+                                                formData.categoryId,
+                                            )?.name
+                                          : "Select category"}
+                                      </span>
+                                      <ChevronsUpDown className="h-4 w-4 opacity-50 shrink-0" />
+                                    </Button>
+                                  </PopoverTrigger>
 
-                                      <Input
-                                        placeholder="Search category..."
-                                        value={categorySearch}
-                                        onChange={(e) =>
-                                          setCategorySearch(e.target.value)
-                                        }
-                                        className="
-              pl-10
-              h-10
-              rounded-lg
-              bg-slate-50
-              dark:bg-slate-900/50
-              border-slate-200
-              dark:border-white/10
-            "
-                                      />
+                                  <PopoverContent
+                                    align="start"
+                                    sideOffset={8}
+                                    className="w-[var(--radix-popover-trigger-width)] p-0 overflow-hidden rounded-xl border-border bg-popover shadow-xl z-[9999]"
+                                  >
+                                    <div className="p-2 border-b border-border bg-muted/20">
+                                      <div className="relative">
+                                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                                        <Input
+                                          placeholder="Search category..."
+                                          value={categorySearch}
+                                          onChange={(e) =>
+                                            setCategorySearch(e.target.value)
+                                          }
+                                          className="pl-9 h-9 rounded-lg bg-background border-input text-sm"
+                                        />
+                                      </div>
                                     </div>
-                                  </div>
 
-                                  {/* LIST */}
-                                  <div className="max-h-[250px] overflow-y-auto p-2">
-                                    {uniqueCategories?.map((cat) => (
-                                      <button
-                                        key={cat.id}
-                                        type="button"
-                                        onClick={() => {
-                                          setFormData((prev) => ({
-                                            ...prev,
-                                            categoryId: cat.id.toString(),
-                                          }));
-
-                                          setOpenCategory(false);
-                                        }}
-                                        className={cn(
-                                          `
-                w-full
-                flex
-                items-center
-                gap-3
-                rounded-lg
-                px-3
-                py-2.5
-                text-sm
-                font-medium
-                transition-all
-                hover:bg-slate-100
-                dark:hover:bg-slate-800
-              `,
-                                          formData.categoryId ===
-                                            cat.id.toString() &&
-                                            "bg-primary text-white hover:bg-primary",
-                                        )}
-                                      >
-                                        <Check
+                                    <div
+                                      className="max-h-[220px] overflow-y-auto overscroll-contain p-1 bg-popover scrollbar-thin scrollbar-thumb-primary/30"
+                                      onWheel={(e) => e.stopPropagation()}
+                                    >
+                                      {uniqueCategories?.map((cat) => (
+                                        <button
+                                          key={cat.id}
+                                          type="button"
+                                          onClick={() => {
+                                            setFormData((prev) => ({
+                                              ...prev,
+                                              categoryId: cat.id.toString(),
+                                            }));
+                                            setOpenCategory(false);
+                                          }}
                                           className={cn(
-                                            "h-4 w-4",
+                                            "w-full flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-all text-left mb-0.5",
                                             formData.categoryId ===
                                               cat.id.toString()
-                                              ? "opacity-100"
-                                              : "opacity-0",
+                                              ? "bg-primary text-primary-foreground font-semibold"
+                                              : "hover:bg-muted/80 text-foreground",
                                           )}
-                                        />
+                                        >
+                                          <Check
+                                            className={cn(
+                                              "h-4 w-4 shrink-0",
+                                              formData.categoryId ===
+                                                cat.id.toString()
+                                                ? "opacity-100"
+                                                : "opacity-0",
+                                            )}
+                                          />
+                                          <span className="truncate">
+                                            {cat.name}
+                                          </span>
+                                        </button>
+                                      ))}
 
-                                        <span>{cat.name}</span>
-                                      </button>
-                                    ))}
-
-                                    {uniqueCategories?.length === 0 && (
-                                      <div className="py-6 text-center text-sm text-muted-foreground">
-                                        No category found
-                                      </div>
-                                    )}
-                                  </div>
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-
-                            {isClient && (
-                              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                                    Company Name
+                                      {uniqueCategories?.length === 0 && (
+                                        <div className="py-6 text-center text-xs text-muted-foreground font-medium">
+                                          No category found
+                                        </div>
+                                      )}
+                                    </div>
+                                  </PopoverContent>
+                                </Popover>
+                                {errors.categoryId && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.categoryId}
                                   </p>
+                                )}
+                              </div>
 
-                                  <div className="flex items-center gap-3">
-                                    <span className="text-4xl font-black">
-                                      {/* {profileData?.currency === "INR"
-                                        ? "₹"
-                                        : "$"} */}
-                                      {profileData?.companyName || "0"}
-                                      {/* <span className="text-sm text-slate-400 font-medium">
-                                        /hr
-                                      </span> */}
+                              {/* STATS CARDS (Client Perspective/Info) */}
+                              {isClient && (
+                                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                  <div className="bg-muted/20 border border-border/60 rounded-xl p-5 shadow-sm flex flex-col justify-between">
+                                    <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                                      Company Name
+                                    </p>
+                                    <span className="text-2xl font-black text-foreground truncate mt-1">
+                                      {profileData?.companyName || "N/A"}
                                     </span>
                                   </div>
-                                </div>
 
-                                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                                    Success Rate
-                                  </p>
-
-                                  <div className="flex items-center gap-3">
-                                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
+                                  <div className="bg-muted/20 border border-border/60 rounded-xl p-5 shadow-sm flex items-center gap-4">
+                                    <div className="w-10 h-10 rounded-xl bg-accent flex items-center justify-center shrink-0">
                                       <Globe
-                                        size={24}
-                                        className="text-blue-500"
+                                        size={20}
+                                        className="text-accent-foreground"
                                       />
                                     </div>
-
-                                    <span className="text-4xl font-black">
-                                      100%
-                                    </span>
+                                    <div>
+                                      <p className="text-[10px] font-bold text-muted-foreground uppercase tracking-widest">
+                                        Success Rate
+                                      </p>
+                                      <span className="text-2xl font-black text-foreground">
+                                        100%
+                                      </span>
+                                    </div>
                                   </div>
                                 </div>
-                              </div>
-                            )}
+                              )}
 
-                            {/* SKILLS */}
-                            <div className="space-y-3">
-                              <div className="space-y-1.5">
-                                <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                  Add Skills
+                              {/* SKILLS */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Skills & Expertise
                                 </Label>
-
                                 <div className="relative">
                                   <Input
                                     value={skillInput}
@@ -643,46 +694,50 @@ const Profile = () => {
                                       setSkillInput(e.target.value)
                                     }
                                     onKeyDown={handleSkillKeyDown}
-                                    placeholder="Type and press Enter..."
-                                    className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20 pr-10"
+                                    placeholder="Type skill and press Enter..."
+                                    className={cn(
+                                      "h-10 bg-muted/30 rounded-lg text-sm pr-12 transition-all",
+                                      errors.skills
+                                        ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                        : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                    )}
                                   />
-
-                                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded shadow-sm">
                                     ↵
                                   </div>
                                 </div>
+                                {errors.skills && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.skills}
+                                  </p>
+                                )}
+
+                                {formData.skills.length > 0 && (
+                                  <div className="flex flex-wrap gap-1.5 p-3 bg-muted/10 rounded-xl border border-dashed border-border">
+                                    {formData.skills.map((skill) => (
+                                      <Badge
+                                        key={skill}
+                                        className="bg-card hover:bg-card text-foreground border border-border flex items-center gap-1.5 py-1 px-2.5 rounded-md shadow-sm text-xs font-medium"
+                                      >
+                                        <span>{skill}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() => removeSkill(skill)}
+                                          className="text-muted-foreground hover:text-destructive transition-colors rounded-sm focus:outline-none"
+                                        >
+                                          <X size={12} />
+                                        </button>
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
 
-                              {formData.skills.length > 0 && (
-                                <div className="flex flex-wrap gap-2 p-3 bg-slate-50/50 dark:bg-white/5 rounded-xl border border-dashed border-slate-200 dark:border-white/10">
-                                  {formData.skills.map((skill) => (
-                                    <Badge
-                                      key={skill}
-                                      className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 py-1 px-2.5"
-                                    >
-                                      <span className="text-[11px] font-semibold">
-                                        {skill}
-                                      </span>
-
-                                      <button
-                                        type="button"
-                                        onClick={() => removeSkill(skill)}
-                                      >
-                                        <X size={12} />
-                                      </button>
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* LANGUAGES */}
-                            <div className="space-y-3">
-                              <div className="space-y-1.5">
-                                <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                  Add Languages
+                              {/* LANGUAGES */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Languages Known
                                 </Label>
-
                                 <div className="relative">
                                   <Input
                                     value={langInput}
@@ -690,165 +745,305 @@ const Profile = () => {
                                       setLangInput(e.target.value)
                                     }
                                     onKeyDown={handleLanguageKeyDown}
-                                    placeholder="Type and press Enter..."
-                                    className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg focus:ring-2 focus:ring-primary/20 pr-10"
+                                    placeholder="Type language and press Enter..."
+                                    className={cn(
+                                      "h-10 bg-muted/30 rounded-lg text-sm pr-12 transition-all",
+                                      errors.languages
+                                        ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                        : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                    )}
                                   />
-
-                                  <div className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 bg-slate-200 dark:bg-slate-800 px-1.5 py-0.5 rounded">
+                                  <div className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] font-bold text-muted-foreground bg-muted border border-border px-1.5 py-0.5 rounded shadow-sm">
                                     ↵
                                   </div>
                                 </div>
+                                {errors.languages && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.languages}
+                                  </p>
+                                )}
+
+                                {formData.languages.length > 0 && (
+                                  <div className="flex flex-wrap gap-1.5 p-3 bg-muted/10 rounded-xl border border-dashed border-border">
+                                    {formData.languages.map((language) => (
+                                      <Badge
+                                        key={language}
+                                        className="bg-card hover:bg-card text-foreground border border-border flex items-center gap-1.5 py-1 px-2.5 rounded-md shadow-sm text-xs font-medium"
+                                      >
+                                        <span>{language}</span>
+                                        <button
+                                          type="button"
+                                          onClick={() =>
+                                            removeLanguage(language)
+                                          }
+                                          className="text-muted-foreground hover:text-destructive transition-colors rounded-sm focus:outline-none"
+                                        >
+                                          <X size={12} />
+                                        </button>
+                                      </Badge>
+                                    ))}
+                                  </div>
+                                )}
                               </div>
 
-                              {formData.languages.length > 0 && (
-                                <div className="flex flex-wrap gap-2 p-3 bg-slate-50/50 dark:bg-white/5 rounded-xl border border-dashed border-slate-200 dark:border-white/10">
-                                  {formData.languages.map((language) => (
-                                    <Badge
-                                      key={language}
-                                      className="bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 border border-slate-200 dark:border-white/10 flex items-center gap-1.5 py-1 px-2.5"
-                                    >
-                                      <span className="text-[11px] font-semibold">
-                                        {language}
-                                      </span>
-
-                                      <button
-                                        type="button"
-                                        onClick={() => removeLanguage(language)}
-                                      >
-                                        <X size={12} />
-                                      </button>
-                                    </Badge>
-                                  ))}
-                                </div>
-                              )}
-                            </div>
-
-                            {/* BIO */}
-                            <div className="space-y-1.5">
-                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                Short Bio
-                              </Label>
-
-                              <Textarea
-                                name="bio"
-                                value={formData.bio}
-                                onChange={handleInputChange}
-                                className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-xl min-h-[80px]"
-                              />
-                            </div>
-
-                            {/* PORTFOLIO */}
-                            <div className="space-y-1.5">
-                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                Portfolio
-                              </Label>
-
-                              <Input
-                                name="portfolio"
-                                value={formData.portfolio}
-                                onChange={handleInputChange}
-                                placeholder="https://portfolio.com"
-                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg"
-                              />
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                Availability
-                              </Label>
-
-                              <Button
-                                type="button"
-                                variant="outline"
-                                onClick={() =>
-                                  setFormData((prev) => ({
-                                    ...prev,
-
-                                    isAvailable: !prev.isAvailable,
-                                  }))
-                                }
-                                className="
-      w-full
-      h-10
-      rounded-lg
-      flex
-      justify-between
-      bg-slate-50
-      dark:bg-slate-900/50
-    "
-                              >
-                                <span>
-                                  {formData.isAvailable ? "Available" : "Busy"}
-                                </span>
-
-                                {formData.isAvailable ? (
-                                  <ToggleRight className="text-green-500" />
-                                ) : (
-                                  <ToggleLeft className="text-red-500" />
+                              {/* BIO */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Short Bio
+                                </Label>
+                                <Textarea
+                                  name="bio"
+                                  value={formData.bio}
+                                  onChange={handleInputChange}
+                                  placeholder="Tell us about yourself..."
+                                  className={cn(
+                                    "bg-muted/30 rounded-xl min-h-[90px] text-sm transition-all",
+                                    errors.bio
+                                      ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/25 focus-visible:border-destructive"
+                                      : "border-input focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:border-primary",
+                                  )}
+                                />
+                                {errors.bio && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.bio}
+                                  </p>
                                 )}
-                              </Button>
+                              </div>
+
+                              {/* PORTFOLIO */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Portfolio URL
+                                </Label>
+                                <Input
+                                  name="portfolio"
+                                  value={formData.portfolio}
+                                  onChange={handleInputChange}
+                                  placeholder="https://yourportfolio.com"
+                                  className={cn(
+                                    "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                    errors.portfolio
+                                      ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                      : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                  )}
+                                />
+                                {errors.portfolio && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.portfolio}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* HOURLY RATE & CURRENCY */}
+                              <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                  <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                    Hourly Rate
+                                  </Label>
+                                  <Input
+                                    type="number"
+                                    min="0"
+                                    step="1"
+                                    name="hourlyRate"
+                                    value={formData.hourlyRate}
+                                    onChange={handleInputChange}
+                                    placeholder="50"
+                                    className={cn(
+                                      "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                      errors.hourlyRate
+                                        ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                        : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                    )}
+                                  />
+                                  {errors.hourlyRate && (
+                                    <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                      {errors.hourlyRate}
+                                    </p>
+                                  )}
+                                </div>
+
+                                <div className="space-y-2">
+                                  <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                    Currency
+                                  </Label>
+                                  <Select
+                                    value={formData.currency}
+                                    onValueChange={(value) =>
+                                      setFormData((prev) => ({
+                                        ...prev,
+                                        currency: value,
+                                      }))
+                                    }
+                                  >
+                                    <SelectTrigger
+                                      className={cn(
+                                        "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                        errors.currency
+                                          ? "border-destructive"
+                                          : "border-input",
+                                      )}
+                                    >
+                                      <SelectValue />
+                                    </SelectTrigger>
+                                    <SelectContent className="bg-popover border-border">
+                                      <SelectItem value="INR">
+                                        INR (₹)
+                                      </SelectItem>
+                                      <SelectItem value="USD">
+                                        USD ($)
+                                      </SelectItem>
+                                    </SelectContent>
+                                  </Select>
+                                  {errors.currency && (
+                                    <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                      {errors.currency}
+                                    </p>
+                                  )}
+                                </div>
+                              </div>
+
+                              {/* AVAILABILITY TOGGLE */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Availability Status
+                                </Label>
+                                <Button
+                                  type="button"
+                                  variant="outline"
+                                  onClick={() =>
+                                    setFormData((prev) => ({
+                                      ...prev,
+                                      isAvailable: !prev.isAvailable,
+                                    }))
+                                  }
+                                  className={cn(
+                                    "w-full h-11 rounded-xl flex justify-between items-center px-4 transition-all duration-200 font-semibold text-sm border",
+                                    formData.isAvailable
+                                      ? "bg-emerald-500/5 border-emerald-500/20 text-emerald-600 dark:text-emerald-400"
+                                      : "bg-rose-500/5 border-rose-500/20 text-rose-600 dark:text-rose-400",
+                                  )}
+                                >
+                                  <span className="flex items-center gap-2">
+                                    <span
+                                      className={cn(
+                                        "h-2 w-2 rounded-full",
+                                        formData.isAvailable
+                                          ? "bg-emerald-500"
+                                          : "bg-rose-500",
+                                      )}
+                                    />
+                                    {formData.isAvailable
+                                      ? "Available for Projects"
+                                      : "Currently Unavailable / Busy"}
+                                  </span>
+                                  {formData.isAvailable ? (
+                                    <ToggleRight
+                                      size={24}
+                                      className="text-emerald-500"
+                                    />
+                                  ) : (
+                                    <ToggleLeft
+                                      size={24}
+                                      className="text-rose-500"
+                                    />
+                                  )}
+                                </Button>
+                              </div>
                             </div>
-                          </>
+                          </div>
                         )}
 
-                        {/* ================= CLIENT ================= */}
+                        {/* ================= CLIENT SECTION ================= */}
                         {isClient && (
-                          <>
-                            {/* COMPANY NAME */}
-                            <div className="space-y-1.5">
-                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                Company Name
-                              </Label>
+                          <div className="space-y-4 pt-2">
+                            <h4 className="text-xs font-bold text-primary uppercase tracking-widest border-b border-border/40 pb-1">
+                              Company Settings
+                            </h4>
 
-                              <Input
-                                name="companyName"
-                                value={formData.companyName}
-                                onChange={handleInputChange}
-                                placeholder="Enter company name"
-                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg"
-                              />
+                            <div className="space-y-4">
+                              {/* COMPANY NAME */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Company Name
+                                </Label>
+                                <Input
+                                  name="companyName"
+                                  value={formData.companyName}
+                                  onChange={handleInputChange}
+                                  placeholder="Enter company name"
+                                  className={cn(
+                                    "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                    errors.companyName
+                                      ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                      : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                  )}
+                                />
+                                {errors.companyName && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.companyName}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* COMPANY WEBSITE */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Company Website
+                                </Label>
+                                <Input
+                                  name="companyWebsite"
+                                  value={formData.companyWebsite}
+                                  onChange={handleInputChange}
+                                  placeholder="https://company.com"
+                                  className={cn(
+                                    "h-10 bg-muted/30 rounded-lg text-sm font-medium transition-all",
+                                    errors.companyWebsite
+                                      ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                                      : "border-input focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary",
+                                  )}
+                                />
+                                {errors.companyWebsite && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.companyWebsite}
+                                  </p>
+                                )}
+                              </div>
+
+                              {/* REQUIREMENT */}
+                              <div className="space-y-2">
+                                <Label className="text-[11px] font-bold uppercase tracking-[0.08em] text-muted-foreground">
+                                  Project Requirements
+                                </Label>
+                                <Textarea
+                                  name="requirement"
+                                  value={formData.requirement}
+                                  onChange={handleInputChange}
+                                  placeholder="Describe your current talent/project hiring needs..."
+                                  className={cn(
+                                    "bg-muted/30 rounded-xl min-h-[120px] text-sm transition-all",
+                                    errors.requirement
+                                      ? "border-destructive focus-visible:ring-2 focus-visible:ring-destructive/25 focus-visible:border-destructive"
+                                      : "border-input focus-visible:ring-2 focus-visible:ring-primary/25 focus-visible:border-primary",
+                                  )}
+                                />
+                                {errors.requirement && (
+                                  <p className="text-destructive text-xs font-medium animate-in fade-in-50 slide-in-from-top-1">
+                                    {errors.requirement}
+                                  </p>
+                                )}
+                              </div>
                             </div>
-
-                            {/* COMPANY WEBSITE */}
-                            <div className="space-y-1.5">
-                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                Company Website
-                              </Label>
-
-                              <Input
-                                name="companyWebsite"
-                                value={formData.companyWebsite}
-                                onChange={handleInputChange}
-                                placeholder="https://company.com"
-                                className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg"
-                              />
-                            </div>
-
-                            {/* REQUIREMENT */}
-                            <div className="space-y-1.5">
-                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
-                                Requirement
-                              </Label>
-
-                              <Textarea
-                                name="requirement"
-                                value={formData.requirement}
-                                onChange={handleInputChange}
-                                placeholder="Describe your project requirement..."
-                                className="bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-xl min-h-[120px]"
-                              />
-                            </div>
-                          </>
+                          </div>
                         )}
                       </div>
 
                       {/* FOOTER */}
-                      <div className="px-6 py-4 bg-slate-50/50 dark:bg-white/5 border-t border-slate-100 dark:border-white/10 flex items-center justify-end gap-3">
+                      <div className="px-6 py-4 bg-muted/30 border-t border-border flex items-center justify-end gap-3 backdrop-blur-sm">
                         <Button
                           type="button"
                           variant="ghost"
                           onClick={() => setIsEditDialogOpen(false)}
-                          className="h-9 px-4 text-slate-500 font-bold text-[10px] uppercase tracking-widest hover:bg-slate-100 dark:hover:bg-white/5"
+                          className="h-10 px-4 text-muted-foreground hover:text-foreground font-bold text-xs uppercase tracking-wider transition-colors"
                         >
                           Discard
                         </Button>
@@ -856,12 +1051,12 @@ const Profile = () => {
                         <Button
                           type="submit"
                           disabled={isUpdatingProfile}
-                          className="h-9 px-6 bg-primary hover:bg-primary/90 text-white font-black text-[10px] uppercase tracking-[0.15em] shadow-lg shadow-primary/20 rounded-lg"
+                          className="h-10 px-6 bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-xs uppercase tracking-wider shadow-md shadow-primary/10 rounded-lg transition-all active:scale-95 flex items-center justify-center"
                         >
                           {isUpdatingProfile ? (
-                            <Loader2 className="animate-spin h-3 w-3" />
+                            <Loader2 className="animate-spin h-4 w-4" />
                           ) : (
-                            "Save Profile"
+                            "Save Changes"
                           )}
                         </Button>
                       </div>
@@ -903,38 +1098,120 @@ const Profile = () => {
           {/* RIGHT: Main Profile Content */}
           <div className="lg:col-span-8 space-y-8">
             {isFreelancer && (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                    Hourly Rate
-                  </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-blue-50 dark:bg-primary/10 flex items-center justify-center">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 p-1">
+                {/* --- CARD 1: HOURLY RATE (PRIMARY BRAND GLOW) --- */}
+                <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950/50 border border-slate-200/60 dark:border-slate-800/50 p-7 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05),0_20px_40px_-20px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(var(--primary),0.15)] hover:border-primary/40">
+                  {/* Mesh Gradient Light (Primary Color Glow on Hover) */}
+                  <div className="absolute -right-12 -top-12 w-32 h-32 bg-primary/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                  <div className="flex items-center justify-between mb-6">
+                    <p className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                      Hourly Rate
+                    </p>
+                    {/* Dynamic Status Badge aligned with Primary Color */}
+                    <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20 shadow-sm">
+                      <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
+                      Active
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-5">
+                    {/* Premium Icon Container with Solid Primary Background */}
+                    <div className="relative shrink-0 w-14 h-14 rounded-2xl bg-primary flex items-center justify-center shadow-[0_8px_20px_-6px_rgba(0,0,0,0.3)] dark:shadow-[0_8px_20px_-6px_rgba(0,0,0,0.7)] transform group-hover:rotate-[6deg] transition-transform duration-300">
+                      <div className="absolute inset-0.5 rounded-[14px] bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                       {profileData?.currency === "INR" ? (
-                        <IndianRupee size={24} className="text-primary" />
+                        <IndianRupee
+                          size={24}
+                          className="text-white drop-shadow-sm"
+                        />
                       ) : (
-                        <DollarSign size={24} className="text-primary" />
+                        <DollarSign
+                          size={24}
+                          className="text-white drop-shadow-sm"
+                        />
                       )}
                     </div>
 
-                    <span className="text-4xl font-black">
-                      {profileData?.currency === "INR" ? "₹" : "$"}
-                      {profileData?.hourlyRate || "0"}
-                      <span className="text-sm text-slate-400 font-medium">
-                        /hr
-                      </span>
-                    </span>
+                    <div className="flex flex-col">
+                      <div className="flex items-baseline gap-0.5">
+                        <span className="text-4xl font-black bg-gradient-to-r from-slate-900 to-slate-700 dark:from-white dark:to-slate-300 bg-clip-text text-transparent tracking-tight">
+                          {profileData?.currency === "INR" ? "₹" : "$"}
+                          {profileData?.hourlyRate || "0"}
+                        </span>
+                        <span className="text-sm font-bold text-slate-400 dark:text-slate-500 ml-1">
+                          /hr
+                        </span>
+                      </div>
+                      <p className="text-xs font-medium text-slate-400 dark:text-slate-500 mt-0.5">
+                        Based on market value
+                      </p>
+                    </div>
                   </div>
                 </div>
-                <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-8 shadow-sm">
-                  <p className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-2">
-                    Success Rate
+
+                {/* --- CARD 2: PROFILE COMPLETION (PRIMARY BRAND RING) --- */}
+                <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950/50 border border-slate-200/60 dark:border-slate-800/50 p-7 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05),0_20px_40px_-20px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(var(--primary),0.15)] hover:border-primary/40">
+                  {/* Mesh Gradient Light */}
+                  <div className="absolute -right-12 -top-12 w-32 h-32 bg-primary/10 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                  <p className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-5">
+                    Profile Completion
                   </p>
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-blue-500/10 flex items-center justify-center">
-                      <Globe size={24} className="text-blue-500" />
+
+                  <div className="flex flex-col sm:flex-row items-center gap-6 justify-center sm:justify-start">
+                    {/* Dynamic Glowing SVG Ring using text-primary */}
+                    <div className="relative w-28 h-28 shrink-0">
+                      {/* Subtle glow behind the active progress */}
+                      <div className="absolute inset-0 rounded-full bg-primary/5 blur-xl group-hover:scale-110 transition-transform duration-500" />
+
+                      <svg className="w-28 h-28 -rotate-90 relative z-10">
+                        {/* Soft Background Track */}
+                        <circle
+                          cx="56"
+                          cy="56"
+                          r="46"
+                          strokeWidth="7"
+                          className="fill-none stroke-slate-100 dark:stroke-slate-800/80"
+                        />
+                        {/* Progress Circle using Tailwind's stroke-primary */}
+                        <circle
+                          cx="56"
+                          cy="56"
+                          r="46"
+                          strokeWidth="7"
+                          strokeLinecap="round"
+                          className="fill-none stroke-primary transition-all duration-1000 ease-out"
+                          style={{
+                            strokeDasharray: 289,
+                            strokeDashoffset:
+                              289 -
+                              (289 * (profileData?.profileCompletion || 10)) /
+                                100,
+                          }}
+                        />
+                      </svg>
+
+                      {/* Value inside Ring */}
+                      <div className="absolute inset-0 flex flex-col items-center justify-center z-20">
+                        <span className="text-2xl font-black bg-gradient-to-br from-slate-900 to-slate-600 dark:from-white dark:to-slate-300 bg-clip-text text-transparent tracking-tighter">
+                          {profileData?.profileCompletion || 10}%
+                        </span>
+                      </div>
                     </div>
-                    <span className="text-4xl font-black">100%</span>
+
+                    {/* Dynamic Copywriting & Progress Action */}
+                    <div className="text-center sm:text-left flex flex-col justify-center">
+                      <h4 className="font-extrabold text-slate-800 dark:text-slate-200 text-sm mb-1 tracking-tight">
+                        {(profileData?.profileCompletion || 10) === 100
+                          ? "⚡ Profile Perfected"
+                          : "🚀 Boost Your Rank"}
+                      </h4>
+                      <p className="text-xs font-medium text-slate-400 dark:text-slate-500 leading-relaxed max-w-[190px]">
+                        {(profileData?.profileCompletion || 10) === 100
+                          ? "Your profile is at peak performance."
+                          : "Complete missing info to unlock premium badge."}
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -983,17 +1260,43 @@ const Profile = () => {
 
             {/* Narrative Box */}
             {isFreelancer && (
-              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm relative overflow-hidden group">
-                <div className="absolute top-[-20%] right-[-10%] w-64 h-64 bg-primary/5 rounded-full blur-3xl group-hover:bg-primary/10 transition-all duration-700" />
-                <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] mb-6">
-                  About Me
-                </h3>
-                <p className="text-xl text-slate-700 dark:text-slate-300 italic font-medium leading-relaxed relative z-10">
-                  "
-                  {profileData?.bio ||
-                    "Tell the community about your expertise and passion..."}
-                  "
-                </p>
+              <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950/50 border border-slate-200/60 dark:border-slate-800/50 p-8 sm:p-10 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05),0_20px_40px_-20px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(var(--primary),0.1)] hover:border-primary/30 mt-6">
+                {/* Futuristic Background Mesh Glow (Primary Color) */}
+                <div className="absolute -right-16 -top-16 w-48 h-48 bg-primary/5 rounded-full blur-3xl opacity-100 group-hover:bg-primary/10 group-hover:scale-110 transition-all duration-700 pointer-events-none" />
+                <div className="absolute -left-16 -bottom-16 w-48 h-48 bg-primary/5 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-all duration-700 pointer-events-none" />
+
+                {/* Elegant Editorial Header */}
+                <div className="flex items-center gap-3 mb-6 relative z-10">
+                  <div className="h-1 w-6 rounded-full bg-primary" />
+                  <h3 className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                    About Me
+                  </h3>
+                </div>
+
+                {/* Bio Content Box with Elegant Quote Effects */}
+                <div className="relative z-10 pl-2 sm:pl-4">
+                  {/* Visual Quote Icon Watermark */}
+                  <span className="absolute -top-6 -left-3 text-7xl font-serif text-primary/10 dark:text-primary/5 select-none pointer-events-none">
+                    “
+                  </span>
+
+                  <p className="text-lg sm:text-xl text-slate-700 dark:text-slate-300 font-medium leading-relaxed tracking-wide relative z-10 antialiased">
+                    {profileData?.bio ? (
+                      profileData.bio
+                    ) : (
+                      <span className="text-slate-400 dark:text-slate-500 font-normal italic text-base">
+                        Tell the community about your expertise, passion, and
+                        what drives you...
+                      </span>
+                    )}
+                  </p>
+
+                  {profileData?.bio && (
+                    <span className="absolute -bottom-12 right-2 text-7xl font-serif text-primary/10 dark:text-primary/5 select-none pointer-events-none">
+                      ”
+                    </span>
+                  )}
+                </div>
               </div>
             )}
 
@@ -1014,60 +1317,69 @@ const Profile = () => {
 
             {/* Expertise Box */}
             {isFreelancer && (
-              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-                    Core Expertise
-                  </h3>
-                  <span className="text-[10px] font-bold text-slate-400">
-                    {profileData?.skills?.length || 0} Specialties
-                  </span>
-                </div>
-                <div className="flex flex-wrap gap-4">
-                  {profileData?.skills?.length > 0 ? (
-                    profileData.skills.map((skill, index) => (
-                      <div
-                        key={index}
-                        className="px-6 py-3 rounded-2xl bg-slate-50 dark:bg-[#1e293b]/50 border border-slate-100 dark:border-white/5 text-sm font-bold hover:border-primary/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-default"
-                      >
-                        {skill}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-slate-400 italic text-sm">
-                      Skills list is empty.
-                    </p>
-                  )}
-                </div>
-              </div>
-            )}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+                {/* --- CARD 1: CORE EXPERTISE --- */}
+                <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950/50 border border-slate-200/60 dark:border-slate-800/50 p-7 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05),0_20px_40px_-20px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08)] hover:border-primary/30">
+                  {/* Subtle Mesh Light */}
+                  <div className="absolute -right-12 -top-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
 
-            {/* Language Box */}
-            {isFreelancer && (
-              <div className="bg-white dark:bg-slate-900/40 border border-slate-200 dark:border-white/5 rounded-sm p-10 shadow-sm">
-                <div className="flex items-center justify-between mb-8">
-                  <h3 className="text-xs font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
-                    Languages
-                  </h3>
-                  <span className="text-[10px] font-bold text-slate-400">
-                    {profileData?.languages?.length || 0} Languages
-                  </span>
+                  <div className="flex items-center justify-between mb-6 relative z-10">
+                    <h3 className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                      Core Expertise
+                    </h3>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                      {profileData?.skills?.length || 0} Specialties
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2.5 relative z-10">
+                    {profileData?.skills?.length > 0 ? (
+                      profileData.skills.map((skill, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-primary/50 hover:text-primary hover:bg-white dark:hover:bg-slate-900 hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] transition-all duration-300 cursor-default"
+                        >
+                          {skill}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-slate-400 dark:text-slate-500 italic text-xs py-2">
+                        Skills list is empty.
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-4">
-                  {profileData?.languages?.length > 0 ? (
-                    profileData.languages.map((language, index) => (
-                      <div
-                        key={index}
-                        className="px-6 py-3 rounded-2xl bg-slate-50 dark:bg-[#1e293b]/50 border border-slate-100 dark:border-white/5 text-sm font-bold hover:border-primary/50 hover:bg-white dark:hover:bg-slate-800 transition-all cursor-default"
-                      >
-                        {language}
-                      </div>
-                    ))
-                  ) : (
-                    <p className="text-slate-400 italic text-sm">
-                      Language list is empty.
-                    </p>
-                  )}
+
+                {/* --- CARD 2: LANGUAGES --- */}
+                <div className="group relative overflow-hidden rounded-3xl bg-gradient-to-b from-white to-slate-50/50 dark:from-slate-900 dark:to-slate-950/50 border border-slate-200/60 dark:border-slate-800/50 p-7 shadow-[0_4px_20px_-4px_rgba(0,0,0,0.05),0_20px_40px_-20px_rgba(0,0,0,0.03)] dark:shadow-[0_20px_40px_-15px_rgba(0,0,0,0.5)] transition-all duration-500 hover:-translate-y-1 hover:shadow-[0_20px_40px_-10px_rgba(0,0,0,0.08)] hover:border-primary/30">
+                  {/* Subtle Mesh Light */}
+                  <div className="absolute -right-12 -top-12 w-32 h-32 bg-primary/5 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-700" />
+
+                  <div className="flex items-center justify-between mb-6 relative z-10">
+                    <h3 className="text-[11px] font-extrabold text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em]">
+                      Languages
+                    </h3>
+                    <span className="inline-flex items-center px-2.5 py-1 rounded-full text-[10px] font-bold bg-primary/10 text-primary border border-primary/20">
+                      {profileData?.languages?.length || 0} Fluent
+                    </span>
+                  </div>
+
+                  <div className="flex flex-wrap gap-2.5 relative z-10">
+                    {profileData?.languages?.length > 0 ? (
+                      profileData.languages.map((language, index) => (
+                        <div
+                          key={index}
+                          className="px-4 py-2 rounded-xl bg-slate-50 dark:bg-slate-800/40 border border-slate-200/50 dark:border-slate-800 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-primary/50 hover:text-primary hover:bg-white dark:hover:bg-slate-900 hover:shadow-[0_4px_12px_rgba(0,0,0,0.03)] transition-all duration-300 cursor-default"
+                        >
+                          {language}
+                        </div>
+                      ))
+                    ) : (
+                      <p className="text-slate-400 dark:text-slate-500 italic text-xs py-2">
+                        Language list is empty.
+                      </p>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

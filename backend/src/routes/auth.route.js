@@ -25,6 +25,7 @@ import {
 } from "../controllers/auth.controller.js";
 import { isAuth } from "../middlewares/auth.middleware.js";
 import upload from "../middlewares/multer.js";
+import { verificationRateLimit } from "../middlewares/verificationRateLimit.js";
 
 const router = express.Router();
 
@@ -66,6 +67,6 @@ router.patch(
   validate(resetPasswordWithTokenSchema),
   resetPasswordWithToken,
 );
-router.post("/resend-verification", isAuth, resendVerificationEmail);
+router.post("/resend-verification", isAuth, verificationRateLimit, resendVerificationEmail);
 
 export default router;
