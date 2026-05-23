@@ -240,7 +240,7 @@ const FindWork = () => {
               </h2>
             </div>
 
-            <Card className="border-none bg-secondary/30 dark:bg-secondary/10 shadow-none rounded-3xl">
+            <Card className="border-none bg-secondary/30 dark:bg-secondary/10 shadow-none rounded-xl">
               <CardContent className="p-8 space-y-8">
                 <div className="space-y-5">
                   <label className="text-sm font-bold uppercase tracking-widest text-muted-foreground">
@@ -369,7 +369,7 @@ const FindWork = () => {
               return (
                 <Card
                   key={i}
-                  className="border-none bg-white dark:bg-[#0f172a] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-[2rem] overflow-hidden group"
+                  className="border-none bg-white dark:bg-[#0f172a] shadow-[0_4px_20px_rgba(0,0,0,0.03)] hover:shadow-[0_20px_40px_rgba(0,0,0,0.08)] transition-all duration-500 rounded-xl overflow-hidden group"
                 >
                   <CardContent className="p-0">
                     <div className="p-8 md:p-10">

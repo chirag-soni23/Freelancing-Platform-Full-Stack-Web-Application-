@@ -80,7 +80,7 @@ const SavedFreelancers = () => {
               <Users size={14} /> Your Saved Experts
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter">
+            <h1 className="text-3xl">
               Saved <span className="text-primary">Freelancers.</span>
             </h1>
 
@@ -137,7 +137,7 @@ const SavedFreelancers = () => {
               <Filter size={16} className="text-primary" /> Filter Talent
             </h2>
 
-            <Card className="border-none bg-secondary/30 dark:bg-secondary/10 rounded-[2rem] overflow-hidden">
+            <Card className="border-none bg-secondary/30 dark:bg-secondary/10 rounded-xl overflow-hidden">
               <CardContent className="p-8 space-y-8">
                 <div className="space-y-4">
                   <label className="text-[11px] font-black uppercase tracking-widest text-muted-foreground ml-1">
@@ -378,7 +378,7 @@ const SavedFreelancers = () => {
               return (
                 <Card
                   key={i}
-                  className="border-none bg-white dark:bg-[#0f172a] shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)] transition-all duration-500 rounded-[2.5rem] overflow-hidden group"
+                  className="border-none bg-white dark:bg-[#0f172a] shadow-[0_10px_30px_rgba(0,0,0,0.02)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.06)] transition-all duration-500 rounded-xl overflow-hidden group"
                 >
                   <CardContent className="p-0">
                     <div className="p-8 md:p-10 flex flex-col md:flex-row gap-8">
