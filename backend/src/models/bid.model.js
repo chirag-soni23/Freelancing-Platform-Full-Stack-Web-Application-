@@ -15,6 +15,14 @@ const Bid = sequelize.define(
       allowNull: false,
     },
 
+    currency: {
+      type: DataTypes.ENUM("INR", "USD"),
+
+      allowNull: false,
+
+      defaultValue: "INR",
+    },
+    
     proposal: {
       type: DataTypes.TEXT,
       allowNull: false,

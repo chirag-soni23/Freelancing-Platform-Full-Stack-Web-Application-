@@ -1,6 +1,7 @@
 import db from "../models/index.js";
 import { StatusCodes } from "../config/index.js";
 import ApiError, { successResponse } from "../utils/apiResponse.js";
+
 import { Op } from "sequelize";
 
 // create bid
@@ -8,7 +9,7 @@ export const createBid = async (req, res, next) => {
   try {
     const freelancerId = req.user.id;
 
-    const { jobId, amount, proposal, deliveryDays } = req.body;
+    const { jobId, amount, currency, proposal, deliveryDays } = req.body;
 
     const job = await db.Job.findByPk(jobId);
 
@@ -16,7 +17,10 @@ export const createBid = async (req, res, next) => {
       throw ApiError.NOTFOUND("Job not found");
     }
 
-    // prevent duplicate bid
+    if (job.status === "closed") {
+      throw ApiError.BADREQUEST("Job already closed");
+    }
+
     const existingBid = await db.Bid.findOne({
       where: {
         freelancerId,
@@ -30,7 +34,11 @@ export const createBid = async (req, res, next) => {
 
     const bid = await db.Bid.create({
       amount,
+
+      currency,
+
       proposal,
+
       deliveryDays,
 
       freelancerId,
@@ -53,30 +61,80 @@ export const createBid = async (req, res, next) => {
 // get my bids
 export const getMyBids = async (req, res, next) => {
   try {
-    const bids = await db.Bid.findAll({
-      where: {
-        freelancerId: req.user.id,
+    let { page = 1, limit = 10, search = "" } = req.query;
+
+    page = parseInt(page, 10);
+
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      throw ApiError.BADREQUEST("Page must be a positive integer");
+    }
+
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    }
+
+    const offset = (page - 1) * limit;
+
+    let where = {
+      freelancerId: req.user.id,
+    };
+
+    const include = [
+      {
+        model: db.Job,
+
+        as: "job",
+
+        ...(search && search.trim()
+          ? {
+              where: {
+                title: {
+                  [Op.like]: `%${search.trim()}%`,
+                },
+              },
+            }
+          : {}),
       },
 
-      include: [
-        {
-          model: db.Job,
-          as: "job",
-        },
+      {
+        model: db.User,
 
-        {
-          model: db.User,
-          as: "client",
+        as: "client",
 
-          attributes: ["id", "name", "profilePic"],
-        },
-      ],
+        attributes: ["id", "name", "email", "profilePic"],
+      },
+    ];
+
+    const { count, rows } = await db.Bid.findAndCountAll({
+      where,
+
+      include,
+
+      limit,
+
+      offset,
 
       order: [["createdAt", "DESC"]],
+
+      distinct: true,
     });
 
     return successResponse(res, StatusCodes.OK, {
-      data: bids,
+      message: "Bids fetched",
+
+      data: rows,
+
+      pagination: {
+        total: count,
+
+        page,
+
+        limit,
+
+        totalPages: Math.ceil(count / limit),
+      },
     });
   } catch (error) {
     next(error);
@@ -94,7 +152,6 @@ export const getJobBids = async (req, res, next) => {
       throw ApiError.NOTFOUND("Job not found");
     }
 
-    // only owner client
     if (job.clientId !== req.user.id) {
       throw ApiError.UNAUTHORIZED("Unauthorized");
     }
@@ -107,6 +164,7 @@ export const getJobBids = async (req, res, next) => {
       include: [
         {
           model: db.User,
+
           as: "freelancer",
 
           attributes: ["id", "name", "profilePic", "title"],
@@ -139,11 +197,34 @@ export const acceptBid = async (req, res, next) => {
       throw ApiError.UNAUTHORIZED("Unauthorized");
     }
 
+    const alreadyAccepted = await db.Bid.findOne({
+      where: {
+        jobId: bid.jobId,
+
+        status: "accepted",
+      },
+    });
+
+    if (alreadyAccepted) {
+      throw ApiError.BADREQUEST("Bid already accepted");
+    }
+
     bid.status = "accepted";
 
     await bid.save();
 
-    // reject others
+    await db.Job.update(
+      {
+        status: "closed",
+      },
+
+      {
+        where: {
+          id: bid.jobId,
+        },
+      },
+    );
+
     await db.Bid.update(
       {
         status: "rejected",
@@ -160,12 +241,21 @@ export const acceptBid = async (req, res, next) => {
       },
     );
 
-    // create chat
     let conversation = await db.Conversation.findOne({
       where: {
-        senderId: bid.clientId,
+        [Op.or]: [
+          {
+            senderId: bid.clientId,
 
-        receiverId: bid.freelancerId,
+            receiverId: bid.freelancerId,
+          },
+
+          {
+            senderId: bid.freelancerId,
+
+            receiverId: bid.clientId,
+          },
+        ],
       },
     });
 
@@ -219,6 +309,53 @@ export const rejectBid = async (req, res, next) => {
   }
 };
 
+// update bid
+export const updateBid = async (req, res, next) => {
+  try {
+    const { bidId } = req.params;
+
+    const { amount, currency, proposal, deliveryDays } = req.body;
+
+    const bid = await db.Bid.findOne({
+      where: {
+        id: bidId,
+
+        freelancerId: req.user.id,
+      },
+    });
+
+    if (!bid) {
+      throw ApiError.NOTFOUND("Bid not found");
+    }
+
+    if (bid.status === "accepted") {
+      throw ApiError.BADREQUEST("Accepted bid cannot be edited");
+    }
+
+    if (bid.status === "rejected") {
+      throw ApiError.BADREQUEST("Rejected bid cannot be edited");
+    }
+
+    await bid.update({
+      amount: amount ?? bid.amount,
+
+      currency: currency ?? bid.currency,
+
+      proposal: proposal ?? bid.proposal,
+
+      deliveryDays: deliveryDays ?? bid.deliveryDays,
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Bid updated successfully",
+
+      data: bid,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 // delete bid
 export const deleteBid = async (req, res, next) => {
   try {
@@ -227,12 +364,17 @@ export const deleteBid = async (req, res, next) => {
     const bid = await db.Bid.findOne({
       where: {
         id: bidId,
+
         freelancerId: req.user.id,
       },
     });
 
     if (!bid) {
       throw ApiError.NOTFOUND("Bid not found");
+    }
+
+    if (bid.status === "accepted") {
+      throw ApiError.BADREQUEST("Accepted bid cannot be deleted");
     }
 
     await bid.destroy();

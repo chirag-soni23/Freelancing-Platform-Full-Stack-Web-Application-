@@ -21,6 +21,9 @@ import Category from "@/admin/pages/Category";
 import Freelancers from "@/admin/pages/Freelancers";
 import Client from "@/admin/pages/Client";
 import AdminJobs from "@/admin/pages/AdminJobs";
+import { useAuth } from "@/hooks/useAuth";
+import FreelancerBid from "@/freelancers/pages/FreelancerBid";
+import ClientBid from "@/client/pages/ClientBid";
 
 /* =========================
    LAZY IMPORTS
@@ -28,14 +31,17 @@ import AdminJobs from "@/admin/pages/AdminJobs";
 
 const MainLayout = lazy(() => import("@/components/layout/MainLayout"));
 
-const Dashboard = lazy(() => import("@/dashboard/Dashboard"));
-
 const AppLayout = lazy(() =>
   import("@/dashboard/layouts/AppLayout").then((m) => ({
     default: m.AppLayout,
   })),
 );
 
+const FreelancerDashboard = lazy(
+  () => import("@/freelancers/FreelancerDashboard"),
+);
+
+const ClientDashboard = lazy(() => import("@/client/ClientDashboard"));
 const ClientSignUp = lazy(() => import("@/pages/ClientSignUp"));
 
 const FindFreelancers = lazy(() => import("@/pages/FindFreelancers"));
@@ -75,6 +81,9 @@ const Loader = () => (
 ========================= */
 
 const AppRoutes = () => {
+  const { user } = useAuth();
+
+  const role = user?.data?.role;
   return (
     <Suspense fallback={<Loader />}>
       <ScrollToTop />
@@ -172,13 +181,32 @@ const AppRoutes = () => {
         <Route
           path="/dashboard"
           element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
+            user?.data?.role === "admin" ? (
+              <NotFound />
+            ) : (
+              <ProtectedRoute>
+                <AppLayout />
+              </ProtectedRoute>
+            )
           }
         >
-          <Route index element={<Dashboard />} />
+          <Route
+            index
+            element={
+              role === "freelancer" ? (
+                <FreelancerDashboard />
+              ) : role === "client" ? (
+                <ClientDashboard />
+              ) : (
+                <NotFound />
+              )
+            }
+          />
 
+          <Route
+            path="my-bids"
+            element={role === "freelancer" && <FreelancerBid />}
+          />
           <Route path="chats" element={<Chat />} />
 
           <Route path="rating-and-reviews" element={<Review />} />

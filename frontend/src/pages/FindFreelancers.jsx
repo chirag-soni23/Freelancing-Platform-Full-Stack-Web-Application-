@@ -81,7 +81,7 @@ const FindFreelancers = () => {
               <Users size={14} /> Top 1% Verified Experts
             </div>
 
-            <h1 className="text-4xl md:text-6xl font-black tracking-tighter">
+            <h1 className="text-3xl md:text-3xl">
               Hire the <span className="text-primary">Best Talent.</span>
             </h1>
 

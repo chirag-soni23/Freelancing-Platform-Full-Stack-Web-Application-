@@ -6,6 +6,7 @@ import {
   Phone,
   Sparkles,
   ArrowRight,
+  Loader2,
 } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -53,92 +54,78 @@ const Contact = () => {
 
     if (error) {
       const newErrors = {};
-
       error.details.forEach((err) => {
         newErrors[err.path[0]] = err.message;
       });
-
       setErrors(newErrors);
-
       return;
     }
 
-    setErrors({
-      name: "",
-      email: "",
-      description: "",
-    });
+    setErrors({ name: "", email: "", description: "" });
 
     createContact(formData, {
       onSuccess: () => {
-        setFormData({
-          name: "",
-          email: "",
-          description: "",
-        });
+        setFormData({ name: "", email: "", description: "" });
       },
     });
   };
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#050505] text-slate-900 dark:text-white selection:bg-primary/30 flex items-center justify-center p-6 md:p-12 font-sans overflow-hidden relative transition-colors duration-500">
-      {/* BG */}
-      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-primary/10 dark:bg-primary/20 rounded-full blur-[120px] animate-pulse" />
+    <div className="min-h-screen bg-slate-50 dark:bg-[#09090b] text-slate-900 dark:text-zinc-50 flex items-center justify-center p-6 md:p-12 font-sans relative overflow-hidden transition-colors duration-500">
+      {/* Background Ambient Glows */}
+      <div className="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] bg-primary/10 dark:bg-primary/5 rounded-full blur-[140px] pointer-events-none" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-blue-500/10 dark:bg-blue-500/5 rounded-full blur-[120px] pointer-events-none" />
 
-      <div className="absolute bottom-[-10%] right-[-10%] w-[30%] h-[30%] bg-blue-400/10 dark:bg-blue-600/10 rounded-full blur-[100px]" />
-
-      <div className="w-full max-w-7xl z-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12">
-          {/* LEFT */}
-          <div className="lg:col-span-5 flex flex-col justify-between space-y-12 p-2">
-            <div className="space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 dark:bg-white/5 border border-primary/20 dark:border-white/10 text-xs font-bold text-primary tracking-wider uppercase">
-                <Sparkles size={14} />
+      <div className="w-full max-w-6xl z-10 my-auto">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-8 items-center">
+          
+          {/* LEFT SIDE - Info Panel */}
+          <div className="lg:col-span-5 flex flex-col justify-center space-y-10 lg:pr-6">
+            <div className="space-y-5">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 dark:bg-primary/20 border border-primary/20 text-xs font-semibold text-primary tracking-wide w-fit">
+                <Sparkles size={13} className="animate-pulse" />
                 Available for new projects
               </div>
 
-              <h1 className="text-6xl md:text-7xl font-extrabold tracking-tight leading-none text-slate-900 dark:text-white">
+              <h1 className="text-5xl md:text-6xl font-semibold tracking-tight leading-[1.05] text-slate-950 dark:text-white">
                 Let's craft <br />
-                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-500 to-blue-600 dark:via-purple-400 dark:to-blue-500">
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-indigo-500 to-blue-600 dark:from-primary dark:via-purple-400 dark:to-blue-500">
                   something iconic.
                 </span>
               </h1>
 
-              <p className="text-slate-600 dark:text-slate-400 text-lg max-w-md leading-relaxed">
-                Aapke vision ko reality mein badalne ka waqt aa gaya hai.
+              <p className="text-slate-600 dark:text-zinc-400 text-base max-w-sm leading-relaxed font-normal">
+                Aapke vision ko reality mein badalne ka waqt aa gaya hai. Let's collaborate to build an exceptional digital experience.
               </p>
             </div>
 
-            <div className="space-y-4">
+            {/* Contact Cards */}
+            <div className="space-y-3 max-w-md">
               {/* EMAIL CARD */}
-              <div className="group flex items-center gap-6 p-4 rounded-3xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 hover:border-primary/50 transition-all duration-500 shadow-sm hover:shadow-xl dark:shadow-none">
-                <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-indigo-600 flex items-center justify-center shadow-lg shadow-primary/20 group-hover:scale-110 transition-transform">
-                  <Mail className="text-white" />
+              <div className="group flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900/40 border border-slate-200/60 dark:border-zinc-800/50 hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 shadow-sm">
+                <div className="w-11 h-11 rounded-xl bg-primary/10 dark:bg-primary/20 flex items-center justify-center text-primary group-hover:scale-105 transition-transform duration-300 shrink-0">
+                  <Mail size={18} />
                 </div>
-
-                <div>
-                  <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                <div className="overflow-hidden">
+                  <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
                     Email Us
                   </p>
-
-                  <p className="text-xl font-bold italic text-slate-800 dark:text-white">
+                  <p className="text-base font-medium text-slate-800 dark:text-zinc-200 truncate">
                     csoni0693@gmail.com
                   </p>
                 </div>
               </div>
 
               {/* PHONE CARD */}
-              <div className="group flex items-center gap-6 p-4 rounded-3xl bg-white dark:bg-white/5 border border-slate-200 dark:border-white/5 hover:border-primary/50 transition-all duration-500 shadow-sm hover:shadow-xl dark:shadow-none">
-                <div className="w-14 h-14 rounded-2xl bg-slate-100 dark:bg-white/5 flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <Phone className="text-primary" />
+              <div className="group flex items-center gap-4 p-4 rounded-2xl bg-white dark:bg-zinc-900/40 border border-slate-200/60 dark:border-zinc-800/50 hover:border-primary/40 dark:hover:border-primary/40 transition-all duration-300 shadow-sm">
+                <div className="w-11 h-11 rounded-xl bg-slate-100 dark:bg-zinc-800 flex items-center justify-center text-slate-600 dark:text-zinc-400 group-hover:scale-105 transition-transform duration-300 shrink-0">
+                  <Phone size={18} />
                 </div>
-
                 <div>
-                  <p className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest">
+                  <p className="text-[11px] font-semibold text-slate-400 dark:text-zinc-500 uppercase tracking-wider">
                     Quick Chat
                   </p>
-
-                  <p className="text-xl font-bold text-slate-800 dark:text-white">
+                  <p className="text-base font-medium text-slate-800 dark:text-zinc-200">
                     +91 8233 877 457
                   </p>
                 </div>
@@ -146,122 +133,108 @@ const Contact = () => {
             </div>
           </div>
 
-          {/* RIGHT */}
+          {/* RIGHT SIDE - Premium Form Panel */}
           <div className="lg:col-span-7 relative">
-            <div className="absolute inset-0 bg-primary/5 dark:bg-primary/10 rounded-[3rem] blur-3xl -z-10" />
+            <div className="absolute inset-0 bg-gradient-to-tr from-primary/5 to-blue-500/5 rounded-[2.5rem] blur-2xl -z-10" />
 
-            <div className="bg-white/80 dark:bg-white/[0.03] backdrop-blur-3xl border border-white dark:border-white/10 rounded-3xl p-8 md:p-12 shadow-[0_20px_50px_rgba(0,0,0,0.05)] dark:shadow-2xl relative overflow-hidden">
-              <div className="mb-10">
-                <h3 className="text-2xl font-bold text-slate-900 dark:text-white">
+            <div className="bg-white dark:bg-zinc-900/70 border border-slate-200/80 dark:border-zinc-800/80 rounded-3xl p-8 md:p-10 shadow-xl shadow-slate-100/40 dark:shadow-none backdrop-blur-md">
+              <div className="mb-8">
+                <h3 className="text-xl font-semibold text-slate-900 dark:text-white tracking-tight">
                   Send a Message
                 </h3>
-
-                <p className="text-slate-500 dark:text-slate-400">
-                  Usually responds in 2 hours
+                <p className="text-sm text-slate-500 dark:text-zinc-400 mt-1">
+                  Leave your details and we'll respond within 2 hours.
                 </p>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <form onSubmit={handleSubmit} className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                   {/* NAME */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-tighter text-slate-400 dark:text-slate-500 ml-1">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 ml-1">
                       Your Name
                     </label>
-
                     <div className="relative">
                       <User
-                        className={`absolute left-4 top-1/2 -translate-y-1/2 ${
-                          errors.name ? "text-red-500" : "text-slate-400"
+                        className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${
+                          errors.name ? "text-destructive" : "text-slate-400 dark:text-zinc-500"
                         }`}
-                        size={18}
+                        size={16}
                       />
-
                       <Input
                         name="name"
                         value={formData.name}
                         onChange={handleChange}
                         placeholder="Rahul Kumar"
-                        className={`bg-slate-100/50 dark:bg-white/[0.05] h-14 pl-12 rounded-2xl transition-all ${
+                        className={`bg-slate-50/50 dark:bg-zinc-950/40 h-12 pl-11 rounded-xl border transition-all duration-300 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary ${
                           errors.name
-                            ? "border-red-500 focus-visible:ring-red-500"
-                            : "border-slate-200 dark:border-white/10"
+                            ? "border-destructive focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                            : "border-slate-200 dark:border-zinc-800"
                         }`}
                       />
                     </div>
-
                     {errors.name && (
-                      <p className="text-sm text-red-500 ml-1">{errors.name}</p>
+                      <p className="text-xs font-medium text-destructive ml-1 mt-1">{errors.name}</p>
                     )}
                   </div>
 
                   {/* EMAIL */}
-                  <div className="space-y-2">
-                    <label className="text-xs font-black uppercase tracking-tighter text-slate-400 dark:text-slate-500 ml-1">
+                  <div className="space-y-1.5">
+                    <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 ml-1">
                       Email Address
                     </label>
-
                     <div className="relative">
                       <Mail
-                        className={`absolute left-4 top-1/2 -translate-y-1/2 ${
-                          errors.email ? "text-red-500" : "text-slate-400"
+                        className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors duration-300 ${
+                          errors.email ? "text-destructive" : "text-slate-400 dark:text-zinc-500"
                         }`}
-                        size={18}
+                        size={16}
                       />
-
                       <Input
                         name="email"
                         type="email"
                         value={formData.email}
                         onChange={handleChange}
                         placeholder="rahul@example.com"
-                        className={`bg-slate-100/50 dark:bg-white/[0.05] h-14 pl-12 rounded-2xl transition-all ${
+                        className={`bg-slate-50/50 dark:bg-zinc-950/40 h-12 pl-11 rounded-xl border transition-all duration-300 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary ${
                           errors.email
-                            ? "border-red-500 focus-visible:ring-red-500"
-                            : "border-slate-200 dark:border-white/10"
+                            ? "border-destructive focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                            : "border-slate-200 dark:border-zinc-800"
                         }`}
                       />
                     </div>
-
                     {errors.email && (
-                      <p className="text-sm text-red-500 ml-1">
-                        {errors.email}
-                      </p>
+                      <p className="text-xs font-medium text-destructive ml-1 mt-1">{errors.email}</p>
                     )}
                   </div>
                 </div>
 
                 {/* DESCRIPTION */}
-                <div className="space-y-2">
-                  <label className="text-xs font-black uppercase tracking-tighter text-slate-400 dark:text-slate-500 ml-1">
+                <div className="space-y-1.5">
+                  <label className="text-[11px] font-semibold uppercase tracking-wider text-slate-400 dark:text-zinc-500 ml-1">
                     Project Details
                   </label>
-
                   <div className="relative">
                     <MessageSquare
-                      className={`absolute left-4 top-5 ${
-                        errors.description ? "text-red-500" : "text-slate-400"
+                      className={`absolute left-4 top-4 transition-colors duration-300 ${
+                        errors.description ? "text-destructive" : "text-slate-400 dark:text-zinc-500"
                       }`}
-                      size={18}
+                      size={16}
                     />
-
                     <Textarea
                       name="description"
                       value={formData.description}
                       onChange={handleChange}
-                      placeholder="Let's talk about your goals..."
-                      className={`bg-slate-100/50 dark:bg-white/[0.05] min-h-[180px] pl-12 pt-5 rounded-3xl resize-none transition-all ${
+                      placeholder="Let's talk about your goals and expectations..."
+                      className={`bg-slate-50/50 dark:bg-zinc-950/40 min-h-[140px] pl-11 pt-3.5 rounded-xl border resize-none transition-all duration-300 focus-visible:ring-1 focus-visible:ring-primary/30 focus-visible:border-primary ${
                         errors.description
-                          ? "border-red-500 focus-visible:ring-red-500"
-                          : "border-slate-200 dark:border-white/10"
+                          ? "border-destructive focus-visible:ring-destructive/20 focus-visible:border-destructive"
+                          : "border-slate-200 dark:border-zinc-800"
                       }`}
                     />
                   </div>
-
                   {errors.description && (
-                    <p className="text-sm text-red-500 ml-1">
-                      {errors.description}
-                    </p>
+                    <p className="text-xs font-medium text-destructive ml-1 mt-1">{errors.description}</p>
                   )}
                 </div>
 
@@ -269,17 +242,24 @@ const Contact = () => {
                 <Button
                   type="submit"
                   disabled={isCreatingContact}
-                  className="w-full h-16 rounded-2xl bg-primary hover:bg-primary/90 text-white font-black text-lg group transition-all duration-300 shadow-lg shadow-primary/25"
+                  className="w-full h-12 rounded-xl bg-primary hover:bg-primary/95 text-white font-semibold text-sm group transition-all duration-300 shadow-sm shadow-primary/10"
                 >
-                  <span className="relative z-10 flex items-center justify-center gap-2">
-                    {isCreatingContact ? "Sending..." : "Send Inquiry"}
-
-                    <ArrowRight className="group-hover:translate-x-2 transition-transform" />
-                  </span>
+                  {isCreatingContact ? (
+                    <span className="flex items-center justify-center gap-2">
+                      <Loader2 size={16} className="animate-spin" />
+                      Sending...
+                    </span>
+                  ) : (
+                    <span className="flex items-center justify-center gap-1.5">
+                      Send Inquiry
+                      <ArrowRight size={15} className="group-hover:translate-x-1 transition-transform duration-300" />
+                    </span>
+                  )}
                 </Button>
               </form>
             </div>
           </div>
+
         </div>
       </div>
     </div>

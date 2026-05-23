@@ -49,9 +49,13 @@ import {
 
 import { cn } from "@/lib/utils";
 import { useSaved } from "@/hooks/useSaved";
+import BidModal from "@/hoc/BidModal";
 
 const FindWork = () => {
   const [page, setPage] = useState(1);
+  const [openBidModal, setOpenBidModal] = useState(false);
+
+  const [selectedJob, setSelectedJob] = useState(null);
   const [search, setSearch] = useState("");
   const [level, setLevel] = useState("");
   const [employment, setEmployment] = useState("");
@@ -588,7 +592,13 @@ const FindWork = () => {
                           />
                         </Button>
 
-                        <Button className="w-full md:w-auto rounded-2xl px-10 h-12 font-black group/btn shadow-lg shadow-primary/20 transition-all hover:-translate-y-1">
+                        <Button
+                          onClick={() => {
+                            setSelectedJob(job);
+                            setOpenBidModal(true);
+                          }}
+                          className="w-full md:w-auto rounded-2xl px-10 h-12 font-black group/btn shadow-lg shadow-primary/20 transition-all hover:-translate-y-1"
+                        >
                           Place a Bid
                           <ArrowUpRight
                             className="ml-2 transition-transform group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1"
@@ -643,6 +653,16 @@ const FindWork = () => {
           )}
         </main>
       </div>
+
+      <BidModal
+  isOpen={openBidModal}
+
+  onClose={() =>
+    setOpenBidModal(false)
+  }
+
+  job={selectedJob}
+/>
     </div>
   );
 };

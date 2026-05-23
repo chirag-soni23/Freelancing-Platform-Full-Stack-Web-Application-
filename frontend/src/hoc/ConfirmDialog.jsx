@@ -4,82 +4,71 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { Trash2, AlertCircle, HelpCircle } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { AlertTriangle, Loader2 } from "lucide-react";
 
 const ConfirmDialog = ({
-  isOpen,
-  onClose,
-  onConfirm,
+  open,
+  onOpenChange,
   title = "Are you sure?",
-  description = "This action cannot be undone.",
-  variant = "destructive",
-  confirmText = "Confirm",
+  description = "Please confirm if you want to proceed with this action. This process cannot be undone.",
+  onConfirm,
   loading = false,
+  confirmText = "Confirm Action",
+  loadingText = "Processing...",
 }) => {
-  const variantStyles = {
-    destructive: {
-      icon: <Trash2 className="text-destructive" size={28} />,
-      bg: "bg-destructive/10",
-      btn: "bg-destructive text-white hover:bg-destructive/90",
-    },
-    warning: {
-      icon: <AlertCircle className="text-orange-500" size={28} />,
-      bg: "bg-orange-500/10",
-      btn: "bg-orange-500 text-white hover:bg-orange-600",
-    },
-    info: {
-      icon: <HelpCircle className="text-primary" size={28} />,
-      bg: "bg-primary/10",
-      btn: "bg-primary text-primary-foreground hover:bg-primary/90",
-    },
-  };
-
-  const style = variantStyles[variant] || variantStyles.destructive;
-
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="glass border-border/40 sm:max-w-[425px]">
-
-        <DialogHeader>
-          <div className="flex flex-col items-center text-center gap-3">
-
-            {/* Icon */}
-            <div className={`w-16 h-16 rounded-full ${style.bg} flex items-center justify-center`}>
-              {style.icon}
-            </div>
-
-            <DialogTitle className="text-2xl font-bold gradient-text">
-              {title}
-            </DialogTitle>
-
-            <p className="text-muted-foreground text-sm">
-              {description}
-            </p>
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[420px] gap-0 rounded-xl border border-border/40 bg-card/70 backdrop-blur-xl p-6 shadow-card focus-visible:outline-hidden">
+        
+        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
+          
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-destructive/10 text-destructive border border-destructive/20 shadow-soft animate-pulse-slow">
+            <AlertTriangle size={22} strokeWidth={2} />
           </div>
-        </DialogHeader>
 
-        <DialogFooter className="flex gap-3 mt-6">
+          <div className="space-y-2 flex-1 w-full">
+            <DialogHeader className="text-center sm:text-left">
+              <DialogTitle className="text-lg font-bold tracking-tight text-foreground">
+                {title}
+              </DialogTitle>
+              <DialogDescription className="text-sm font-medium leading-relaxed text-muted-foreground/90">
+                {description}
+              </DialogDescription>
+            </DialogHeader>
+          </div>
+        </div>
 
-          {/* Cancel */}
-          <button
-            onClick={onClose}
-            className="w-full bg-secondary/50 border border-border py-3 rounded-xl font-semibold"
+        {/* REFINED SYSTEM BUTTONS (Premium & Rounded) */}
+        <DialogFooter className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+          <Button
+            variant="outline"
+            onClick={() => onOpenChange(false)}
+            disabled={loading}
+            className="h-11 rounded-xl border-border/60 bg-transparent text-sm font-semibold text-muted-foreground transition-smooth hover:bg-secondary hover:text-foreground disabled:opacity-40 sm:px-5"
           >
             Cancel
-          </button>
+          </Button>
 
-          {/* Confirm */}
-          <button
+          <Button
             onClick={onConfirm}
             disabled={loading}
-            className={`w-full py-3 rounded-xl font-bold ${style.btn}`}
+            className="h-11 rounded-xl bg-destructive text-sm font-semibold text-destructive-foreground transition-smooth hover:bg-destructive/90 shadow-soft disabled:opacity-50 sm:px-5"
           >
-            {loading ? "Processing..." : confirmText}
-          </button>
-
+            {loading ? (
+              <div className="flex items-center justify-center gap-2">
+                <Loader2 size={16} className="animate-spin" />
+                <span>{loadingText}</span>
+              </div>
+            ) : (
+              confirmText
+            )}
+          </Button>
         </DialogFooter>
+
       </DialogContent>
     </Dialog>
   );

@@ -107,7 +107,7 @@ const freelancerItems = [
       {
         label: "My Proposals",
         icon: FileText,
-        path: `${BASE}/proposals`,
+        path: `${BASE}/my-bids`,
       },
     ],
   },

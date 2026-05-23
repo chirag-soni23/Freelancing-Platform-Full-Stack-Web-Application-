@@ -18,6 +18,12 @@ export const createBidSchema = Joi.object({
     "any.required": "Amount is required",
   }),
 
+  currency: Joi.string().valid("INR", "USD").required().messages({
+    "any.only": "Currency must be INR or USD",
+
+    "any.required": "Currency is required",
+  }),
+
   proposal: Joi.string().trim().min(20).max(1000).required().messages({
     "string.empty": "Proposal is required",
 
@@ -55,3 +61,32 @@ export const deleteBidSchema = Joi.object({
     "any.required": "Bid id required",
   }),
 });
+
+// UPDATE BID
+export const updateBidSchema = Joi.object({
+  amount: Joi.number().positive().messages({
+    "number.base": "Amount must be a number",
+
+    "number.positive": "Amount must be greater than 0",
+  }),
+
+  currency: Joi.string().valid("INR", "USD").messages({
+    "any.only": "Currency must be INR or USD",
+  }),
+
+  proposal: Joi.string().trim().min(20).max(1000).messages({
+    "string.min": "Proposal must be at least 20 characters",
+
+    "string.max": "Proposal cannot exceed 1000 characters",
+  }),
+
+  deliveryDays: Joi.number().integer().min(1).messages({
+    "number.base": "Delivery days must be number",
+
+    "number.min": "Delivery days must be at least 1",
+  }),
+})
+  .min(1)
+  .messages({
+    "object.min": "At least one field is required to update",
+  });

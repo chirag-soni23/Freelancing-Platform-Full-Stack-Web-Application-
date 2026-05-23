@@ -11,15 +11,14 @@ import {
 
 import { toast } from "./use-toast";
 
-export const useBid = (jobId) => {
+export const useBid = (jobId, params) => {
   const queryClient = useQueryClient();
 
   // my bids
   const myBidsQuery = useQuery({
-    queryKey: ["my-bids"],
-
-    queryFn: getMyBids,
-
+    queryKey: ["my-bids", params],
+    queryFn: () => getMyBids(params),
+    keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
 
@@ -139,6 +138,7 @@ export const useBid = (jobId) => {
   return {
     // my bids
     myBids: myBidsQuery.data?.data || [],
+    pagination: myBidsQuery.data?.pagination || {},
 
     isLoadingMyBids: myBidsQuery.isLoading,
 

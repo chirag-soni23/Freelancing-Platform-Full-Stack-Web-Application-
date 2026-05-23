@@ -23,7 +23,7 @@ const Header = () => {
               : "240 New Jobs Added Today"}
           </div>
 
-          <h1 className="text-4xl md:text-6xl font-black tracking-tighter">
+          <h1 className="text-3xl md:text-4xl">
             {isSavedPage ? (
               <>
                 Saved <span className="text-primary">Jobs.</span>

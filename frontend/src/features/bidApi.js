@@ -8,8 +8,10 @@ export const createBid = async (data) => {
 };
 
 // get my bids
-export const getMyBids = async () => {
-  const res = await api.get("/bid/my");
+export const getMyBids = async (params) => {
+  const res = await api.get("/bid/my", {
+    params,
+  });
 
   return res.data;
 };
