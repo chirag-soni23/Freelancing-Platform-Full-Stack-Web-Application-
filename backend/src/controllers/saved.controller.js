@@ -103,7 +103,6 @@ export const getSavedFreelancers = async (req, res, next) => {
       limit = 10,
       search = "",
       category = "",
-      rating = "",
       hourlyRate = "",
     } = req.query;
 
@@ -114,6 +113,11 @@ export const getSavedFreelancers = async (req, res, next) => {
 
     let freelancerWhere = {
       role: "freelancer",
+
+      // khud ka profile hide
+      id: {
+        [Op.ne]: req.user.id,
+      },
     };
 
     // search
@@ -149,35 +153,33 @@ export const getSavedFreelancers = async (req, res, next) => {
     }
 
     // category
-    if (category && category.trim()) {
+    if (category?.trim()) {
       freelancerWhere.categoryId = Number(category);
     }
 
     // hourly rate
-    if (hourlyRate) {
-      if (hourlyRate === "0-500") {
-        freelancerWhere.hourlyRate = {
-          [Op.between]: [0, 500],
-        };
-      }
+    if (hourlyRate === "0-500") {
+      freelancerWhere.hourlyRate = {
+        [Op.between]: [0, 500],
+      };
+    }
 
-      if (hourlyRate === "500-1000") {
-        freelancerWhere.hourlyRate = {
-          [Op.between]: [500, 1000],
-        };
-      }
+    if (hourlyRate === "500-1000") {
+      freelancerWhere.hourlyRate = {
+        [Op.between]: [500, 1000],
+      };
+    }
 
-      if (hourlyRate === "1000-5000") {
-        freelancerWhere.hourlyRate = {
-          [Op.between]: [1000, 5000],
-        };
-      }
+    if (hourlyRate === "1000-5000") {
+      freelancerWhere.hourlyRate = {
+        [Op.between]: [1000, 5000],
+      };
+    }
 
-      if (hourlyRate === "5000+") {
-        freelancerWhere.hourlyRate = {
-          [Op.gte]: 5000,
-        };
-      }
+    if (hourlyRate === "5000+") {
+      freelancerWhere.hourlyRate = {
+        [Op.gte]: 5000,
+      };
     }
 
     const { count, rows } = await db.SavedFreelancer.findAndCountAll({
@@ -188,6 +190,7 @@ export const getSavedFreelancers = async (req, res, next) => {
       include: [
         {
           model: db.User,
+
           as: "freelancer",
 
           where: freelancerWhere,
@@ -200,50 +203,18 @@ export const getSavedFreelancers = async (req, res, next) => {
               "emailVerificationToken",
               "emailVerificationExpire",
             ],
-
-            include: [
-              [
-                fn(
-                  "ROUND",
-                  fn("AVG", col("freelancer.receivedFeedbacks.rating")),
-                  1,
-                ),
-
-                "averageRating",
-              ],
-            ],
           },
 
           include: [
             {
               model: db.Category,
-              as: "categories",
-              attributes: ["id", "name"],
-            },
 
-            {
-              model: db.Feedback,
-              as: "receivedFeedbacks",
-              attributes: [],
-              required: false,
+              as: "categories",
+
+              attributes: ["id", "name"],
             },
           ],
         },
-      ],
-
-      having: rating
-        ? sequelizeWhere(
-            fn("AVG", col("freelancer.receivedFeedbacks.rating")),
-            {
-              [Op.gte]: Number(rating),
-            },
-          )
-        : undefined,
-
-      group: [
-        "SavedFreelancer.id",
-        "freelancer.id",
-        "freelancer->categories.id",
       ],
 
       limit,
@@ -260,20 +231,19 @@ export const getSavedFreelancers = async (req, res, next) => {
       data: rows,
 
       pagination: {
-        total: Array.isArray(count) ? count.length : count,
+        total: count,
 
         page,
         limit,
 
-        totalPages: Math.ceil(
-          (Array.isArray(count) ? count.length : count) / limit,
-        ),
+        totalPages: Math.ceil(count / limit),
       },
     });
   } catch (error) {
     next(error);
   }
 };
+
 // get saved job
 export const getSavedJobs = async (req, res, next) => {
   try {

@@ -30,17 +30,17 @@ async function syncDatabase() {
     //   alter: true,
     // });
 
-    // await db.Feedback.sync({
-    //   alter: true,
-    // });
+    await db.Feedback.sync({
+      alter: true,
+    });
 
-    // await db.SavedFreelancer.sync({
-    //   alter: true,
-    // });
+    await db.SavedFreelancer.sync({
+      alter: true,
+    });
 
-    // await db.SavedJob.sync({
-    //   alter: true,
-    // });
+    await db.SavedJob.sync({
+      alter: true,
+    });
 
     await db.Bid.sync({
       alter: true,
