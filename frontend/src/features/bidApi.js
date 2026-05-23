@@ -17,8 +17,10 @@ export const getMyBids = async (params) => {
 };
 
 // get bids by job
-export const getJobBids = async (jobId) => {
-  const res = await api.get(`/bid/job/${jobId}`);
+export const getJobBids = async (jobId, params) => {
+  const res = await api.get(`/bid/job/${jobId}`, {
+    params,
+  });
 
   return res.data;
 };

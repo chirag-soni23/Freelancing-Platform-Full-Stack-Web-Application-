@@ -24,12 +24,10 @@ export const useBid = (jobId, params) => {
 
   // job bids
   const jobBidsQuery = useQuery({
-    queryKey: ["job-bids", jobId],
-
-    queryFn: () => getJobBids(jobId),
-
+    queryKey: ["job-bids", jobId, params],
+    queryFn: () => getJobBids(jobId, params),
     enabled: !!jobId,
-
+    keepPreviousData: true,
     refetchOnWindowFocus: false,
   });
 
@@ -65,22 +63,14 @@ export const useBid = (jobId, params) => {
     mutationFn: acceptBid,
 
     onSuccess: (data) => {
-      queryClient.invalidateQueries(["job-bids"]);
+      queryClient.invalidateQueries({
+        queryKey: ["job-bids"],
+      });
 
       toast({
         title: "Success",
 
         description: data?.message || "Bid accepted",
-      });
-    },
-
-    onError: (err) => {
-      toast({
-        title: "Error",
-
-        description: err?.response?.data?.message || err.message,
-
-        variant: "destructive",
       });
     },
   });
@@ -90,7 +80,9 @@ export const useBid = (jobId, params) => {
     mutationFn: rejectBid,
 
     onSuccess: (data) => {
-      queryClient.invalidateQueries(["job-bids"]);
+      queryClient.invalidateQueries({
+        queryKey: ["job-bids"],
+      });
 
       toast({
         title: "Success",
@@ -98,18 +90,7 @@ export const useBid = (jobId, params) => {
         description: data?.message || "Bid rejected",
       });
     },
-
-    onError: (err) => {
-      toast({
-        title: "Error",
-
-        description: err?.response?.data?.message || err.message,
-
-        variant: "destructive",
-      });
-    },
   });
-
   // delete bid
   const deleteBidMutation = useMutation({
     mutationFn: deleteBid,
@@ -144,7 +125,7 @@ export const useBid = (jobId, params) => {
 
     // job bids
     jobBids: jobBidsQuery.data?.data || [],
-
+    jobBidsPagination: jobBidsQuery.data?.pagination || {},
     isLoadingJobBids: jobBidsQuery.isLoading,
 
     // create

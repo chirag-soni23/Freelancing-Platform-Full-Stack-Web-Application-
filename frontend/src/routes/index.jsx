@@ -24,6 +24,7 @@ import AdminJobs from "@/admin/pages/AdminJobs";
 import { useAuth } from "@/hooks/useAuth";
 import FreelancerBid from "@/freelancers/pages/FreelancerBid";
 import ClientBid from "@/client/pages/ClientBid";
+import ClientJobDetails from "@/client/pages/ClientJobDetails";
 
 /* =========================
    LAZY IMPORTS
@@ -216,6 +217,14 @@ const AppRoutes = () => {
             element={
               <RoleProtectedRoute allowedRoles={["client"]}>
                 <Jobs />
+              </RoleProtectedRoute>
+            }
+          />
+          <Route
+            path="job/:id"
+            element={
+              <RoleProtectedRoute allowedRoles={["client"]}>
+                <ClientJobDetails />
               </RoleProtectedRoute>
             }
           />

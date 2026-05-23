@@ -26,6 +26,7 @@ import { useJob } from "@/hooks/useJob";
 import WithPagination from "@/hoc/WithPagination";
 import useDebounce from "@/hooks/useDebounce";
 import ConfirmDialog from "@/hoc/ConfirmDialog";
+import { Link } from "react-router-dom";
 
 const Jobs = () => {
   const [open, setOpen] = useState(false);
@@ -241,8 +242,21 @@ const Jobs = () => {
 
                       <div className="flex gap-2">
                         {/* View */}
-                        <Button className="flex-1 h-12 rounded-2xl font-bold bg-primary hover:bg-primary/90 shadow-[0_10px_20px_rgba(var(--primary),0.2)] transition-all active:scale-95">
-                          View
+                        <Button
+                          asChild
+                          className="
+    flex-1
+    h-12
+    rounded-2xl
+    font-bold
+    bg-primary
+    hover:bg-primary/90
+    shadow-[0_10px_20px_rgba(var(--primary),0.2)]
+    transition-all
+    active:scale-95
+  "
+                        >
+                          <Link to={`/dashboard/job/${job?.id}`}>View</Link>
                         </Button>
 
                         {/* Dropdown */}

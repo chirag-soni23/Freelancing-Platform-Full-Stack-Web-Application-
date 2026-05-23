@@ -61,23 +61,14 @@ export const getJobs = async (req, res, next) => {
     limit = parseInt(limit, 10);
 
     if (isNaN(page) || page < 1) {
-      throw ApiError.BADREQUEST(
-        "Page must be a positive integer"
-      );
+      throw ApiError.BADREQUEST("Page must be a positive integer");
     }
 
-    if (
-      isNaN(limit) ||
-      limit < 1 ||
-      limit > 50
-    ) {
-      throw ApiError.BADREQUEST(
-        "Limit must be between 1 and 50"
-      );
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
     }
 
-    const offset =
-      (page - 1) * limit;
+    const offset = (page - 1) * limit;
 
     let where = {};
     let user = null;
@@ -85,8 +76,7 @@ export const getJobs = async (req, res, next) => {
     // search
     if (search?.trim()) {
       where.title = {
-        [Op.like]:
-          `%${search.trim()}%`,
+        [Op.like]: `%${search.trim()}%`,
       };
     }
 
@@ -95,187 +85,121 @@ export const getJobs = async (req, res, next) => {
     }
 
     if (employment) {
-      where.employment =
-        employment;
+      where.employment = employment;
     }
 
     if (jobType) {
-      where.jobType =
-        jobType;
+      where.jobType = jobType;
     }
 
     if (status) {
       where.status = status;
     }
 
-    let categoryWhere =
-      {};
+    let categoryWhere = {};
 
     if (category) {
-      categoryWhere.name =
-        category;
+      categoryWhere.name = category;
     }
 
     // token check
-    const token =
-      req.cookies?.token;
+    const token = req.cookies?.token;
 
     if (token) {
       try {
-        const decoded =
-          jwt.verify(
-            token,
-            process.env.JWT_SECRET
-          );
+        const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
-        user =
-          await db.User.findByPk(
-            decoded.id
-          );
+        user = await db.User.findByPk(decoded.id);
 
         // client apni jobs na dekhe
-        if (
-          user?.role ===
-          "client"
-        ) {
+        if (user?.role === "client") {
           where.clientId = {
-            [Op.ne]:
-              user.id,
+            [Op.ne]: user.id,
           };
         }
       } catch {
-        console.log(
-          "Invalid token"
-        );
+        console.log("Invalid token");
       }
     }
 
-    const {
-      count,
-      rows,
-    } =
-      await db.Job.findAndCountAll(
+    const { count, rows } = await db.Job.findAndCountAll({
+      where,
+
+      limit,
+      offset,
+
+      include: [
         {
-          where,
+          model: db.User,
 
-          limit,
-          offset,
+          as: "client",
 
-          include: [
-            {
-              model:
-                db.User,
-
-              as: "client",
-
-              attributes:
-                [
-                  "id",
-                  "name",
-                  "profilePic",
-                  "isEmailVerified",
-                  "createdAt",
-                ],
-            },
-
-            {
-              model:
-                db.Bid,
-
-              as: "bids",
-
-              required:
-                false,
-
-              attributes:
-                [
-                  "id",
-                  "status",
-                  "freelancerId",
-                ],
-            },
-
-            {
-              model:
-                db.Category,
-
-              as: "category",
-
-              attributes:
-                [
-                  "id",
-                  "name",
-                ],
-
-              where:
-                categoryWhere,
-            },
+          attributes: [
+            "id",
+            "name",
+            "profilePic",
+            "isEmailVerified",
+            "createdAt",
           ],
-
-          distinct: true,
-
-          order: [
-            [
-              "createdAt",
-              "DESC",
-            ],
-          ],
-        }
-      );
-
-    const jobs = rows.map(
-      (job) => {
-        const myBid =
-          user?.role ===
-          "freelancer"
-            ? job.bids?.find(
-                (
-                  bid
-                ) =>
-                  bid.freelancerId ===
-                  user.id
-              ) ||
-              null
-            : null;
-
-        const jobData =
-          job.toJSON();
-
-        delete jobData.bids;
-
-        return {
-          ...jobData,
-          myBid,
-        };
-      }
-    );
-
-    return successResponse(
-      res,
-      StatusCodes.OK,
-      {
-        message:
-          "Jobs fetched successfully",
-
-        data: jobs,
-
-        pagination: {
-          total: count,
-          page,
-          limit,
-
-          totalPages:
-            Math.ceil(
-              count /
-                limit
-            ),
         },
-      }
-    );
+
+        {
+          model: db.Bid,
+
+          as: "bids",
+
+          required: false,
+
+          attributes: ["id", "status", "freelancerId"],
+        },
+
+        {
+          model: db.Category,
+
+          as: "category",
+
+          attributes: ["id", "name"],
+
+          where: categoryWhere,
+        },
+      ],
+
+      distinct: true,
+
+      order: [["createdAt", "DESC"]],
+    });
+
+    const jobs = rows.map((job) => {
+      const myBid =
+        user?.role === "freelancer"
+          ? job.bids?.find((bid) => bid.freelancerId === user.id) || null
+          : null;
+
+      const jobData = job.toJSON();
+
+      delete jobData.bids;
+
+      return {
+        ...jobData,
+        myBid,
+      };
+    });
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Jobs fetched successfully",
+
+      data: jobs,
+
+      pagination: {
+        total: count,
+        page,
+        limit,
+
+        totalPages: Math.ceil(count / limit),
+      },
+    });
   } catch (error) {
-    console.log(
-      error.message
-    );
+    console.log(error.message);
 
     next(error);
   }
@@ -421,6 +345,7 @@ export const getJobById = async (req, res, next) => {
       include: [
         {
           model: db.User,
+
           as: "client",
 
           attributes: [
@@ -437,6 +362,24 @@ export const getJobById = async (req, res, next) => {
             "createdAt",
           ],
         },
+
+        {
+          model: db.Bid,
+
+          as: "bids",
+
+          required: false,
+
+          attributes: ["id"],
+        },
+
+        {
+          model: db.Category,
+
+          as: "category",
+
+          attributes: ["id", "name"],
+        },
       ],
     });
 
@@ -444,9 +387,16 @@ export const getJobById = async (req, res, next) => {
       throw ApiError.NOTFOUND("Job not found!");
     }
 
+    const jobData = job.toJSON();
+
+    jobData.bidCount = jobData.bids?.length || 0;
+
+    delete jobData.bids;
+
     return successResponse(res, StatusCodes.OK, {
       message: "Job fetched successfully",
-      data: job,
+
+      data: jobData,
     });
   } catch (error) {
     next(error);

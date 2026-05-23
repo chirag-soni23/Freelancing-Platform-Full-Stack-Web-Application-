@@ -156,6 +156,22 @@ export const getJobBids = async (req, res, next) => {
   try {
     const { jobId } = req.params;
 
+    let { page = 1, limit = 10, search = "", status = "" } = req.query;
+
+    page = parseInt(page, 10);
+
+    limit = parseInt(limit, 10);
+
+    if (isNaN(page) || page < 1) {
+      throw ApiError.BADREQUEST("Page must be positive");
+    }
+
+    if (isNaN(limit) || limit < 1 || limit > 50) {
+      throw ApiError.BADREQUEST("Limit must be between 1 and 50");
+    }
+
+    const offset = (page - 1) * limit;
+
     const job = await db.Job.findByPk(jobId);
 
     if (!job) {
@@ -166,26 +182,64 @@ export const getJobBids = async (req, res, next) => {
       throw ApiError.UNAUTHORIZED("Unauthorized");
     }
 
-    const bids = await db.Bid.findAll({
-      where: {
-        jobId,
+    let where = {
+      jobId,
+    };
+
+    if (status) {
+      where.status = status;
+    }
+
+    const include = [
+      {
+        model: db.User,
+
+        as: "freelancer",
+
+        attributes: ["id", "name", "profilePic", "title"],
+
+        ...(search && search.trim()
+          ? {
+              where: {
+                [Op.or]: [
+                  {
+                    name: {
+                      [Op.like]: `%${search.trim()}%`,
+                    },
+                  },
+
+                  {
+                    title: {
+                      [Op.like]: `%${search.trim()}%`,
+                    },
+                  },
+                ],
+              },
+            }
+          : {}),
       },
+    ];
 
-      include: [
-        {
-          model: db.User,
-
-          as: "freelancer",
-
-          attributes: ["id", "name", "profilePic", "title"],
-        },
-      ],
-
+    const { count, rows } = await db.Bid.findAndCountAll({
+      where,
+      include,
+      limit,
+      offset,
+      distinct: true,
       order: [["createdAt", "DESC"]],
     });
 
     return successResponse(res, StatusCodes.OK, {
-      data: bids,
+      message: "Job bids fetched",
+
+      data: rows,
+
+      pagination: {
+        total: count,
+        page,
+        limit,
+        totalPages: Math.ceil(count / limit),
+      },
     });
   } catch (error) {
     next(error);
