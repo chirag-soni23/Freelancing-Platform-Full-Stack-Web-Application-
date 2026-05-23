@@ -6,9 +6,9 @@ async function syncDatabase() {
     await db.connection.authenticate();
     await db.connection.query("SET FOREIGN_KEY_CHECKS = 0");
 
-    // await db.User.sync({
-    //   alter: true,
-    // });
+    await db.User.sync({
+      alter: true,
+    });
 
     // await db.Category.sync({
     //   alter: true,
@@ -30,21 +30,21 @@ async function syncDatabase() {
     //   alter: true,
     // });
 
-    await db.Feedback.sync({
-      alter: true,
-    });
+    // await db.Feedback.sync({
+    //   alter: true,
+    // });
 
-    await db.SavedFreelancer.sync({
-      alter: true,
-    });
+    // await db.SavedFreelancer.sync({
+    //   alter: true,
+    // });
 
-    await db.SavedJob.sync({
-      alter: true,
-    });
+    // await db.SavedJob.sync({
+    //   alter: true,
+    // });
 
-    await db.Bid.sync({
-      alter: true,
-    });
+    // await db.Bid.sync({
+    //   alter: true,
+    // });
 
     await db.connection.query("SET FOREIGN_KEY_CHECKS = 1");
     console.log("Database synchronized successfully.");

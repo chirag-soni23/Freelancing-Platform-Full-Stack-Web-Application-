@@ -151,6 +151,7 @@ export const getMe = async (req, res, next) => {
         hourlyRate: userData.hourlyRate,
         currency: userData.currency,
         portfolio: userData.portfolio,
+        isAvailable: userData.isAvailable,
         isEmailVerified: userData.isEmailVerified,
         createdAt: userData.createdAt,
       };
@@ -218,6 +219,8 @@ export const updateProfile = async (req, res, next) => {
       if (data.hourlyRate !== undefined) user.hourlyRate = data.hourlyRate;
       if (data.currency !== undefined) user.currency = data.currency;
       if (data.portfolio !== undefined) user.portfolio = data.portfolio;
+      if (data.isAvailable !== undefined) user.isAvailable = data.isAvailable;
+
       if (data.categoryId !== undefined) {
         const category = await db.Category.findByPk(data.categoryId);
 
@@ -771,4 +774,3 @@ export const getFreelancerById = async (req, res, next) => {
     next(error);
   }
 };
-

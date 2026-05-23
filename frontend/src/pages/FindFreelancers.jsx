@@ -420,17 +420,22 @@ const FindFreelancers = () => {
 
                             <Badge
                               variant="secondary"
-                              className="
-      bg-primary/5
-      text-primary
+                              className={cn(
+                                `
       border-none
       text-[10px]
       font-bold
       uppercase
       tracking-tighter
-    "
+    `,
+                                f?.isAvailable
+                                  ? "bg-green-100 text-green-700 dark:bg-green-500/10 dark:text-green-400"
+                                  : "bg-red-100 text-red-700 dark:bg-red-500/10 dark:text-red-400",
+                              )}
                             >
-                              Available Now
+                              {f?.isAvailable
+                                ? "Available Now"
+                                : "Not Available"}
                             </Badge>
                             <Button
                               variant="ghost"

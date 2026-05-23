@@ -85,6 +85,12 @@ const User = sequelize.define(
       defaultValue: "INR",
     },
 
+    isAvailable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: true,
+    },
+
     portfolio: {
       type: DataTypes.STRING,
     },

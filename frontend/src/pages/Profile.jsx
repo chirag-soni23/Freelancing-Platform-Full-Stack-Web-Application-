@@ -41,6 +41,8 @@ import {
   Check,
   ChevronsUpDown,
   Search,
+  ToggleLeft,
+  ToggleRight,
 } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
@@ -92,6 +94,7 @@ const Profile = () => {
     languages: [],
     portfolio: "",
     categoryId: "",
+    isAvailable: true,
 
     // client
     companyName: "",
@@ -115,6 +118,7 @@ const Profile = () => {
         languages: profileData.languages || [],
         portfolio: profileData.portfolio || "",
         categoryId: profileData?.category?.id?.toString() || "",
+        isAvailable: profileData?.isAvailable ?? true,
 
         // client
         companyName: profileData.companyName || "",
@@ -284,10 +288,23 @@ const Profile = () => {
                   {profileData?.title || "Professional Specialist"}
                 </div>
 
+                {isFreelancer && (
+                  <Badge
+                    className={` mt-3 flex items-center justify-center
+                      ${
+                        profileData?.isAvailable
+                          ? "bg-green-100 text-green-700"
+                          : "bg-red-100 text-red-700"
+                      }
+                    `}
+                  >
+                    {profileData?.isAvailable ? "Available" : "Busy"}
+                  </Badge>
+                )}
+
                 <div className="w-full h-[1px] bg-slate-100 dark:bg-white/5 my-8" />
 
                 <div className="w-full space-y-4 text-left">
-                  
                   {isFreelancer && (
                     <div className="flex items-center gap-4 text-slate-600 dark:text-slate-400">
                       <div className="w-10 h-10 rounded-xl bg-slate-50 dark:bg-white/5 flex items-center justify-center">
@@ -733,6 +750,43 @@ const Profile = () => {
                                 placeholder="https://portfolio.com"
                                 className="h-10 bg-slate-50 dark:bg-slate-900/50 border-slate-200 dark:border-white/10 rounded-lg"
                               />
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label className="text-[10px] font-bold uppercase tracking-[0.1em] text-slate-400">
+                                Availability
+                              </Label>
+
+                              <Button
+                                type="button"
+                                variant="outline"
+                                onClick={() =>
+                                  setFormData((prev) => ({
+                                    ...prev,
+
+                                    isAvailable: !prev.isAvailable,
+                                  }))
+                                }
+                                className="
+      w-full
+      h-10
+      rounded-lg
+      flex
+      justify-between
+      bg-slate-50
+      dark:bg-slate-900/50
+    "
+                              >
+                                <span>
+                                  {formData.isAvailable ? "Available" : "Busy"}
+                                </span>
+
+                                {formData.isAvailable ? (
+                                  <ToggleRight className="text-green-500" />
+                                ) : (
+                                  <ToggleLeft className="text-red-500" />
+                                )}
+                              </Button>
                             </div>
                           </>
                         )}

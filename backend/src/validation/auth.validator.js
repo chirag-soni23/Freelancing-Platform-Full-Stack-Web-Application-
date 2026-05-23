@@ -104,6 +104,10 @@ export const updateProfileSchema = Joi.object({
     "any.only": "Currency must be INR or USD",
   }),
 
+  isAvailable: Joi.boolean().messages({
+    "boolean.base": "Availability must be true or false",
+  }),
+
   requirement: Joi.string().min(10).max(1000).messages({
     "string.min": "Requirement must be at least 10 characters",
     "string.max": "Requirement cannot exceed 1000 characters",
