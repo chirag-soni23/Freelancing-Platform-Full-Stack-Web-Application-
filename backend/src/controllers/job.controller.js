@@ -2,6 +2,7 @@ import { Op } from "sequelize";
 import { StatusCodes } from "../config/index.js";
 import db from "../models/index.js";
 import ApiError, { successResponse } from "../utils/apiResponse.js";
+import { io, onlineUsers } from "../../server.js";
 import jwt from "jsonwebtoken";
 
 // create job
@@ -34,12 +35,37 @@ export const createJob = async (req, res, next) => {
       clientId,
     });
 
-    return successResponse(res, StatusCodes.CREATED, {
-      message: "Job created successfully",
-      data: job,
+    // create notification
+    const notification = await db.Notification.create({
+      jobId: job.id,
+
+      clientId: req.user.id,
+
+      title: "New Job",
+
+      message: `${title}
+posted`,
+
+      type: "job",
+
+      isRead: false,
     });
+
+    // realtime
+    io.emit("newNotification", notification);
+
+    return successResponse(
+      res,
+
+      StatusCodes.CREATED,
+
+      {
+        message: "Job created",
+
+        data: job,
+      },
+    );
   } catch (error) {
-    console.log(error.message);
     next(error);
   }
 };
@@ -457,19 +483,45 @@ export const deleteJob = async (req, res, next) => {
     const { id } = req.params;
 
     const job = await db.Job.findOne({
-      where: { id, clientId: req.user.id },
+      where: {
+        id,
+        clientId: req.user.id,
+      },
     });
 
     if (!job) {
       throw ApiError.NOTFOUND("Job not found!");
     }
 
+    // keep notification history
+    await db.Notification.update(
+      {
+        jobId: null,
+      },
+
+      {
+        where: {
+          jobId: id,
+        },
+      },
+    );
+
+    // delete bids
+    await db.Bid.destroy({
+      where: {
+        jobId: id,
+      },
+    });
+
+    // delete job
     await job.destroy();
 
     return successResponse(res, StatusCodes.OK, {
       message: "Job deleted successfully",
     });
   } catch (error) {
+    console.log(error.message);
+
     next(error);
   }
 };

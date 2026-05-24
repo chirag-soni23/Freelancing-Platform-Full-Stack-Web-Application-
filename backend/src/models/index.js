@@ -7,6 +7,7 @@ import Conversation from "./conversation.model.js";
 import Feedback from "./feedback.model.js";
 import Job from "./job.model.js";
 import Message from "./message.model.js";
+import Notification from "./notification.model.js";
 import SavedJob from "./savedJob.model.js";
 import SavedFreelancer from "./saveFreelancer.model.js";
 
@@ -22,6 +23,7 @@ const db = {
   SavedFreelancer,
   SavedJob,
   Bid,
+  Notification,
 };
 
 // db.User.hasMany(db.Category, {
@@ -153,7 +155,6 @@ db.SavedJob.belongsTo(db.Job, {
   as: "job",
 });
 
-
 db.User.hasMany(db.Bid, {
   foreignKey: "freelancerId",
   as: "myBids",
@@ -188,6 +189,33 @@ db.Job.hasMany(db.Bid, {
 db.Bid.belongsTo(db.Job, {
   foreignKey: "jobId",
   as: "job",
+});
+
+// NOTIFICATIONS
+// NOTIFICATIONS
+
+db.Notification.belongsTo(db.Job, {
+  foreignKey: "jobId",
+
+  as: "job",
+});
+
+db.Job.hasMany(db.Notification, {
+  foreignKey: "jobId",
+
+  as: "notifications",
+});
+
+db.Notification.belongsTo(db.User, {
+  foreignKey: "clientId",
+
+  as: "client",
+});
+
+db.User.hasMany(db.Notification, {
+  foreignKey: "clientId",
+
+  as: "notifications",
 });
 
 // db.Job.hasMany(db.Bid, { foreignKey: "jobId" });

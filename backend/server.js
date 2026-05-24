@@ -18,6 +18,7 @@ import feedbackRoutes from "./src/routes/feedback.route.js";
 import dashboardRoutes from "./src/routes/dashboard.route.js";
 import savedRoutes from "./src/routes/saved.route.js";
 import bidRoutes from "./src/routes/bid.route.js";
+import notificationRoutes from "./src/routes/notification.route.js";
 
 import db from "./src/models/index.js";
 import { emailQueue } from "./src/queue/emailQueue.js";
@@ -39,7 +40,7 @@ export const io = new Server(server, {
   },
 });
 
-const onlineUsers = {};
+export const onlineUsers = {};
 
 // socket connection
 io.on("connection", (socket) => {
@@ -216,6 +217,7 @@ app.use("/api/feedback", isAuth, feedbackRoutes);
 app.use("/api/dashboard", isAuth, dashboardRoutes);
 app.use("/api/saved", isAuth, savedRoutes);
 app.use("/api/bid", isAuth, bidRoutes);
+app.use("/api/notifications", isAuth, notificationRoutes);
 
 // error handler
 app.use(errorHandler);

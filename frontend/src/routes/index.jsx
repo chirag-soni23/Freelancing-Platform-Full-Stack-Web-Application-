@@ -25,6 +25,7 @@ import { useAuth } from "@/hooks/useAuth";
 import FreelancerBid from "@/freelancers/pages/FreelancerBid";
 import ClientBid from "@/client/pages/ClientBid";
 import ClientJobDetails from "@/client/pages/ClientJobDetails";
+import Notifications from "@/freelancers/pages/Notifications";
 
 /* =========================
    LAZY IMPORTS
@@ -191,6 +192,8 @@ const AppRoutes = () => {
             )
           }
         >
+
+         
           <Route
             index
             element={
@@ -203,6 +206,8 @@ const AppRoutes = () => {
               )
             }
           />
+
+          <Route path="notifications" element={role === "freelancer" && <Notifications/>}/>
 
           <Route
             path="my-bids"
