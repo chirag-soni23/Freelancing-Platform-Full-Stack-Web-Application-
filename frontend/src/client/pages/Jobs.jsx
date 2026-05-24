@@ -356,10 +356,13 @@ const Jobs = () => {
       />
 
       <ConfirmDialog
-        isOpen={confirmOpen}
-        onClose={() => {
-          setConfirmOpen(false);
-          setDeleteId(null);
+        open={confirmOpen}
+        onOpenChange={(value) => {
+          setConfirmOpen(value);
+
+          if (!value) {
+            setDeleteId(null);
+          }
         }}
         onConfirm={() => {
           deleteJob(deleteId, {
