@@ -30,7 +30,6 @@ const ClientJobDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  // Apne custom hook se job data fetch karein
   const { job, isLoadingJob } = useJob(id);
 
   if (isLoadingJob) {

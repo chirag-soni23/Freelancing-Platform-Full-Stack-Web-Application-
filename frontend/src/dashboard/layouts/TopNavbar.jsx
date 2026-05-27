@@ -27,32 +27,32 @@ export function TopNavbar({ isSidebarOpen, onToggleSidebar }) {
   const { theme, toggle } = useTheme();
   const queryClient = useQueryClient();
   const { unreadCount } = useNotification();
-  const audioRef = useRef(null);
+  // const audioRef = useRef(null);
 
-  // realtime notification
-  useEffect(() => {
-    audioRef.current = new Audio("/notification.mpeg");
+  // // realtime notification
+  // useEffect(() => {
+  //   audioRef.current = new Audio("/notification.mpeg");
 
-    socket.on(
-      "newNotification",
+  //   socket.on(
+  //     "newNotification",
 
-      (data) => {
-        console.log("Notification:", data);
+  //     (data) => {
+  //       console.log("Notification:", data);
 
-        // play sound
-        audioRef.current?.play().catch((err) => console.log(err));
+  //       // play sound
+  //       audioRef.current?.play().catch((err) => console.log(err));
 
-        // refresh notification query
-        queryClient.invalidateQueries({
-          queryKey: ["notifications"],
-        });
-      },
-    );
+  //       // refresh notification query
+  //       queryClient.invalidateQueries({
+  //         queryKey: ["notifications"],
+  //       });
+  //     },
+  //   );
 
-    return () => {
-      socket.off("newNotification");
-    };
-  }, [queryClient]);
+  //   return () => {
+  //     socket.off("newNotification");
+  //   };
+  // }, [queryClient]);
 
   return (
     <header className="h-14 border-b border-border flex items-center justify-between px-4 bg-card/50 backdrop-blur-sm shrink-0">
