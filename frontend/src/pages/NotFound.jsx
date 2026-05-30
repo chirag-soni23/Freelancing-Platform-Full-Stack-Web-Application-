@@ -9,16 +9,12 @@ const NotFound = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-white dark:bg-neutral-950 px-4 transition-colors duration-300">
       <div className="w-full max-w-[400px] border border-neutral-200 bg-white p-6 shadow-xl dark:border-neutral-800 dark:bg-neutral-950">
-        {/* STRUCTURAL CONTENT LAYOUT */}
         <div className="flex items-start gap-4">
-          {/* SOPHISTICATED ICON BOX */}
           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-none bg-neutral-50 border border-neutral-200 text-neutral-600 dark:bg-neutral-900 dark:border-neutral-800 dark:text-neutral-400">
             <SearchX size={18} strokeWidth={2} />
           </div>
 
-          {/* TEXT CONTENT */}
           <div className="space-y-1.5 flex-1 text-left">
-            {/* यहाँ पर text-primary का उपयोग किया गया है */}
             <span className="text-xs font-semibold uppercase tracking-wider text-primary">
               Error 404
             </span>

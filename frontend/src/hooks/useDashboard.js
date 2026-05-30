@@ -63,7 +63,7 @@ export const useDashboard = (role, params = {}) => {
   const adminJobsQuery = useQuery({
     queryKey: ["admin-jobs", params],
     queryFn: () => getAdminJobs(params),
-    enabled: role === "admin",
+    enabled: role === "admin" || role === "freelancer",
     placeholderData: keepPreviousData,
   });
 
@@ -80,6 +80,30 @@ export const useDashboard = (role, params = {}) => {
     reviews: dashboardData?.reviews || [],
     pagination: dashboardData?.pagination || {},
 
+    // Freelancer & Client Stats
+    totalReviews: dashboardData?.stats?.totalReviews || 0,
+
+    totalBids: dashboardData?.stats?.totalBids || 0,
+
+    acceptedBids: dashboardData?.stats?.acceptedBids || 0,
+
+    rejectedBids: dashboardData?.stats?.rejectedBids || 0,
+
+    pendingBids: dashboardData?.stats?.pendingBids || 0,
+
+    averageRating: dashboardData?.stats?.averageRating || 0,
+
+    // Jobs
+    totalJobs:
+      role === "client"
+        ? dashboardData?.stats?.totalJobs || 0
+        : adminJobsQuery.data?.totalJobs || 0,
+
+    jobs: adminJobsQuery.data?.data || [],
+
+    jobsPagination: adminJobsQuery.data?.pagination || {},
+
+    // Admin Stats
     totalFreelancers:
       adminFreelancersQuery.data?.totalFreelancers || 0,
 
@@ -106,15 +130,6 @@ export const useDashboard = (role, params = {}) => {
 
     categoriesPagination:
       adminCategoriesQuery.data?.pagination || {},
-
-    totalJobs:
-      adminJobsQuery.data?.totalJobs || 0,
-
-    jobs:
-      adminJobsQuery.data?.data || [],
-
-    jobsPagination:
-      adminJobsQuery.data?.pagination || {},
 
     isLoading:
       freelancerDashboardQuery.isLoading ||

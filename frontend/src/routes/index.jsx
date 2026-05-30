@@ -83,9 +83,19 @@ const Loader = () => (
 ========================= */
 
 const AppRoutes = () => {
-  const { user } = useAuth();
+  const { user, isLoadingUser } = useAuth();
+  if (isLoadingUser) {
+    return <Loader />;
+  }
 
   const role = user?.data?.role;
+
+  console.log("ROLE:", role);
+console.log(
+  role === "freelancer"
+    ? "Rendering FreelancerDashboard"
+    : "Rendering ClientDashboard"
+);
   return (
     <Suspense fallback={<Loader />}>
       <ScrollToTop />
@@ -175,120 +185,109 @@ const AppRoutes = () => {
             }
           />
         </Route>
+{/* =========================
+    FREELANCER DASHBOARD
+========================= */}
 
-        {/* =========================
-            USER DASHBOARD
-        ========================= */}
+<Route
+  path="/freelancer-dashboard"
+  element={
+    <RoleProtectedRoute allowedRoles={["freelancer"]}>
+      <AppLayout />
+    </RoleProtectedRoute>
+  }
+>
+  <Route index element={<FreelancerDashboard />} />
 
-        <Route
-          path="/dashboard"
-          element={
-            user?.data?.role === "admin" ? (
-              <NotFound />
-            ) : (
-              <ProtectedRoute>
-                <AppLayout />
-              </ProtectedRoute>
-            )
-          }
-        >
+  <Route path="notifications" element={<Notifications />} />
 
-         
-          <Route
-            index
-            element={
-              role === "freelancer" ? (
-                <FreelancerDashboard />
-              ) : role === "client" ? (
-                <ClientDashboard />
-              ) : (
-                <NotFound />
-              )
-            }
-          />
+  <Route path="my-bids" element={<FreelancerBid />} />
 
-          <Route path="notifications" element={role === "freelancer" && <Notifications/>}/>
+  <Route path="chats" element={<Chat />} />
 
-          <Route
-            path="my-bids"
-            element={role === "freelancer" && <FreelancerBid />}
-          />
-          <Route path="chats" element={<Chat />} />
+  <Route path="rating-and-reviews" element={<Review />} />
+</Route>
 
-          <Route path="rating-and-reviews" element={<Review />} />
+{/* =========================
+    CLIENT DASHBOARD
+========================= */}
 
-          <Route
-            path="jobs"
-            element={
-              <RoleProtectedRoute allowedRoles={["client"]}>
-                <Jobs />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="job/:id"
-            element={
-              <RoleProtectedRoute allowedRoles={["client"]}>
-                <ClientJobDetails />
-              </RoleProtectedRoute>
-            }
-          />
-        </Route>
+<Route
+  path="/client-dashboard"
+  element={
+    <RoleProtectedRoute allowedRoles={["client"]}>
+      <AppLayout />
+    </RoleProtectedRoute>
+  }
+>
+  <Route index element={<ClientDashboard />} />
 
-        {/* =========================
-            ADMIN DASHBOARD
-        ========================= */}
+  <Route path="jobs" element={<Jobs />} />
 
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <AppLayout />
-            </ProtectedRoute>
-          }
-        >
-          <Route
-            path="dashboard"
-            element={
-              <RoleProtectedRoute allowedRoles={["admin"]}>
-                <AdminDashboard />
-              </RoleProtectedRoute>
-            }
-          />
+  <Route path="job/:id" element={<ClientJobDetails />} />
 
-          <Route
-            path="category"
-            element={
-              <RoleProtectedRoute allowedRoles={["admin"]}>
-                <Category />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="freelancers"
-            element={
-              <RoleProtectedRoute allowedRoles={["admin"]}>
-                <Freelancers />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="clients"
-            element={
-              <RoleProtectedRoute allowedRoles={["admin"]}>
-                <Client />
-              </RoleProtectedRoute>
-            }
-          />
-          <Route
-            path="jobs"
-            element={
-              <RoleProtectedRoute allowedRoles={["admin"]}>
-                <AdminJobs />
-              </RoleProtectedRoute>
-            }
-          />
-        </Route>
+  <Route path="chats" element={<Chat />} />
+
+  <Route path="rating-and-reviews" element={<Review />} />
+</Route>
+
+{/* =========================
+    ADMIN DASHBOARD
+========================= */}
+
+<Route
+  path="/admin"
+  element={
+    <ProtectedRoute>
+      <AppLayout />
+    </ProtectedRoute>
+  }
+>
+  <Route
+    path="dashboard"
+    element={
+      <RoleProtectedRoute allowedRoles={["admin"]}>
+        <AdminDashboard />
+      </RoleProtectedRoute>
+    }
+  />
+
+  <Route
+    path="category"
+    element={
+      <RoleProtectedRoute allowedRoles={["admin"]}>
+        <Category />
+      </RoleProtectedRoute>
+    }
+  />
+
+  <Route
+    path="freelancers"
+    element={
+      <RoleProtectedRoute allowedRoles={["admin"]}>
+        <Freelancers />
+      </RoleProtectedRoute>
+    }
+  />
+
+  <Route
+    path="clients"
+    element={
+      <RoleProtectedRoute allowedRoles={["admin"]}>
+        <Client />
+      </RoleProtectedRoute>
+    }
+  />
+
+  <Route
+    path="jobs"
+    element={
+      <RoleProtectedRoute allowedRoles={["admin"]}>
+        <AdminJobs />
+      </RoleProtectedRoute>
+    }
+  />
+</Route>
 
         {/* =========================
             NOT FOUND

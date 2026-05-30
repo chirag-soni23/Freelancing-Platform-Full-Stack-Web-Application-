@@ -27,7 +27,8 @@ import {
 import { NavLink, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/hooks/useAuth";
 
-const BASE = "/dashboard";
+const CLIENT_BASE = "/client-dashboard";
+const FREELANCER_BASE = "/freelancer-dashboard";
 
 /* =========================
    CLIENT SIDEBAR ITEMS
@@ -40,7 +41,7 @@ const clientItems = [
       {
         label: "Dashboard",
         icon: LayoutGrid,
-        path: `${BASE}`,
+        path: CLIENT_BASE,
       },
     ],
   },
@@ -51,7 +52,7 @@ const clientItems = [
       {
         label: "Jobs",
         icon: Briefcase,
-        path: `${BASE}/jobs`,
+        path: `${CLIENT_BASE}/jobs`,
       },
     ],
   },
@@ -62,7 +63,7 @@ const clientItems = [
       {
         label: "Chats",
         icon: MessageCircle,
-        path: `${BASE}/chats`,
+        path: `${CLIENT_BASE}/chats`,
       },
     ],
   },
@@ -73,7 +74,7 @@ const clientItems = [
       {
         label: "Reviews",
         icon: Star,
-        path: `${BASE}/rating-and-reviews`,
+        path: `${CLIENT_BASE}/rating-and-reviews`,
       },
     ],
   },
@@ -90,7 +91,7 @@ const freelancerItems = [
       {
         label: "Dashboard",
         icon: LayoutGrid,
-        path: `${BASE}`,
+        path: FREELANCER_BASE,
       },
     ],
   },
@@ -101,13 +102,13 @@ const freelancerItems = [
       {
         label: "Find Jobs",
         icon: Search,
-        path: `${BASE}/find-jobs`,
+        path: `${FREELANCER_BASE}/find-jobs`,
       },
 
       {
         label: "My Proposals",
         icon: FileText,
-        path: `${BASE}/my-bids`,
+        path: `${FREELANCER_BASE}/my-bids`,
       },
     ],
   },
@@ -118,7 +119,7 @@ const freelancerItems = [
       {
         label: "Chats",
         icon: MessageCircle,
-        path: `${BASE}/chats`,
+        path: `${FREELANCER_BASE}/chats`,
       },
     ],
   },
@@ -129,7 +130,7 @@ const freelancerItems = [
       {
         label: "Reviews",
         icon: Star,
-        path: `${BASE}/rating-and-reviews`,
+        path: `${FREELANCER_BASE}/rating-and-reviews`,
       },
     ],
   },
@@ -222,15 +223,11 @@ export function AppSidebar({ isOpen, onClose }) {
 
       {/* SIDEBAR */}
 
-   <aside
-  className={`fixed top-0 left-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col
+      <aside
+        className={`fixed top-0 left-0 z-50 h-screen w-64 bg-sidebar border-r border-sidebar-border flex flex-col
   transition-transform duration-500 ease-in-out
-  ${
-    isOpen
-      ? "translate-x-0"
-      : "-translate-x-full"
-  }`}
->
+  ${isOpen ? "translate-x-0" : "-translate-x-full"}`}
+      >
         <div className="flex flex-col h-full">
           {/* LOGO */}
 

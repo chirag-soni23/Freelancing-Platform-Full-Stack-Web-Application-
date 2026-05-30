@@ -447,8 +447,13 @@ const Chat = () => {
                   <div
                     key={conversation.id}
                     onClick={() => {
+                      const base =
+                        user?.data?.role === "freelancer"
+                          ? "/freelancer-dashboard"
+                          : "/client-dashboard";
+
                       navigate(
-                        `/dashboard/chats?conversationId=${conversation?.id}&receiverId=${otherUser?.id}`,
+                        `${base}/chats?conversationId=${conversation?.id}&receiverId=${otherUser?.id}`,
                       );
 
                       setMobileSidebar(false);

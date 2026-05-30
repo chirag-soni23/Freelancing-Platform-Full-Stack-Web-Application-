@@ -217,8 +217,13 @@ const FreelancerDetails = () => {
                           receiverId: f?.id,
                         });
 
+                        const base =
+                          user?.data?.role === "freelancer"
+                            ? "/freelancer-dashboard"
+                            : "/client-dashboard";
+
                         navigate(
-                          `/dashboard/chats?conversationId=${res?.data?.id}&receiverId=${f?.id}`,
+                          `${base}/chats?conversationId=${res?.data?.id}&receiverId=${f?.id}`,
                         );
                       } catch (error) {
                         console.log(error);

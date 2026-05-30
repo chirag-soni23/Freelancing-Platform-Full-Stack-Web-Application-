@@ -260,8 +260,13 @@ const JobDetails = () => {
                           receiverId: j?.client.id,
                         });
 
+                        const base =
+                          user?.data?.role === "freelancer"
+                            ? "/freelancer-dashboard"
+                            : "/client-dashboard";
+
                         navigate(
-                          `/dashboard/chats?conversationId=${res?.data?.id}&receiverId=${j?.client.id}`,
+                          `${base}/chats?conversationId=${conversation?.id}&receiverId=${otherUser?.id}`,
                         );
                       } catch (error) {
                         console.log(error);

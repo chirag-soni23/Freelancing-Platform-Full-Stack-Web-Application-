@@ -42,6 +42,18 @@ export const getClientReviewDashboard = async (req, res, next) => {
       },
     });
 
+    const totalJobs = await db.Job.count({
+      where: {
+        clientId: userId,
+      },
+    });
+
+    const totalBids = await db.Bid.count({
+      where: {
+        clientId: userId,
+      },
+    });
+
     // paginated reviews
     const reviews = await db.Feedback.findAll({
       where: {
@@ -129,6 +141,8 @@ export const getClientReviewDashboard = async (req, res, next) => {
         stats: {
           averageRating,
           totalReviews,
+          totalJobs,
+          totalBids,
           ratingBreakdown,
           ratingPercentages,
         },
@@ -184,6 +198,33 @@ export const getFreelancerReviewDashboard = async (req, res, next) => {
     const totalReviews = await db.Feedback.count({
       where: {
         receiverId: userId,
+      },
+    });
+
+    const totalBids = await db.Bid.count({
+      where: {
+        freelancerId: userId,
+      },
+    });
+
+    const acceptedBids = await db.Bid.count({
+      where: {
+        freelancerId: userId,
+        status: "accepted",
+      },
+    });
+
+    const rejectedBids = await db.Bid.count({
+      where: {
+        freelancerId: userId,
+        status: "rejected",
+      },
+    });
+
+    const pendingBids = await db.Bid.count({
+      where: {
+        freelancerId: userId,
+        status: "pending",
       },
     });
 
@@ -274,6 +315,10 @@ export const getFreelancerReviewDashboard = async (req, res, next) => {
         stats: {
           averageRating,
           totalReviews,
+          totalBids,
+          acceptedBids,
+          rejectedBids,
+          pendingBids,
           ratingBreakdown,
           ratingPercentages,
         },

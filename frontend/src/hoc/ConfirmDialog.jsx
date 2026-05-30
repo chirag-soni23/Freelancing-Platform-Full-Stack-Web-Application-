@@ -22,33 +22,38 @@ const ConfirmDialog = ({
 }) => {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[420px] gap-0 rounded-xl border border-border/40 bg-card/70 backdrop-blur-xl p-6 shadow-card focus-visible:outline-hidden">
-        
-        <div className="flex flex-col sm:flex-row items-center sm:items-start gap-4 text-center sm:text-left">
-          
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-destructive/10 text-destructive border border-destructive/20 shadow-soft animate-pulse-slow">
-            <AlertTriangle size={22} strokeWidth={2} />
+      <DialogContent className="sm:max-w-[420px] gap-0 rounded-2xl border border-neutral-200/60 bg-white/80 p-6 shadow-2xl backdrop-blur-xl transition-all dark:border-neutral-800/60 dark:bg-neutral-950/80 focus-visible:outline-none">
+        {/* HEADER & CONTENT LAYOUT */}
+        <div className="flex flex-col items-center gap-4 text-center sm:flex-row sm:items-start sm:text-left">
+          {/* SOPHISTICATED DESTRUCTIVE ICON */}
+          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl border border-red-200/60 bg-red-50 text-red-600 shadow-sm dark:border-red-900/40 dark:bg-red-950/40 dark:text-red-400">
+            <AlertTriangle
+              size={20}
+              strokeWidth={2.2}
+              className="animate-bounce-slow"
+            />
           </div>
 
-          <div className="space-y-2 flex-1 w-full">
+          {/* TEXT CONTENT */}
+          <div className="space-y-1.5 flex-1 w-full">
             <DialogHeader className="text-center sm:text-left">
-              <DialogTitle className="text-lg font-bold tracking-tight text-foreground">
+              <DialogTitle className="text-base font-semibold tracking-tight text-neutral-900 dark:text-neutral-50">
                 {title}
               </DialogTitle>
-              <DialogDescription className="text-sm font-medium leading-relaxed text-muted-foreground/90">
+              <DialogDescription className="text-sm font-light leading-relaxed text-neutral-500 dark:text-neutral-400">
                 {description}
               </DialogDescription>
             </DialogHeader>
           </div>
         </div>
 
-        {/* REFINED SYSTEM BUTTONS (Premium & Rounded) */}
-        <DialogFooter className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-3">
+        {/* REFINED SYSTEM BUTTONS */}
+        <DialogFooter className="mt-6 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end sm:gap-2.5">
           <Button
             variant="outline"
             onClick={() => onOpenChange(false)}
             disabled={loading}
-            className="h-11 rounded-xl border-border/60 bg-transparent text-sm font-semibold text-muted-foreground transition-smooth hover:bg-secondary hover:text-foreground disabled:opacity-40 sm:px-5"
+            className="h-10 rounded-xl border-neutral-200 bg-white text-xs font-medium tracking-wide text-neutral-600 transition-colors hover:bg-neutral-50 hover:text-neutral-900 disabled:opacity-40 sm:px-4 dark:border-neutral-800 dark:bg-neutral-950 dark:text-neutral-400 dark:hover:bg-neutral-900 dark:hover:text-neutral-50"
           >
             Cancel
           </Button>
@@ -56,11 +61,11 @@ const ConfirmDialog = ({
           <Button
             onClick={onConfirm}
             disabled={loading}
-            className="h-11 rounded-xl bg-destructive text-sm font-semibold text-destructive-foreground transition-smooth hover:bg-destructive/90 shadow-soft disabled:opacity-50 sm:px-5"
+            className="h-10 min-w-[120px] rounded-xl bg-red-600 text-xs font-medium tracking-wide text-white shadow-md transition-all hover:bg-red-700 active:scale-[0.98] disabled:opacity-50 sm:px-4 dark:bg-red-500 dark:hover:bg-red-600"
           >
             {loading ? (
               <div className="flex items-center justify-center gap-2">
-                <Loader2 size={16} className="animate-spin" />
+                <Loader2 size={14} className="animate-spin" />
                 <span>{loadingText}</span>
               </div>
             ) : (
@@ -68,7 +73,6 @@ const ConfirmDialog = ({
             )}
           </Button>
         </DialogFooter>
-
       </DialogContent>
     </Dialog>
   );

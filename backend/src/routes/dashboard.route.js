@@ -20,5 +20,5 @@ router.get(
 router.get("/total-freelancer", checkRole("admin"), getAdminFreelancers);
 router.get("/total-client", checkRole("admin"), getAdminClients);
 router.get("/total-categories", checkRole("admin"), getAdminCategories);
-router.get("/total-job",checkRole("admin"),getAdminJobs);
+router.get("/total-job", checkRole("admin", "freelancer"), getAdminJobs);
 export default router;

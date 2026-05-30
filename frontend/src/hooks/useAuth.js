@@ -20,7 +20,7 @@ import {
 } from "@/features/authApi";
 import { toast } from "./use-toast";
 
-export const useAuth = (params,freelancerId) => {
+export const useAuth = (params, freelancerId) => {
   const queryClient = useQueryClient();
 
   const meQuery = useQuery({
@@ -94,11 +94,12 @@ export const useAuth = (params,freelancerId) => {
     mutationFn: login,
 
     onSuccess: async () => {
-      await queryClient.invalidateQueries(["me"]);
-
+      await queryClient.refetchQueries({
+        queryKey: ["me"],
+      });
       toast({
         title: "Success",
-        description: "Login successful 🎉",
+        description: "Login successful",
       });
     },
 
@@ -301,8 +302,8 @@ export const useAuth = (params,freelancerId) => {
     // registerClient: registerClientMutation.mutate,
     // isRegisteringClient: registerClientMutation.isPending,
 
-    register:registerMutation.mutate,
-    isRegistering:registerMutation.isPending,
+    register: registerMutation.mutate,
+    isRegistering: registerMutation.isPending,
 
     // registerFreelancer: registerFreelancerMutation.mutate,
     // isRegisteringFreelancer: registerFreelancerMutation.isPending,

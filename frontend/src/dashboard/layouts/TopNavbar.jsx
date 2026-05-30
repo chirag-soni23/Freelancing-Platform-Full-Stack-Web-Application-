@@ -150,12 +150,11 @@ export function TopNavbar({ isSidebarOpen, onToggleSidebar }) {
           <Settings className="h-4 w-4 stroke-[1.75]" />
         </button>
 
-        {/* Divider */}
         <div className="h-4 w-[1px] bg-border/60 mx-1" />
 
-        {/* Avatar Button */}
+       
         <button className="relative ml-0.5 w-8 h-8 rounded-full bg-primary/10 hover:bg-primary/20 dark:bg-primary/20 dark:hover:bg-primary/30 text-primary border border-primary/20 flex items-center justify-center text-xs font-semibold tracking-wider transition-all duration-200 focus:ring-2 focus:ring-primary/40 active:scale-95">
-          A
+          {user?.data?.name?.[0]?.toUpperCase()}
         </button>
       </div>
     </header>
