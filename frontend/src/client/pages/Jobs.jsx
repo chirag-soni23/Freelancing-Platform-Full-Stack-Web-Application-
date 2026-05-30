@@ -256,10 +256,11 @@ const Jobs = () => {
     active:scale-95
   "
                         >
-                          <Link to={`/dashboard/job/${job?.id}`}>View</Link>
+                          <Link to={`/client-dashboard/job/${job?.id}`}>
+                            View
+                          </Link>
                         </Button>
 
-                        {/* Dropdown */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button
