@@ -64,6 +64,7 @@ export const createBid = async (req, res, next) => {
       data: bid,
     });
   } catch (error) {
+    
     next(error);
   }
 };
@@ -94,7 +95,6 @@ export const getMyBids = async (req, res, next) => {
     const include = [
       {
         model: db.Job,
-
         as: "job",
 
         ...(search && search.trim()
@@ -110,10 +110,15 @@ export const getMyBids = async (req, res, next) => {
 
       {
         model: db.User,
-
         as: "client",
-
         attributes: ["id", "name", "email", "profilePic"],
+      },
+
+      {
+        model: db.Submission,
+        as: "submission",
+        required: false,
+        attributes: ["id", "submissionUrl", "createdAt"],
       },
     ];
 
@@ -159,7 +164,6 @@ export const getJobBids = async (req, res, next) => {
     let { page = 1, limit = 10, search = "", status = "" } = req.query;
 
     page = parseInt(page, 10);
-
     limit = parseInt(limit, 10);
 
     if (isNaN(page) || page < 1) {
@@ -178,9 +182,9 @@ export const getJobBids = async (req, res, next) => {
       throw ApiError.NOTFOUND("Job not found");
     }
 
-    if (job.clientId !== req.user.id) {
-      throw ApiError.UNAUTHORIZED("Unauthorized");
-    }
+    // if (job.clientId !== req.user.id) {
+    //   throw ApiError.UNAUTHORIZED("Unauthorized");
+    // }
 
     let where = {
       jobId,
@@ -193,9 +197,7 @@ export const getJobBids = async (req, res, next) => {
     const include = [
       {
         model: db.User,
-
         as: "freelancer",
-
         attributes: ["id", "name", "profilePic", "title"],
 
         ...(search && search.trim()
@@ -207,7 +209,6 @@ export const getJobBids = async (req, res, next) => {
                       [Op.like]: `%${search.trim()}%`,
                     },
                   },
-
                   {
                     title: {
                       [Op.like]: `%${search.trim()}%`,
@@ -217,6 +218,20 @@ export const getJobBids = async (req, res, next) => {
               },
             }
           : {}),
+      },
+
+      {
+        model: db.Submission,
+        as: "submission",
+        required: false,
+        attributes: ["id", "submissionUrl", "createdAt"],
+      },
+
+      {
+        model: db.Payment,
+        as: "payment",
+        required: false,
+        attributes: ["id", "status", "paidAt"],
       },
     ];
 
@@ -229,11 +244,20 @@ export const getJobBids = async (req, res, next) => {
       order: [["createdAt", "DESC"]],
     });
 
+    const formattedRows = rows.map((bid) => {
+      const bidData = bid.toJSON();
+
+      // Payment nahi hui to submission hide
+      if (!bidData.payment || bidData.payment.status !== "paid") {
+        bidData.submission = null;
+      }
+
+      return bidData;
+    });
+
     return successResponse(res, StatusCodes.OK, {
       message: "Job bids fetched",
-
-      data: rows,
-
+      data: formattedRows,
       pagination: {
         total: count,
         page,
@@ -245,7 +269,6 @@ export const getJobBids = async (req, res, next) => {
     next(error);
   }
 };
-
 // accept bid
 export const acceptBid = async (req, res, next) => {
   try {

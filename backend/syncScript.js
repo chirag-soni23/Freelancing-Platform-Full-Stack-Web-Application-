@@ -42,13 +42,21 @@ async function syncDatabase() {
     //   alter: true,
     // });
 
-    // await db.Bid.sync({
+    await db.Bid.sync({
+      alter: true,
+    });
+
+    // await db.Notification.sync({
     //   alter: true,
     // });
 
-    await db.Notification.sync({
-      alter: true,
-    });
+    // await db.Payment.sync({
+    //   alter: true,
+    // });
+
+    // await db.Submission.sync({
+    //   alter: true,
+    // });
 
     await db.connection.query("SET FOREIGN_KEY_CHECKS = 1");
     console.log("Database synchronized successfully.");

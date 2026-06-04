@@ -24,6 +24,7 @@ import {
   Trash2,
   Eye,
 } from "lucide-react";
+import SubmissionDialog from "@/hoc/SubmissionDialog";
 
 const ProposalDialog = ({ open, onOpenChange, title, content }) => {
   if (!open) return null;
@@ -64,6 +65,9 @@ const FreelancerBid = () => {
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [selectedBidId, setSelectedBidId] = useState(null);
+  const [isSubmissionOpen, setIsSubmissionOpen] = useState(false);
+
+  const [selectedBid, setSelectedBid] = useState(null);
 
   // Proposal view modal states
   const [isProposalOpen, setIsProposalOpen] = useState(false);
@@ -99,6 +103,11 @@ const FreelancerBid = () => {
   const handleDeleteClick = (bidId) => {
     setSelectedBidId(bidId);
     setIsDialogOpen(true);
+  };
+
+  const handleOpenSubmissionModal = (bid) => {
+    setSelectedBid(bid);
+    setIsSubmissionOpen(true);
   };
 
   const handleConfirmDelete = async () => {
@@ -256,8 +265,12 @@ const FreelancerBid = () => {
                       Proposal Summary
                     </TableHead>
                     <TableHead className="font-bold">Bid Amount</TableHead>
+                    <TableHead className="font-bold">Status</TableHead>
                     <TableHead className="py-5 px-6 font-bold">
                       Submission Date
+                    </TableHead>
+                    <TableHead className="py-5 px-6 font-bold">
+                      Submission Link
                     </TableHead>
                     <TableHead className="font-bold text-center">
                       Action
@@ -298,6 +311,21 @@ const FreelancerBid = () => {
                           {bid.amount}
                         </div>
                       </TableCell>
+                      <TableCell>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-semibold ${
+                            bid.status === "accepted"
+                              ? "bg-green-100 text-green-700"
+                              : bid.status === "rejected"
+                                ? "bg-red-100 text-red-700"
+                                : bid.status === "withdrawn"
+                                  ? "bg-gray-100 text-gray-700"
+                                  : "bg-yellow-100 text-yellow-700"
+                          }`}
+                        >
+                          {bid.status}
+                        </span>
+                      </TableCell>
 
                       <TableCell className="py-4 px-6 text-muted-foreground group-hover:text-foreground transition-colors">
                         <div className="flex items-center gap-2 text-sm font-semibold">
@@ -306,6 +334,29 @@ const FreelancerBid = () => {
                         </div>
                       </TableCell>
 
+                      <TableCell className="py-4 px-6 text-muted-foreground group-hover:text-foreground transition-colors">
+                        {bid.status === "accepted" ? (
+                          bid.submission ? (
+                            <button
+                              onClick={() => handleOpenSubmissionModal(bid)}
+                              className="px-3 py-1 text-xs font-medium rounded-lg bg-blue-600 text-white hover:bg-blue-700"
+                            >
+                              Update Link
+                            </button>
+                          ) : (
+                            <button
+                              onClick={() => handleOpenSubmissionModal(bid)}
+                              className="px-3 py-1 text-xs font-medium rounded-lg bg-green-600 text-white hover:bg-green-700"
+                            >
+                              Submit Link
+                            </button>
+                          )
+                        ) : (
+                          <span className="text-muted-foreground">
+                            No Submission
+                          </span>
+                        )}
+                      </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-1">
                           <button
@@ -315,16 +366,15 @@ const FreelancerBid = () => {
                                 bid.proposal,
                               )
                             }
-                            className="text-muted-foreground hover:text-primary p-2 rounded-xl hover:bg-primary/10 transition-colors inline-flex items-center justify-center"
-                            title="View Full Proposal"
+                            className="text-muted-foreground hover:text-primary p-2 rounded-xl hover:bg-primary/10 transition-colors"
                           >
                             <Eye size={16} />
                           </button>
+
                           <button
                             disabled={isDeletingBid}
                             onClick={() => handleDeleteClick(bid.id || bid._id)}
-                            className="text-muted-foreground hover:text-destructive p-2 rounded-xl hover:bg-destructive/10 transition-colors inline-flex items-center justify-center"
-                            title="Delete Bid"
+                            className="text-muted-foreground hover:text-destructive p-2 rounded-xl hover:bg-destructive/10 transition-colors"
                           >
                             <Trash2 size={16} />
                           </button>
@@ -353,7 +403,6 @@ const FreelancerBid = () => {
           </div>
         )}
 
-        {/* Pagination Section */}
         <WithPagination
           page={page}
           totalPages={pagination?.totalPages || 1}
@@ -361,7 +410,6 @@ const FreelancerBid = () => {
         />
       </div>
 
-      {/* Modern Luxury Confirmation Dialog */}
       <ConfirmDialog
         open={isDialogOpen}
         onOpenChange={setIsDialogOpen}
@@ -373,12 +421,19 @@ const FreelancerBid = () => {
         onConfirm={handleConfirmDelete}
       />
 
-      {/* Dynamic Modal to view proposal summary */}
       <ProposalDialog
         open={isProposalOpen}
         onOpenChange={setIsProposalOpen}
         title={selectedProposal.title}
         content={selectedProposal.content}
+      />
+
+      <SubmissionDialog
+        open={isSubmissionOpen}
+        onOpenChange={setIsSubmissionOpen}
+        bidId={selectedBid?.id}
+        initialValue={selectedBid?.submission?.submissionUrl}
+        isEdit={!!selectedBid?.submission}
       />
     </div>
   );

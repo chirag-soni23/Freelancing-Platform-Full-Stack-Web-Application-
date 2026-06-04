@@ -69,6 +69,23 @@ const Job = sequelize.define(
       defaultValue: 0,
     },
 
+    projectStatus: {
+      type: DataTypes.ENUM("in_progress", "submitted", "completed"),
+      allowNull: false,
+      defaultValue: "in_progress",
+    },
+
+    paymentStatus: {
+      type: DataTypes.ENUM("pending", "paid"),
+      allowNull: false,
+      defaultValue: "pending",
+    },
+
+    completedAt: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
+
     competition: {
       type: DataTypes.ENUM("low", "medium", "high"),
       defaultValue: "low",

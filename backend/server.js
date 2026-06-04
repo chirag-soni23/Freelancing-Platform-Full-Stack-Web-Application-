@@ -19,6 +19,8 @@ import dashboardRoutes from "./src/routes/dashboard.route.js";
 import savedRoutes from "./src/routes/saved.route.js";
 import bidRoutes from "./src/routes/bid.route.js";
 import notificationRoutes from "./src/routes/notification.route.js";
+import paymentRoutes from "./src/routes/payment.route.js";
+import submissionRoutes from "./src/routes/submission.route.js";
 
 import db from "./src/models/index.js";
 import { emailQueue } from "./src/queue/emailQueue.js";
@@ -164,7 +166,6 @@ Login to reply.
       if (senderSocketId) {
         io.to(senderSocketId).emit("messagesSeen", {
           conversationId: data.conversationId,
-
           seen: true,
         });
       }
@@ -190,7 +191,7 @@ Login to reply.
     io.emit("onlineUsers", Object.keys(onlineUsers));
   });
 });
-
+app.use("/api/payment/webhook", express.raw({ type: "application/json" }));
 // middlewared
 app.use(express.json());
 app.use(
@@ -218,6 +219,8 @@ app.use("/api/dashboard", isAuth, dashboardRoutes);
 app.use("/api/saved", isAuth, savedRoutes);
 app.use("/api/bid", isAuth, bidRoutes);
 app.use("/api/notifications", isAuth, notificationRoutes);
+app.use("/api/payment", paymentRoutes);
+app.use("/api/submission", isAuth, submissionRoutes);
 
 // error handler
 app.use(errorHandler);

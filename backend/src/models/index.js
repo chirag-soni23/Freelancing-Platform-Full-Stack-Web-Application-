@@ -8,8 +8,10 @@ import Feedback from "./feedback.model.js";
 import Job from "./job.model.js";
 import Message from "./message.model.js";
 import Notification from "./notification.model.js";
+import Payment from "./payment.model.js";
 import SavedJob from "./savedJob.model.js";
 import SavedFreelancer from "./saveFreelancer.model.js";
+import Submission from "./submission.model.js";
 
 const db = {
   connection,
@@ -24,6 +26,8 @@ const db = {
   SavedJob,
   Bid,
   Notification,
+  Payment,
+  Submission,
 };
 
 // db.User.hasMany(db.Category, {
@@ -217,6 +221,84 @@ db.User.hasMany(db.Notification, {
 
   as: "notifications",
 });
+
+// Payment -> Client
+db.User.hasMany(db.Payment, {
+  foreignKey: "clientId",
+  as: "clientPayments",
+});
+
+db.Payment.belongsTo(db.User, {
+  foreignKey: "clientId",
+  as: "client",
+});
+
+// Payment -> Freelancer
+db.User.hasMany(db.Payment, {
+  foreignKey: "freelancerId",
+  as: "freelancerPayments",
+});
+
+db.Payment.belongsTo(db.User, {
+  foreignKey: "freelancerId",
+  as: "freelancer",
+});
+
+// Payment -> Bid
+db.Bid.hasOne(db.Payment, {
+  foreignKey: "bidId",
+  as: "payment",
+});
+
+db.Payment.belongsTo(db.Bid, {
+  foreignKey: "bidId",
+  as: "bid",
+});
+
+// Payment -> Job
+db.Job.hasMany(db.Payment, {
+  foreignKey: "jobId",
+  as: "payments",
+});
+
+db.Payment.belongsTo(db.Job, {
+  foreignKey: "jobId",
+  as: "job",
+});
+
+// Bid <-> Submission
+db.Bid.hasOne(db.Submission, {
+  foreignKey: "bidId",
+  as: "submission",
+});
+
+db.Submission.belongsTo(db.Bid, {
+  foreignKey: "bidId",
+  as: "bid",
+});
+
+// Freelancer <-> Submission
+db.User.hasMany(db.Submission, {
+  foreignKey: "freelancerId",
+  as: "submittedProjects",
+});
+
+db.Submission.belongsTo(db.User, {
+  foreignKey: "freelancerId",
+  as: "freelancer",
+});
+
+// Client <-> Submission
+db.User.hasMany(db.Submission, {
+  foreignKey: "clientId",
+  as: "receivedProjects",
+});
+
+db.Submission.belongsTo(db.User, {
+  foreignKey: "clientId",
+  as: "client",
+});
+
 
 // db.Job.hasMany(db.Bid, { foreignKey: "jobId" });
 // db.Bid.belongsTo(db.Job, { foreignKey: "jobId" });
