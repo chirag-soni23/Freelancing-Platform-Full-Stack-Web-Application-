@@ -3,18 +3,46 @@ import { Users, BriefcaseBusiness, FolderKanban } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useDashboard } from "@/hooks/useDashboard";
+import ClientCharts from "./ClientChart";
 
 const ClientDashboard = () => {
-  const { totalJobs, totalReviews, isLoading, totalBids } =
-    useDashboard("client");
+  const {
+    totalJobs,
+    totalReviews,
+    totalBids,
+    totalSpent,
+    clientPendingPayments,
+    clientTotalProjects,
+    isLoading,
+  } = useDashboard("client");
 
   const cards = [
+    {
+      title: "Total Spent",
+      value: `₹${totalSpent?.toLocaleString() || 0}`,
+      icon: BriefcaseBusiness,
+      gradient: "from-green-500/10 to-emerald-500/5",
+      iconBg: "bg-green-500/10 text-green-600 dark:text-green-400",
+    },
+    {
+      title: "Pending Payments",
+      value: `₹${clientPendingPayments?.toLocaleString() || 0}`,
+      icon: FolderKanban,
+      gradient: "from-yellow-500/10 to-amber-500/5",
+      iconBg: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+    },
+    {
+      title: "Total Projects",
+      value: clientTotalProjects,
+      icon: BriefcaseBusiness,
+      gradient: "from-blue-500/10 to-cyan-500/5",
+      iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    },
     {
       title: "My Jobs",
       value: totalJobs,
       icon: BriefcaseBusiness,
       gradient: "from-orange-500/10 to-amber-500/5",
-      // border: "group-hover:border-orange-500/30",
       iconBg: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
     },
     {
@@ -22,7 +50,6 @@ const ClientDashboard = () => {
       value: totalBids,
       icon: FolderKanban,
       gradient: "from-violet-500/10 to-purple-500/5",
-      // border: "group-hover:border-violet-500/30",
       iconBg: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
     },
     {
@@ -30,7 +57,6 @@ const ClientDashboard = () => {
       value: totalReviews,
       icon: Users,
       gradient: "from-blue-500/10 to-cyan-500/5",
-      // border: "group-hover:border-blue-500/30",
       iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     },
   ];
@@ -83,6 +109,7 @@ const ClientDashboard = () => {
           ),
         )}
       </div>
+      <ClientCharts />
     </div>
   );
 };

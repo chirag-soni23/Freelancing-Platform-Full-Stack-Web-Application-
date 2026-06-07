@@ -8,6 +8,8 @@ import {
   getAdminClients,
   getAdminCategories,
   getAdminJobs,
+  getFreelancerEarningsDashboard,
+  getClientPaymentsDashboard,
 } from "@/features/dashboardApi";
 
 export const useDashboard = (role, params = {}) => {
@@ -67,12 +69,26 @@ export const useDashboard = (role, params = {}) => {
     placeholderData: keepPreviousData,
   });
 
+  // freelancer earnings
+  const freelancerEarningsQuery = useQuery({
+    queryKey: ["freelancer-earnings"],
+    queryFn: getFreelancerEarningsDashboard,
+    enabled: role === "freelancer",
+  });
+
+  const clientPaymentsQuery = useQuery({
+    queryKey: ["client-payments-dashboard"],
+    queryFn: getClientPaymentsDashboard,
+    enabled: role === "client",
+    placeholderData: keepPreviousData,
+  });
+
   const dashboardData =
     role === "freelancer"
       ? freelancerDashboardQuery.data?.data
       : role === "client"
-      ? clientDashboardQuery.data?.data
-      : reviewDashboardQuery.data?.data;
+        ? clientDashboardQuery.data?.data
+        : reviewDashboardQuery.data?.data;
 
   return {
     dashboard: dashboardData || {},
@@ -80,18 +96,42 @@ export const useDashboard = (role, params = {}) => {
     reviews: dashboardData?.reviews || [],
     pagination: dashboardData?.pagination || {},
 
-    // Freelancer & Client Stats
+    // Review Stats
     totalReviews: dashboardData?.stats?.totalReviews || 0,
-
     totalBids: dashboardData?.stats?.totalBids || 0,
-
     acceptedBids: dashboardData?.stats?.acceptedBids || 0,
-
     rejectedBids: dashboardData?.stats?.rejectedBids || 0,
-
     pendingBids: dashboardData?.stats?.pendingBids || 0,
-
     averageRating: dashboardData?.stats?.averageRating || 0,
+
+    // Freelancer Earnings Dashboard
+    earningsDashboard: freelancerEarningsQuery.data?.data || {},
+
+    totalEarnings:
+      freelancerEarningsQuery.data?.data?.stats?.totalEarnings || 0,
+
+    pendingPayments:
+      freelancerEarningsQuery.data?.data?.stats?.pendingPayments || 0,
+
+    totalProjects:
+      freelancerEarningsQuery.data?.data?.stats?.totalProjects || 0,
+
+    earningsGraph: freelancerEarningsQuery.data?.data?.earningsGraph || [],
+
+    // Client Payments Dashboard
+    clientPaymentsDashboard: clientPaymentsQuery.data?.data || {},
+
+    totalSpent: clientPaymentsQuery.data?.data?.stats?.totalSpent || 0,
+
+    clientPendingPayments:
+      clientPaymentsQuery.data?.data?.stats?.pendingPayments || 0,
+
+    clientTotalProjects:
+      clientPaymentsQuery.data?.data?.stats?.totalProjects || 0,
+
+    clientTotalJobs: clientPaymentsQuery.data?.data?.stats?.totalJobs || 0,
+
+    spendingGraph: clientPaymentsQuery.data?.data?.spendingGraph || [],
 
     // Jobs
     totalJobs:
@@ -104,32 +144,23 @@ export const useDashboard = (role, params = {}) => {
     jobsPagination: adminJobsQuery.data?.pagination || {},
 
     // Admin Stats
-    totalFreelancers:
-      adminFreelancersQuery.data?.totalFreelancers || 0,
+    totalFreelancers: adminFreelancersQuery.data?.totalFreelancers || 0,
 
-    freelancers:
-      adminFreelancersQuery.data?.data || [],
+    freelancers: adminFreelancersQuery.data?.data || [],
 
-    freelancersPagination:
-      adminFreelancersQuery.data?.pagination || {},
+    freelancersPagination: adminFreelancersQuery.data?.pagination || {},
 
-    totalClients:
-      adminClientsQuery.data?.totalClients || 0,
+    totalClients: adminClientsQuery.data?.totalClients || 0,
 
-    clients:
-      adminClientsQuery.data?.data || [],
+    clients: adminClientsQuery.data?.data || [],
 
-    clientsPagination:
-      adminClientsQuery.data?.pagination || {},
+    clientsPagination: adminClientsQuery.data?.pagination || {},
 
-    totalCategories:
-      adminCategoriesQuery.data?.totalCategories || 0,
+    totalCategories: adminCategoriesQuery.data?.totalCategories || 0,
 
-    categories:
-      adminCategoriesQuery.data?.data || [],
+    categories: adminCategoriesQuery.data?.data || [],
 
-    categoriesPagination:
-      adminCategoriesQuery.data?.pagination || {},
+    categoriesPagination: adminCategoriesQuery.data?.pagination || {},
 
     isLoading:
       freelancerDashboardQuery.isLoading ||
@@ -138,7 +169,9 @@ export const useDashboard = (role, params = {}) => {
       adminFreelancersQuery.isLoading ||
       adminClientsQuery.isLoading ||
       adminCategoriesQuery.isLoading ||
-      adminJobsQuery.isLoading,
+      adminJobsQuery.isLoading ||
+      freelancerEarningsQuery.isLoading ||
+      clientPaymentsQuery.isLoading,
 
     isFetching:
       freelancerDashboardQuery.isFetching ||
@@ -147,6 +180,8 @@ export const useDashboard = (role, params = {}) => {
       adminFreelancersQuery.isFetching ||
       adminClientsQuery.isFetching ||
       adminCategoriesQuery.isFetching ||
-      adminJobsQuery.isFetching,
+      adminJobsQuery.isFetching ||
+      freelancerEarningsQuery.isFetching ||
+      clientPaymentsQuery.isFetching,
   };
 };

@@ -10,9 +10,13 @@ import {
 
 import { Card, CardContent } from "@/components/ui/card";
 import { useDashboard } from "@/hooks/useDashboard";
+import FreelancerCharts from "./FreelancerCharts";
 
 const FreelancerDashboard = () => {
   const {
+    totalEarnings,
+    pendingPayments,
+    totalProjects,
     totalJobs,
     totalReviews,
     totalBids,
@@ -24,11 +28,32 @@ const FreelancerDashboard = () => {
 
   const cards = [
     {
+      title: "Total Earnings",
+      value: `₹${totalEarnings?.toLocaleString() || 0}`,
+      icon: BriefcaseBusiness,
+      gradient: "from-green-500/10 to-emerald-500/5",
+      iconBg: "bg-green-500/10 text-green-600 dark:text-green-400",
+    },
+    {
+      title: "Pending Payments",
+      value: `₹${pendingPayments?.toLocaleString() || 0}`,
+      icon: Clock,
+      gradient: "from-yellow-500/10 to-amber-500/5",
+      iconBg: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
+    },
+    {
+      title: "Total Projects",
+      value: totalProjects,
+      icon: FolderKanban,
+      gradient: "from-blue-500/10 to-cyan-500/5",
+      iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
+    },
+    {
       title: "Total Jobs",
       value: totalJobs,
       icon: BriefcaseBusiness,
       gradient: "from-orange-500/10 to-amber-500/5",
-      // border: "group-hover:border-orange-500/30",
+      border: "group-hover:border-orange-500/30",
       iconBg: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
     },
     {
@@ -74,6 +99,7 @@ const FreelancerDashboard = () => {
   ];
 
   return (
+    <>
     <div className="p-6 md:p-8 space-y-8 max-w-8xl mx-auto">
       <div className="flex flex-col gap-1">
         <h1 className="text-3xl md:text-4xl font-extrabold tracking-tight bg-gradient-to-r from-slate-900 to-slate-700 dark:from-slate-100 dark:to-slate-400 bg-clip-text text-transparent">
@@ -121,7 +147,9 @@ const FreelancerDashboard = () => {
           ),
         )}
       </div>
+      <FreelancerCharts/>
     </div>
+      </>
   );
 };
 

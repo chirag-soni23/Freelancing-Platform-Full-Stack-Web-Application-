@@ -765,3 +765,166 @@ export const getAdminJobs = async (req, res, next) => {
     next(error);
   }
 };
+
+// freelancer earnings dashboard
+export const getFreelancerEarningsDashboard = async (req, res, next) => {
+  try {
+    const freelancerId = req.user.id;
+
+    const totalEarnings =
+      (await db.Payment.sum("amount", {
+        where: {
+          freelancerId,
+          status: "paid",
+        },
+      })) || 0;
+
+    const totalProjects = await db.Payment.count({
+      where: {
+        freelancerId,
+        status: "paid",
+      },
+    });
+
+    const pendingPayments =
+      (await db.Payment.sum("amount", {
+        where: {
+          freelancerId,
+          status: "pending",
+        },
+      })) || 0;
+
+    const acceptedBids = await db.Bid.count({
+      where: {
+        freelancerId,
+        status: "accepted",
+      },
+    });
+
+    const totalBids = await db.Bid.count({
+      where: {
+        freelancerId,
+      },
+    });
+
+    // last 12 months earnings graph
+    const payments = await db.Payment.findAll({
+      where: {
+        freelancerId,
+        status: "paid",
+      },
+      attributes: ["amount", "paidAt"],
+      order: [["paidAt", "ASC"]],
+    });
+
+    const monthlyMap = {};
+
+    payments.forEach((item) => {
+      const month = new Date(item.paidAt).toLocaleString("en-US", {
+        month: "short",
+      });
+
+      monthlyMap[month] = (monthlyMap[month] || 0) + Number(item.amount);
+    });
+
+    const earningsGraph = Object.keys(monthlyMap).map((month) => ({
+      month,
+      earnings: monthlyMap[month],
+    }));
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Freelancer earnings dashboard fetched",
+
+      data: {
+        stats: {
+          totalEarnings,
+          pendingPayments,
+          totalProjects,
+          acceptedBids,
+          totalBids,
+        },
+
+        earningsGraph,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// get client payment dashboard 
+export const getClientPaymentDashboard = async (req, res, next) => {
+  try {
+    const clientId = req.user.id;
+
+    const totalSpent =
+      (await db.Payment.sum("amount", {
+        where: {
+          clientId,
+          status: "paid",
+        },
+      })) || 0;
+
+    const totalProjects = await db.Payment.count({
+      where: {
+        clientId,
+        status: "paid",
+      },
+    });
+
+    const pendingPayments =
+      (await db.Payment.sum("amount", {
+        where: {
+          clientId,
+          status: "pending",
+        },
+      })) || 0;
+
+    const totalJobs = await db.Job.count({
+      where: {
+        clientId,
+      },
+    });
+
+    const payments = await db.Payment.findAll({
+      where: {
+        clientId,
+        status: "paid",
+      },
+      attributes: ["amount", "paidAt"],
+      order: [["paidAt", "ASC"]],
+    });
+
+    const monthlyMap = {};
+
+    payments.forEach((item) => {
+      const month = new Date(item.paidAt).toLocaleString("en-US", {
+        month: "short",
+      });
+
+      monthlyMap[month] = (monthlyMap[month] || 0) + Number(item.amount);
+    });
+
+    const spendingGraph = Object.keys(monthlyMap).map((month) => ({
+      month,
+      spent: monthlyMap[month],
+    }));
+
+    return successResponse(res, StatusCodes.OK, {
+      message: "Client payment dashboard fetched",
+
+      data: {
+        stats: {
+          totalSpent,
+          pendingPayments,
+          totalProjects,
+          totalJobs,
+        },
+
+        spendingGraph,
+      },
+    });
+  } catch (error) {
+    next(error);
+  }
+};

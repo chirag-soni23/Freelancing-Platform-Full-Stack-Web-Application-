@@ -62,3 +62,15 @@ export const getAdminJobs = async (params) => {
 
   return res.data;
 };
+
+// freelancer earnings dashboard
+export const getFreelancerEarningsDashboard = async () => {
+  const res = await api.get("/dashboard/freelancer-earnings");
+  return res.data;
+};
+
+// client payments dashboard
+export const getClientPaymentsDashboard = async () => {
+  const res = await api.get("/dashboard/client-payments");
+  return res.data;
+};
