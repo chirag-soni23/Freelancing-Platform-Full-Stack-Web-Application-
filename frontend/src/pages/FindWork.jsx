@@ -11,9 +11,6 @@ import {
   Clock,
   Briefcase,
   Bookmark,
-  CheckCircle2,
-  MapPin,
-  CircleDollarSign,
   ArrowUpRight,
   Gavel,
   TrendingUp,
@@ -75,7 +72,29 @@ const FindWork = () => {
     jobType,
     category,
   });
-  console.log(jobs);
+  // console.log(jobs);
+
+  const getTimeAgo = (date) => {
+    const seconds = Math.floor((new Date() - new Date(date)) / 1000);
+
+    const intervals = {
+      year: 31536000,
+      month: 2592000,
+      day: 86400,
+      hour: 3600,
+      minute: 60,
+    };
+
+    for (const [unit, value] of Object.entries(intervals)) {
+      const interval = Math.floor(seconds / value);
+
+      if (interval >= 1) {
+        return `${interval}${unit.charAt(0)} ago`;
+      }
+    }
+
+    return "Just now";
+  };
   const navigate = useNavigate();
   const { savedJobs, toggleSaveJob, isTogglingJob } = useSaved();
   return (
@@ -394,7 +413,8 @@ const FindWork = () => {
                               {job?.status === "open" ? "Open" : "Closed"}
                             </Badge>
                             <span className="text-[13px] text-muted-foreground font-bold flex items-center gap-1.5">
-                              <Clock size={14} /> Posted 2h ago
+                              <Clock size={14} />{" "}
+                              <span>Posted {getTimeAgo(job.createdAt)}</span>
                             </span>
                           </div>
 
@@ -591,70 +611,71 @@ const FindWork = () => {
                             size={18}
                           />
                         </Button>
-{job?.status === "closed" &&
-job?.projectStatus === "completed" ? (
-  <Button
-    disabled
-    className="
-      w-full md:w-auto
-      rounded-2xl
-      px-10
-      h-12
-      font-black
-      bg-slate-600
-      hover:bg-slate-600
-    "
-  >
-    Project Completed
-  </Button>
-) : job?.myBid?.status === "pending" ? (
-  <Button
-    disabled
-    className="
-      w-full md:w-auto
-      rounded-2xl
-      px-10
-      h-12
-      font-black
-      bg-yellow-500
-      hover:bg-yellow-500
-    "
-  >
-    Pending
-  </Button>
-) : job?.myBid?.status === "accepted" ? (
-  <Button
-    disabled
-    className="
-      w-full md:w-auto
-      rounded-2xl
-      px-10
-      h-12
-      font-black
-      bg-emerald-600
-      hover:bg-emerald-600
-    "
-  >
-    Success
-  </Button>
-) : (
-  <Button
-    onClick={() => {
-      setSelectedJob(job);
-      setOpenBidModal(true);
-    }}
-    className="
-      w-full md:w-auto
-      rounded-2xl
-      px-10
-      h-12
-      font-black
-    "
-  >
-    Place a Bid
-    <ArrowUpRight className="ml-2" size={18} />
-  </Button>
-)}
+                        {job?.status === "closed" ? (
+                          job?.paymentStatus === "paid" ? (
+                            <Button
+                              disabled
+                              className="
+          w-full md:w-auto
+          rounded-2xl
+          px-10
+          h-12
+          font-black
+          bg-emerald-600
+          hover:bg-emerald-600
+        "
+                            >
+                              Project Completed
+                            </Button>
+                          ) : null
+                        ) : job?.myBid?.status === "pending" ? (
+                          <Button
+                            disabled
+                            className="
+        w-full md:w-auto
+        rounded-2xl
+        px-10
+        h-12
+        font-black
+        bg-yellow-500
+        hover:bg-yellow-500
+      "
+                          >
+                            Pending
+                          </Button>
+                        ) : job?.myBid?.status === "accepted" ? (
+                          <Button
+                            disabled
+                            className="
+        w-full md:w-auto
+        rounded-2xl
+        px-10
+        h-12
+        font-black
+        bg-emerald-600
+        hover:bg-emerald-600
+      "
+                          >
+                            Success
+                          </Button>
+                        ) : (
+                          <Button
+                            onClick={() => {
+                              setSelectedJob(job);
+                              setOpenBidModal(true);
+                            }}
+                            className="
+        w-full md:w-auto
+        rounded-2xl
+        px-10
+        h-12
+        font-black
+      "
+                          >
+                            Place a Bid
+                            <ArrowUpRight className="ml-2" size={18} />
+                          </Button>
+                        )}
                       </div>
                     </div>
                   </CardContent>

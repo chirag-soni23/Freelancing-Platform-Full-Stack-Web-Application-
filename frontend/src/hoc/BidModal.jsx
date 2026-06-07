@@ -31,17 +31,17 @@ const BidModal = ({ isOpen, onClose, job }) => {
   const [currency, setCurrency] = useState("INR");
   const [proposal, setProposal] = useState("");
   const [deliveryDays, setDeliveryDays] = useState("");
-  
+
   const [errors, setErrors] = useState({});
 
   const { createBid, isCreatingBid } = useBid();
 
   useEffect(() => {
-    if (isOpen) {
-      setAmount("");
+    if (isOpen && job) {
+      setAmount(job?.budget || "");
+      setCurrency(job?.currency || "INR");
       setProposal("");
       setDeliveryDays("");
-      setCurrency(job?.currency || "INR");
       setErrors({});
     }
   }, [isOpen, job]);
@@ -72,7 +72,7 @@ const BidModal = ({ isOpen, onClose, job }) => {
         validationErrors[detail.path[0]] = detail.message;
       });
       setErrors(validationErrors);
-      return; 
+      return;
     }
 
     createBid(
@@ -84,7 +84,7 @@ const BidModal = ({ isOpen, onClose, job }) => {
         onSuccess: () => {
           onClose();
         },
-      }
+      },
     );
   };
 
@@ -145,30 +145,28 @@ const BidModal = ({ isOpen, onClose, job }) => {
 
             <div className="flex gap-3">
               <div className="flex-1 relative">
-                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-muted-foreground">
+                <span className="absolute left-4 top-1/2 -translate-y-1/2 font-bold text-primary">
                   {currency === "INR" ? "₹" : "$"}
                 </span>
 
                 <Input
                   type="number"
-                  disabled={isCreatingBid}
                   value={amount}
-                  onChange={(e) => handleInputChange("amount", e.target.value, setAmount)}
-                  placeholder="9000"
-                  className={`pl-10 h-12 rounded-xl bg-secondary/5 ${
-                    errors.amount ? "border-destructive focus-visible:ring-destructive" : ""
-                  }`}
+                  onChange={(e) =>
+                    handleInputChange("amount", e.target.value, setAmount)
+                  }
+                  placeholder={`Amount (${currency})`}
+                  className="pl-10 h-12 rounded-xl"
                 />
               </div>
-
               <Select
                 value={currency}
-                onValueChange={(val) => handleInputChange("currency", val, setCurrency)}
-                disabled={isCreatingBid}
+                onValueChange={(val) => setCurrency(val)}
               >
                 <SelectTrigger className="w-[120px] h-12 rounded-xl bg-secondary/5">
                   <SelectValue />
                 </SelectTrigger>
+
                 <SelectContent>
                   <SelectItem value="INR">₹ INR</SelectItem>
                   <SelectItem value="USD">$ USD</SelectItem>
@@ -198,10 +196,18 @@ const BidModal = ({ isOpen, onClose, job }) => {
                 type="number"
                 disabled={isCreatingBid}
                 value={deliveryDays}
-                onChange={(e) => handleInputChange("deliveryDays", e.target.value, setDeliveryDays)}
+                onChange={(e) =>
+                  handleInputChange(
+                    "deliveryDays",
+                    e.target.value,
+                    setDeliveryDays,
+                  )
+                }
                 placeholder="7"
                 className={`pl-12 h-12 rounded-xl ${
-                  errors.deliveryDays ? "border-destructive focus-visible:ring-destructive" : ""
+                  errors.deliveryDays
+                    ? "border-destructive focus-visible:ring-destructive"
+                    : ""
                 }`}
               />
             </div>
@@ -222,10 +228,14 @@ const BidModal = ({ isOpen, onClose, job }) => {
               rows={5}
               disabled={isCreatingBid}
               value={proposal}
-              onChange={(e) => handleInputChange("proposal", e.target.value, setProposal)}
+              onChange={(e) =>
+                handleInputChange("proposal", e.target.value, setProposal)
+              }
               placeholder="Describe your experience and approach..."
               className={`rounded-xl resize-none p-4 ${
-                errors.proposal ? "border-destructive focus-visible:ring-destructive" : ""
+                errors.proposal
+                  ? "border-destructive focus-visible:ring-destructive"
+                  : ""
               }`}
             />
             {errors.proposal && (
@@ -246,7 +256,11 @@ const BidModal = ({ isOpen, onClose, job }) => {
               Cancel
             </Button>
 
-            <Button type="submit" disabled={isCreatingBid} className="rounded-xl h-12">
+            <Button
+              type="submit"
+              disabled={isCreatingBid}
+              className="rounded-xl h-12"
+            >
               {isCreatingBid ? (
                 <>
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />

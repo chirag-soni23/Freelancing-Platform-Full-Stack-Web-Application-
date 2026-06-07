@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useJob } from "@/hooks/useJob";
 import {
@@ -32,6 +32,7 @@ import { Separator } from "@/components/ui/separator";
 import { useChat } from "@/hooks/useChat";
 import Feedback from "./Feedback";
 import { useSaved } from "@/hooks/useSaved";
+import BidModal from "@/hoc/BidModal";
 
 const JobDetails = () => {
   const { savedJobs, toggleSaveJob, isTogglingJob } = useSaved();
@@ -40,6 +41,9 @@ const JobDetails = () => {
   const navigate = useNavigate();
   const { job, isLoadingJob } = useJob(id);
   const { startChat } = useChat();
+  const [openBidModal, setOpenBidModal] = useState(false);
+
+  
 
   if (isLoadingJob) {
     return (
@@ -247,10 +251,12 @@ const JobDetails = () => {
 
                 {/* ACTION BUTTONS */}
                 <div className="space-y-3 pt-4">
-                  <Button className="w-full h-16 rounded-2xl font-black text-lg shadow-xl shadow-primary/25 transition-all hover:scale-[1.02] active:scale-95">
+                  <Button
+                    onClick={() => setOpenBidModal(true)}
+                    className="w-full h-16 rounded-2xl font-black text-lg shadow-xl shadow-primary/25 transition-all hover:scale-[1.02] active:scale-95"
+                  >
                     Submit a Proposal
                   </Button>
-
                   <Button
                     variant="outline"
                     className="w-full h-14 rounded-2xl font-bold border-2 hover:bg-secondary flex items-center justify-center gap-2 transition-all active:scale-95"
@@ -398,7 +404,11 @@ const JobDetails = () => {
           </aside>
         </div>
         <Separator className="bg-border/50 mt-10 w-full h-0.5" />
-
+        <BidModal
+          isOpen={openBidModal}
+          onClose={() => setOpenBidModal(false)}
+          job={j}
+        />
         <Feedback id={j?.client.id} />
       </main>
     </div>
