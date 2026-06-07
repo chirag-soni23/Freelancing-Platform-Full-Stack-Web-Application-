@@ -28,7 +28,7 @@ const FreelancerDashboard = () => {
       value: totalJobs,
       icon: BriefcaseBusiness,
       gradient: "from-orange-500/10 to-amber-500/5",
-      border: "group-hover:border-orange-500/30",
+      // border: "group-hover:border-orange-500/30",
       iconBg: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
     },
     {
@@ -36,7 +36,7 @@ const FreelancerDashboard = () => {
       value: totalReviews,
       icon: Users,
       gradient: "from-blue-500/10 to-cyan-500/5",
-      border: "group-hover:border-blue-500/30",
+      // border: "group-hover:border-blue-500/30",
       iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     },
     {
@@ -44,7 +44,7 @@ const FreelancerDashboard = () => {
       value: totalBids,
       icon: FolderKanban,
       gradient: "from-violet-500/10 to-purple-500/5",
-      border: "group-hover:border-violet-500/30",
+      // border: "group-hover:border-violet-500/30",
       iconBg: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
     },
     {
@@ -52,7 +52,7 @@ const FreelancerDashboard = () => {
       value: acceptedBids,
       icon: CheckCircle,
       gradient: "from-green-500/10 to-emerald-500/5",
-      border: "group-hover:border-green-500/30",
+      // border: "group-hover:border-green-500/30",
       iconBg: "bg-green-500/10 text-green-600 dark:text-green-400",
     },
     {
@@ -60,7 +60,7 @@ const FreelancerDashboard = () => {
       value: rejectedBids,
       icon: UserRound,
       gradient: "from-red-500/10 to-rose-500/5",
-      border: "group-hover:border-red-500/30",
+      // border: "group-hover:border-red-500/30",
       iconBg: "bg-red-500/10 text-red-600 dark:text-red-400",
     },
     {
@@ -68,7 +68,7 @@ const FreelancerDashboard = () => {
       value: pendingBids,
       icon: Clock,
       gradient: "from-yellow-500/10 to-amber-500/5",
-      border: "group-hover:border-yellow-500/30",
+      // border: "group-hover:border-yellow-500/30",
       iconBg: "bg-yellow-500/10 text-yellow-600 dark:text-yellow-400",
     },
   ];

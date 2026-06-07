@@ -32,7 +32,7 @@ const AdminDashboard = () => {
       value: totalClients,
       icon: UserRound,
       gradient: "from-emerald-500/10 to-teal-500/5",
-      border: "group-hover:border-emerald-500/30",
+      // border: "group-hover:border-emerald-500/30",
       iconBg: "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400",
     },
     {
@@ -40,7 +40,7 @@ const AdminDashboard = () => {
       value: totalCategories,
       icon: FolderKanban,
       gradient: "from-purple-500/10 to-pink-500/5",
-      border: "group-hover:border-purple-500/30",
+      // border: "group-hover:border-purple-500/30",
       iconBg: "bg-purple-500/10 text-purple-600 dark:text-purple-400",
     },
     {
@@ -48,7 +48,7 @@ const AdminDashboard = () => {
       value: totalJobs,
       icon: BriefcaseBusiness,
       gradient: "from-orange-500/10 to-amber-500/5",
-      border: "group-hover:border-orange-500/30",
+      // border: "group-hover:border-orange-500/30",
       iconBg: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
     },
   ];

@@ -30,6 +30,7 @@ import ConfirmDialog from "@/hoc/ConfirmDialog";
 import WithPagination from "@/hoc/WithPagination";
 import { Input } from "@/components/ui/input";
 import useDebounce from "@/hooks/useDebounce";
+import { usePayment } from "@/hooks/usePayment";
 
 const ClientBid = ({ jobId: propJobId }) => {
   const { jobId: routeJobId } = useParams();
@@ -54,6 +55,7 @@ const ClientBid = ({ jobId: propJobId }) => {
   const [actionOpen, setActionOpen] = useState(false);
   const [actionType, setActionType] = useState(null);
   const [targetBidId, setTargetBidId] = useState(null);
+  const { createPayment, isCreatingPayment } = usePayment();
 
   const getStatusStyle = (status) => {
     switch (status?.toLowerCase()) {
@@ -205,7 +207,7 @@ const ClientBid = ({ jobId: propJobId }) => {
                   </div>
                 </div>
 
-                {bid.status === "pending" && (
+                {bid.status === "pending" ? (
                   <div className="flex gap-2 pt-1">
                     <button
                       disabled={isMutating}
@@ -218,6 +220,7 @@ const ClientBid = ({ jobId: propJobId }) => {
                     >
                       <Check size={14} /> Accept Offer
                     </button>
+
                     <button
                       disabled={isMutating}
                       onClick={() => {
@@ -230,7 +233,26 @@ const ClientBid = ({ jobId: propJobId }) => {
                       <Ban size={14} /> Decline
                     </button>
                   </div>
-                )}
+                ) : bid.status === "accepted" ? (
+                  bid.payment?.status === "paid" ? (
+                    <a
+                      href={bid.submission?.submissionUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-full flex items-center justify-center py-2.5 rounded-xl bg-emerald-500 text-white font-bold text-xs"
+                    >
+                      View Submission
+                    </a>
+                  ) : (
+                    <button
+                      onClick={() => createPayment(bid.id)}
+                      disabled={isCreatingPayment}
+                      className="w-full py-2.5 rounded-xl bg-primary text-primary-foreground font-bold text-xs disabled:opacity-50"
+                    >
+                      {isCreatingPayment ? "Processing..." : "Pay Now"}
+                    </button>
+                  )
+                ) : null}
               </div>
             ))
           ) : (
@@ -352,6 +374,7 @@ const ClientBid = ({ jobId: propJobId }) => {
                             >
                               <Check size={18} />
                             </button>
+
                             <button
                               disabled={isMutating}
                               onClick={() => {
@@ -364,6 +387,25 @@ const ClientBid = ({ jobId: propJobId }) => {
                               <Ban size={18} />
                             </button>
                           </>
+                        ) : bid.status === "accepted" ? (
+                          bid.payment?.status === "paid" ? (
+                            <a
+                              href={bid.submission?.submissionUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="px-4 py-2 rounded-xl bg-emerald-500 text-white text-xs font-bold hover:bg-emerald-600 transition-all"
+                            >
+                              View Submission
+                            </a>
+                          ) : (
+                            <button
+                              onClick={() => createPayment(bid.id)}
+                              disabled={isCreatingPayment}
+                              className="px-4 py-2 rounded-xl bg-primary text-primary-foreground text-xs font-bold hover:opacity-90 transition-all disabled:opacity-50"
+                            >
+                              {isCreatingPayment ? "Processing..." : "Pay Now"}
+                            </button>
+                          )
                         ) : (
                           <span className="text-xs text-muted-foreground italic pr-2 select-none">
                             No actions available

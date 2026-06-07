@@ -591,11 +591,26 @@ const FindWork = () => {
                             size={18}
                           />
                         </Button>
-
-                        {job?.myBid?.status === "pending" ? (
-                          <Button
-                            disabled
-                            className="
+{job?.status === "closed" &&
+job?.projectStatus === "completed" ? (
+  <Button
+    disabled
+    className="
+      w-full md:w-auto
+      rounded-2xl
+      px-10
+      h-12
+      font-black
+      bg-slate-600
+      hover:bg-slate-600
+    "
+  >
+    Project Completed
+  </Button>
+) : job?.myBid?.status === "pending" ? (
+  <Button
+    disabled
+    className="
       w-full md:w-auto
       rounded-2xl
       px-10
@@ -604,13 +619,13 @@ const FindWork = () => {
       bg-yellow-500
       hover:bg-yellow-500
     "
-                          >
-                            Pending
-                          </Button>
-                        ) : job?.myBid?.status === "accepted" ? (
-                          <Button
-                            disabled
-                            className="
+  >
+    Pending
+  </Button>
+) : job?.myBid?.status === "accepted" ? (
+  <Button
+    disabled
+    className="
       w-full md:w-auto
       rounded-2xl
       px-10
@@ -619,27 +634,27 @@ const FindWork = () => {
       bg-emerald-600
       hover:bg-emerald-600
     "
-                          >
-                            Success
-                          </Button>
-                        ) : (
-                          <Button
-                            onClick={() => {
-                              setSelectedJob(job);
-                              setOpenBidModal(true);
-                            }}
-                            className="
+  >
+    Success
+  </Button>
+) : (
+  <Button
+    onClick={() => {
+      setSelectedJob(job);
+      setOpenBidModal(true);
+    }}
+    className="
       w-full md:w-auto
       rounded-2xl
       px-10
       h-12
       font-black
     "
-                          >
-                            Place a Bid
-                            <ArrowUpRight className="ml-2" size={18} />
-                          </Button>
-                        )}
+  >
+    Place a Bid
+    <ArrowUpRight className="ml-2" size={18} />
+  </Button>
+)}
                       </div>
                     </div>
                   </CardContent>

@@ -14,7 +14,7 @@ const ClientDashboard = () => {
       value: totalJobs,
       icon: BriefcaseBusiness,
       gradient: "from-orange-500/10 to-amber-500/5",
-      border: "group-hover:border-orange-500/30",
+      // border: "group-hover:border-orange-500/30",
       iconBg: "bg-orange-500/10 text-orange-600 dark:text-orange-400",
     },
     {
@@ -22,7 +22,7 @@ const ClientDashboard = () => {
       value: totalBids,
       icon: FolderKanban,
       gradient: "from-violet-500/10 to-purple-500/5",
-      border: "group-hover:border-violet-500/30",
+      // border: "group-hover:border-violet-500/30",
       iconBg: "bg-violet-500/10 text-violet-600 dark:text-violet-400",
     },
     {
@@ -30,7 +30,7 @@ const ClientDashboard = () => {
       value: totalReviews,
       icon: Users,
       gradient: "from-blue-500/10 to-cyan-500/5",
-      border: "group-hover:border-blue-500/30",
+      // border: "group-hover:border-blue-500/30",
       iconBg: "bg-blue-500/10 text-blue-600 dark:text-blue-400",
     },
   ];

@@ -18,7 +18,6 @@ export const createPayment = async (req, res, next) => {
         id: bidId,
         status: "accepted",
       },
-
       include: [
         {
           model: db.Job,
@@ -31,27 +30,50 @@ export const createPayment = async (req, res, next) => {
       throw ApiError.NOTFOUND("Accepted bid not found");
     }
 
-    // already paid check
+    // check existing payment
     const existingPayment = await db.Payment.findOne({
       where: {
         bidId: bid.id,
-        status: "paid",
       },
     });
 
     if (existingPayment) {
-      throw ApiError.BADREQUEST("Payment already completed");
+      if (existingPayment.status === "paid") {
+        throw ApiError.BADREQUEST("Payment already completed");
+      }
+
+      // Pending payment hai
+      const session = await stripe.checkout.sessions.retrieve(
+        existingPayment.stripeSessionId,
+      );
+
+      return successResponse(res, StatusCodes.OK, {
+        message: "Continue existing payment",
+        url: session.url,
+      });
     }
 
-    // delivery days completed?
-    const unlockDate = new Date(bid.acceptedAt);
+    if (existingPayment) {
+      if (existingPayment.status === "paid") {
+        throw ApiError.BADREQUEST("Payment already completed");
+      }
 
-    unlockDate.setDate(unlockDate.getDate() + bid.deliveryDays);
-
-    if (new Date() < unlockDate) {
       throw ApiError.BADREQUEST(
-        `Payment available after ${unlockDate.toLocaleDateString()}`,
+        "Payment already initiated. Complete the existing payment.",
       );
+    }
+
+    // delivery period check
+    if (bid.acceptedAt) {
+      const unlockDate = new Date(bid.acceptedAt);
+
+      unlockDate.setDate(unlockDate.getDate() + bid.deliveryDays);
+
+      if (new Date() < unlockDate) {
+        throw ApiError.BADREQUEST(
+          `Payment available after ${unlockDate.toLocaleDateString()}`,
+        );
+      }
     }
 
     const session = await stripe.checkout.sessions.create({
@@ -82,12 +104,12 @@ export const createPayment = async (req, res, next) => {
         freelancerId: bid.freelancerId,
       },
 
-      success_url: `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}`,
+      success_url: `${process.env.CLIENT_URL}/payment-success?session_id={CHECKOUT_SESSION_ID}&jobId=${bid.jobId}`,
 
       cancel_url: `${process.env.CLIENT_URL}/payment-cancel`,
     });
 
-    await db.Payment.create({
+    const payment = await db.Payment.create({
       stripeSessionId: session.id,
 
       amount: bid.amount,
@@ -109,9 +131,11 @@ export const createPayment = async (req, res, next) => {
       message: "Payment session created",
 
       url: session.url,
+
+      data: payment,
     });
   } catch (error) {
-    console.log(error)
+    console.log("CREATE PAYMENT ERROR:", error);
     next(error);
   }
 };
@@ -151,17 +175,31 @@ export const stripeWebhook = async (req, res) => {
 
         await payment.save();
 
+        // If complete the payment the job is closed
+        await db.Job.update(
+          {
+            paymentStatus: "paid",
+            projectStatus: "completed",
+            status: "closed",
+            completedAt: new Date(),
+          },
+          {
+            where: {
+              id: payment.jobId,
+            },
+          },
+        );
+
         console.log("Payment Updated Successfully");
 
         console.log({
           paymentId: payment.id,
           bidId: payment.bidId,
+          jobId: payment.jobId,
           amount: payment.amount,
           currency: payment.currency,
           status: payment.status,
         });
-      } else {
-        console.log("Payment Record Not Found");
       }
     }
 

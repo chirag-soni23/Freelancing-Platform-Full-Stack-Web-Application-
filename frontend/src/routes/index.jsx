@@ -26,6 +26,7 @@ import FreelancerBid from "@/freelancers/pages/FreelancerBid";
 import ClientBid from "@/client/pages/ClientBid";
 import ClientJobDetails from "@/client/pages/ClientJobDetails";
 import Notifications from "@/freelancers/pages/Notifications";
+import PaymentSuccess from "@/pages/PaymentSuccess";
 
 /* =========================
    LAZY IMPORTS
@@ -207,7 +208,10 @@ console.log(
 
   <Route path="rating-and-reviews" element={<Review />} />
 </Route>
-
+<Route
+  path="/payment-success"
+  element={<PaymentSuccess />}
+/>
 {/* =========================
     CLIENT DASHBOARD
 ========================= */}
